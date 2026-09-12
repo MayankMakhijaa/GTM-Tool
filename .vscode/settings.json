@@ -1,0 +1,12 @@
+{
+  "python.defaultInterpreterPath": "D:\\Programming\\FameWebs_Internship\\linkedin_lead_generator\\venv\\Scripts\\python.exe",
+  "python.pythonPath": "D:\\Programming\\FameWebs_Internship\\linkedin_lead_generator\\venv\\Scripts\\python.exe",
+  "python.analysis.extraPaths": [
+    "D:\\Programming\\FameWebs_Internship\\linkedin_lead_generator\\venv\\Lib\\site-packages",
+    "./venv/Lib/site-packages"
+  ],
+  "python.autoComplete.extraPaths": [
+    "D:\\Programming\\FameWebs_Internship\\linkedin_lead_generator\\venv\\Lib\\site-packages",
+    "./venv/Lib/site-packages"
+  ]
+}

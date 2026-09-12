@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "status-score-high-text": "#1D4ED8", "background": "#f8f9ff", "on-error-container": "#93000a", "on-background": "#0b1c30", "error-container": "#ffdad6", "on-surface-variant": "#414752", "surface-bright": "#f8f9ff", "secondary-fixed-dim": "#bec6e0", "tertiary-fixed": "#6ffbbe", "on-tertiary-fixed": "#002113", "inverse-on-surface": "#eaf1ff", "surface-subtle": "#F1F5F9", "primary-fixed-dim": "#a8c8ff", "on-tertiary": "#ffffff", "text-secondary": "#475569", "tertiary-fixed-dim": "#4edea3", "on-tertiary-fixed-variant": "#005236", "primary-fixed": "#d6e3ff", "tertiary": "#005b3d", "primary-container": "#0a66c2", "status-success-border": "#A7F3D0", "on-secondary-fixed": "#131b2e", "status-score-high-bg": "#EFF6FF", "surface-tint": "#005eb5", "on-primary-container": "#dbe6ff", "surface-dim": "#cbdbf5", "inverse-surface": "#213145", "on-secondary": "#ffffff", "on-surface": "#0b1c30", "status-success-text": "#047857", "outline": "#727783", "surface-variant": "#d3e4fe", "error": "#ba1a1a", "surface-container-high": "#dce9ff", "secondary-fixed": "#dae2fd", "on-tertiary-container": "#76ffc2", "border-default": "#E2E8F0", "border-focus": "#0A66C2", "surface": "#f8f9ff", "border-hover": "#CBD5E1", "text-primary": "#0F172A", "inverse-primary": "#a8c8ff", "on-primary-fixed": "#001b3d", "secondary": "#565e74", "status-success-bg": "#ECFDF5", "surface-canvas": "#F8FAFC", "on-primary": "#ffffff", "surface-container-lowest": "#ffffff", "on-primary-fixed-variant": "#00468a", "on-error": "#ffffff", "primary": "#004e99", "outline-variant": "#c1c6d4", "text-muted": "#94A3B8", "on-secondary-fixed-variant": "#3f465c", "on-secondary-container": "#5c647a", "surface-card": "#FFFFFF", "surface-container-low": "#eff4ff", "surface-container": "#e5eeff", "secondary-container": "#dae2fd", "surface-container-highest": "#d3e4fe", "tertiary-container": "#007650" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-lg": "1.5rem", "space-sm": "0.5rem", "gutter": "1.5rem", "space-md": "1rem", "space-xs": "0.25rem", "margin": "2rem", "space-xl": "2rem" }, "fontFamily": { "headline-sm": ["Geist"], "headline-lg": ["Geist"], "body-sm": ["Geist"], "headline-lg-mobile": ["Geist"], "body-md": ["Geist"], "label-sm": ["Geist"], "stat-value": ["Geist"], "body-lg": ["Geist"], "table-header": ["Geist"], "table-cell": ["Geist"], "headline-md": ["Geist"], "label-md": ["Geist"] }, "fontSize": { "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "stat-value": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "table-header": ["12px", { "lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600" }], "table-cell": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+<aside class="fixed left-0 top-0 h-full w-60 bg-surface-card z-50 flex flex-col justify-between py-space-lg px-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col gap-space-lg">
+<div class="flex items-center gap-space-sm px-space-xs">
+<div class="w-8 h-8 rounded-xl bg-primary-container flex items-center justify-center text-on-primary font-headline-sm text-headline-sm">L</div>
+<span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">LinkedIn Lead Gen</span>
+</div>
+<nav class="flex flex-col gap-space-xs" id="main-nav">
+<!-- Dashboard Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl transition-colors bg-status-score-high-bg text-primary-container font-label-md" data-path="dashboard" id="nav-dashboard" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span>Dashboard</span>
+</a>
+
+<!-- Email Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="email" id="nav-email" href="#">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+<span>Email</span>
+</a>
+
+<!-- History Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="history" id="nav-history" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span>History</span>
+</a>
+</nav>
+</div>
+<div class="px-space-xs pt-space-md">
+<div class="p-space-sm rounded-xl bg-surface-canvas flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-text-primary truncate">Pro User</span>
+<span class="font-label-sm text-label-sm text-text-muted truncate">pro@enterprise.com</span>
+</div>
+</div>
+</div>
+</aside>
+
+<div class="pl-60 min-h-screen flex flex-col">
+<header class="fixed top-0 left-60 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 flex items-center justify-end px-margin gap-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+</div>
+</header>
+
+<main class="w-full pt-16 flex-1 bg-surface">
+<div class="max-w-[1200px] mx-auto px-margin py-space-xl flex flex-col gap-space-xl">
+<div class="flex flex-col w-full">
+
+<!-- Dashboard View Container -->
+<div id="view-dashboard" class="flex flex-col gap-space-lg w-full">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Dashboard</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-success-text"></span>
+<span class="font-label-sm text-label-sm text-text-secondary">Engine V1.4 Ready</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Generate qualified leads from LinkedIn post comments.</p>
+</div>
+
+<!-- LinkedIn Comments Input Terminal Section -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-text-primary flex items-center gap-1.5" for="linkedin-comments">
+<span class="material-symbols-outlined text-[18px] text-primary-container">content_paste</span>
+<span>Paste LinkedIn Comments</span>
+</label>
+<span class="font-label-sm text-label-sm text-text-muted">Raw copy-paste from LinkedIn</span>
+</div>
+<div class="flex flex-col items-stretch gap-space-sm pt-1">
+<div class="relative w-full">
+<textarea class="w-full min-h-[140px] p-3.5 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container resize-y" id="linkedin-comments" placeholder="Paste messy/raw LinkedIn comments here... e.g. Amogh Misra • 1st Co-Founder & CEO at ScaleUp AI... Interested in testing..."></textarea>
+</div>
+<div class="flex justify-end pt-1">
+<button class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="generate-leads-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+<span>Generate Leads</span>
+</button>
+</div>
+</div>
+</div>
+
+<!-- Execution Pipeline Visualizer -->
+<div class="pt-2">
+<div class="bg-surface-canvas rounded-xl p-space-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2">
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-score-high-bg text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">content_paste</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">1. Raw Paste</span>
+<span class="font-label-sm text-[10px] text-text-muted truncate">Unstructured text</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-text-muted hidden sm:block">arrow_forward</span>
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-score-high-bg text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">cleaning_services</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">2. Local Parser</span>
+<span class="font-label-sm text-[10px] text-text-muted truncate">Clean & structure</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-text-muted hidden sm:block">arrow_forward</span>
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-score-high-bg text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">filter_alt</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">3. Local Pre-Filter</span>
+<span class="font-label-sm text-[10px] text-text-muted truncate">Headline & noise</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-text-muted hidden sm:block">arrow_forward</span>
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-score-high-bg text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">neurology</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">4. Gemini AI Scoring</span>
+<span class="font-label-sm text-[10px] text-text-muted truncate">Qualification & intent</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-text-muted hidden sm:block">arrow_forward</span>
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-success-bg text-status-success-text flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">table_view</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">5. Excel Export</span>
+<span class="font-label-sm text-[10px] text-status-success-text truncate">Ready (.xlsx)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Telemetry Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Metric 1: Comments Analyzed -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Comments Analyzed</span>
+<span class="font-stat-value text-stat-value text-text-primary tracking-tight">-</span>
+<span class="font-label-sm text-label-sm text-text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-status-success-text">check_circle</span>
+            100% thread extracted
+          </span>
+</div>
+<div class="w-11 h-11 rounded-xl bg-surface-subtle flex items-center justify-center text-text-secondary shrink-0">
+<span class="material-symbols-outlined text-[22px]">mode_comment</span>
+</div>
+</div>
+<!-- Metric 2: Qualified Leads -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Qualified Leads</span>
+<span class="font-stat-value text-stat-value text-text-primary tracking-tight">-</span>
+<span class="font-label-sm text-label-sm text-status-success-text flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+            B2B conversion yield
+          </span>
+</div>
+<div class="w-11 h-11 rounded-xl bg-status-score-high-bg flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-[22px]">group</span>
+</div>
+</div>
+<!-- Metric 3: Avg Intent Score -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Avg Lead Intent</span>
+<span class="font-stat-value text-stat-value text-text-primary tracking-tight">-<span class="font-body-sm text-body-sm text-text-muted font-normal">/100</span></span>
+<span class="font-label-sm text-label-sm text-text-secondary">High decision-maker density</span>
+</div>
+<div class="w-11 h-11 rounded-xl bg-surface-subtle flex items-center justify-center text-text-secondary shrink-0">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</div>
+</div>
+<!-- Metric 4: Processing Time -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">AI Run Duration</span>
+<span class="font-stat-value text-stat-value text-text-primary tracking-tight">-</span>
+<span class="font-label-sm text-label-sm text-text-secondary">Real-time processing</span>
+</div>
+<div class="w-11 h-11 rounded-xl bg-surface-subtle flex items-center justify-center text-text-secondary shrink-0">
+<span class="material-symbols-outlined text-[22px]">timer</span>
+</div>
+</div>
+</div>
+
+<!-- Main Table Container: Qualified Leads Results -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Section Header -->
+<div class="p-space-md bg-surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Lead Results</h2>
+<span class="px-2 py-0.5 rounded-full bg-status-score-high-bg text-status-score-high-text font-label-sm text-label-sm">Current Run</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Preview of generated Excel data (showing top qualified leads for current post)</p>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-text-muted">Sort:</span>
+<div class="px-2.5 py-1 rounded-lg bg-surface-canvas font-label-sm text-label-sm text-text-primary flex items-center gap-1 cursor-default">
+<span>Score (Highest first)</span>
+<span class="material-symbols-outlined text-[14px] text-text-muted">expand_more</span>
+</div>
+</div>
+</div>
+
+<!-- Tabular Data -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-canvas text-text-secondary font-table-header text-table-header uppercase">
+<th class="py-3 px-4 w-[110px]" scope="col">Lead Score</th>
+<th class="py-3 px-4 w-[180px]" scope="col">Name</th>
+<th class="py-3 px-4 w-[170px]" scope="col">Company</th>
+<th class="py-3 px-4 w-[210px]" scope="col">Role</th>
+<th class="py-3 px-4 min-w-[280px]" scope="col">Business Need</th>
+<th class="py-3 px-4 w-[110px]" scope="col">Intent</th>
+<th class="py-3 px-4 w-[140px] text-right" scope="col">LinkedIn Profile</th>
+</tr>
+</thead>
+<tbody id="dashboard-table-body" class="divide-y-0 font-table-cell text-table-cell text-text-primary">
+<tr>
+<td colspan="7" class="py-8 text-center text-text-muted">
+No leads generated yet. Paste a LinkedIn post URL above to get started.
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- Action Footer / Export Bar -->
+<div class="p-space-md bg-surface-canvas/60 flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-2 text-text-secondary">
+<span class="material-symbols-outlined text-[18px] text-text-muted">info</span>
+<span class="font-body-sm text-body-sm text-text-secondary">
+            The complete dataset of qualified leads and extracted comments is included in the export.
+          </span>
+</div>
+<button class="w-full sm:w-auto h-10 px-5 rounded-xl bg-surface-card hover:bg-surface-subtle text-text-primary font-label-md text-label-md transition-colors flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] shrink-0" id="download-excel-btn" type="button">
+<svg class="w-4 h-4 text-status-success-text" fill="currentColor" viewbox="0 0 24 24">
+<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V9h12v2zm0-4H6V5h12v2z"></path>
+</svg>
+<span>Download Excel (.xlsx)</span>
+<span class="material-symbols-outlined text-[16px] text-text-muted">download</span>
+</button>
+</div>
+</div>
+</div>
+
+<!-- Email Leads View Container -->
+<div id="view-email-leads" class="flex flex-col gap-space-lg w-full hidden">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Email Outreach</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-success-text"></span>
+<span class="font-label-sm text-label-sm text-text-secondary" id="email-leads-count-badge">0 Email Qualified</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Persistent historical email contacts consolidated across all Excel files in output/.</p>
+</div>
+
+<!-- Email Leads Table Section -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-space-md bg-surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Email Contacts</h2>
+<span class="px-2 py-0.5 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm">Historical Email Store</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Consolidated deduplicated leads with public emails from all saved Excel files.</p>
+</div>
+</div>
+
+<!-- Tabular Data -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-canvas text-text-secondary font-table-header text-table-header uppercase">
+<th class="py-3 px-4 w-[110px]" scope="col">Lead Score</th>
+<th class="py-3 px-4 w-[180px]" scope="col">Name</th>
+<th class="py-3 px-4 w-[170px]" scope="col">Company</th>
+<th class="py-3 px-4 min-w-[260px]" scope="col">Need</th>
+<th class="py-3 px-4 min-w-[240px]" scope="col">Reason</th>
+<th class="py-3 px-4 w-[140px] text-right" scope="col">Send Mail</th>
+</tr>
+</thead>
+<tbody id="email-table-body" class="divide-y-0 font-table-cell text-table-cell text-text-primary">
+<tr>
+<td colspan="6" class="py-12 text-center text-text-muted">
+<div class="flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[36px] text-text-muted">mail_lock</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">No leads with email addresses yet.</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Generate leads from a LinkedIn post to discover public email contacts.</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- History View Container -->
+<div id="view-history" class="flex flex-col gap-space-lg w-full hidden">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Lead History Vault</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-success-text"></span>
+<span class="font-label-sm text-label-sm text-text-secondary" id="history-leads-count-badge">0 Total Leads</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Consolidated record of ALL qualified leads across all historical Excel exports.</p>
+</div>
+
+<!-- History Leads Table Section -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-space-md bg-surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">All Historical Leads</h2>
+<span class="px-2 py-0.5 rounded-full bg-status-score-high-bg text-status-score-high-text font-label-sm text-label-sm">All Runs</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Comprehensive deduplicated lead database read directly from output/*.xlsx files.</p>
+</div>
+</div>
+
+<!-- Tabular Data -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-canvas text-text-secondary font-table-header text-table-header uppercase">
+<th class="py-3 px-4 w-[110px]" scope="col">Lead Score</th>
+<th class="py-3 px-4 w-[180px]" scope="col">Name</th>
+<th class="py-3 px-4 w-[170px]" scope="col">Company</th>
+<th class="py-3 px-4 w-[210px]" scope="col">Role</th>
+<th class="py-3 px-4 min-w-[280px]" scope="col">Business Need</th>
+<th class="py-3 px-4 w-[110px]" scope="col">Intent</th>
+<th class="py-3 px-4 w-[140px] text-right" scope="col">LinkedIn Profile</th>
+</tr>
+</thead>
+<tbody id="history-table-body" class="divide-y-0 font-table-cell text-table-cell text-text-primary">
+<tr>
+<td colspan="7" class="py-12 text-center text-text-muted">
+<div class="flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[36px] text-text-muted">history_toggle_off</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">No historical leads recorded yet.</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Run lead generation on a LinkedIn post to save data to output/*.xlsx.</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</main>
+</div>
+
+<script>
+  (function() {
+    const generateBtn = document.getElementById('generate-leads-btn');
+    const downloadBtn = document.getElementById('download-excel-btn');
+    const commentsInput = document.getElementById('linkedin-comments');
+
+    const dashboardTableBody = document.getElementById('dashboard-table-body');
+    const emailTableBody = document.getElementById('email-table-body');
+    const historyTableBody = document.getElementById('history-table-body');
+    const metricSpans = document.querySelectorAll('.font-stat-value');
+
+    const navDashboard = document.getElementById('nav-dashboard');
+    const navEmail = document.getElementById('nav-email');
+    const navHistory = document.getElementById('nav-history');
+
+    const viewDashboard = document.getElementById('view-dashboard');
+    const viewEmailLeads = document.getElementById('view-email-leads');
+    const viewHistory = document.getElementById('view-history');
+
+    let currentDownloadUrl = null;
+
+    // Fetch historical email leads from /api/email-leads
+    async function fetchHistoricalEmailLeads() {
+      try {
+        const res = await fetch('/api/email-leads');
+        const data = await res.json();
+        if (res.ok && data.success) {
+          renderEmailTable(data.leads || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch historical email leads:', err);
+      }
+    }
+
+    // Fetch all historical leads from /api/history-leads
+    async function fetchHistoricalAllLeads() {
+      try {
+        const res = await fetch('/api/history-leads');
+        const data = await res.json();
+        if (res.ok && data.success) {
+          renderHistoryTable(data.leads || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch all historical leads:', err);
+      }
+    }
+
+    // Switch active tabs
+    function switchTab(target) {
+      viewDashboard.classList.add('hidden');
+      viewEmailLeads.classList.add('hidden');
+      viewHistory.classList.add('hidden');
+
+      const inactiveClass = 'flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md';
+      const activeClass = 'flex items-center gap-space-sm px-space-sm py-2 rounded-xl transition-colors bg-status-score-high-bg text-primary-container font-label-md';
+
+      // Reset active classes for top-level links
+      if (navDashboard) navDashboard.className = inactiveClass;
+      if (navEmail) navEmail.className = inactiveClass;
+      if (navHistory) navHistory.className = inactiveClass;
+
+      if (target === 'email') {
+        viewEmailLeads.classList.remove('hidden');
+        if (navEmail) navEmail.className = activeClass;
+        fetchHistoricalEmailLeads();
+      } else if (target === 'history') {
+        viewHistory.classList.remove('hidden');
+        if (navHistory) navHistory.className = activeClass;
+        fetchHistoricalAllLeads();
+      } else {
+        viewDashboard.classList.remove('hidden');
+        if (navDashboard) navDashboard.className = activeClass;
+      }
+    }
+
+    if (navDashboard) {
+      navDashboard.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab('dashboard');
+      });
+    }
+
+    if (navEmail) {
+      navEmail.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab('email');
+      });
+    }
+
+    if (navHistory) {
+      navHistory.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab('history');
+      });
+    }
+
+    // Render Dashboard table (current run)
+    function renderDashboardTable(leads) {
+      dashboardTableBody.innerHTML = '';
+      if (leads && leads.length > 0) {
+        leads.slice(0, 10).forEach(lead => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-surface-canvas/60 transition-colors group';
+
+          const initials = lead.name ? lead.name.substring(0, 2).toUpperCase() : '??';
+          const name = lead.name || 'Unknown';
+          const company = lead.company || '-';
+          const role = lead.role || '-';
+          const need = lead.business_need || '-';
+          const intent = lead.intent || '-';
+          const score = lead.lead_score || 0;
+
+          const profileUrl = lead.profile_url || '';
+          const profileHtml = profileUrl ? 
+            `<a href="${profileUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-primary-container hover:underline font-label-sm text-label-sm">
+               <span>View Profile</span>
+               <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+             </a>` : '<span class="text-text-muted text-label-sm">-</span>';
+
+          row.innerHTML = `
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md font-label-md text-label-sm bg-status-score-high-bg text-status-score-high-text font-mono font-semibold">
+                ${score}/100
+              </span>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-label-md text-[11px] shrink-0 font-medium">
+                  ${initials}
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-label-md text-label-md text-text-primary truncate">${name}</span>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap font-medium text-text-primary">${company}</td>
+            <td class="py-3.5 px-4 whitespace-nowrap text-text-secondary">${role}</td>
+            <td class="py-3.5 px-4 text-text-secondary">
+              <div class="line-clamp-1 max-w-[360px]" title="${need}">
+                ${need}
+              </div>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm">
+                ${intent}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap text-right">
+              ${profileHtml}
+            </td>
+          `;
+          dashboardTableBody.appendChild(row);
+        });
+      } else {
+        dashboardTableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-text-muted">
+              No leads generated yet. Paste a LinkedIn post URL above to get started.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Render Email table (historical email store)
+    function renderEmailTable(leads) {
+      if (!emailTableBody) return;
+
+      const emailLeads = (leads || []).filter(l => l && l.email && typeof l.email === 'string' && l.email.trim() !== '');
+
+      const countBadge = document.getElementById('email-leads-count-badge');
+      if (countBadge) {
+        countBadge.textContent = `${emailLeads.length} Email Qualified`;
+      }
+
+      emailTableBody.innerHTML = '';
+      if (emailLeads.length > 0) {
+        emailLeads.forEach(lead => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-surface-canvas/60 transition-colors group';
+
+          const initials = lead.name ? lead.name.substring(0, 2).toUpperCase() : '??';
+          const name = lead.name || 'Unknown';
+          const company = lead.company || '-';
+          const need = lead.business_need || '-';
+          const reason = lead.reason || '-';
+          const score = lead.lead_score || 0;
+          const email = lead.email.trim();
+
+          row.innerHTML = `
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md font-label-md text-label-sm bg-status-score-high-bg text-status-score-high-text font-mono font-semibold">
+                ${score}/100
+              </span>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-label-md text-[11px] shrink-0 font-medium">
+                  ${initials}
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-label-md text-label-md text-text-primary truncate">${name}</span>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap font-medium text-text-primary">${company}</td>
+            <td class="py-3.5 px-4 text-text-secondary">
+              <div class="line-clamp-1 max-w-[260px]" title="${need}">
+                ${need}
+              </div>
+            </td>
+            <td class="py-3.5 px-4 text-text-secondary">
+              <div class="line-clamp-1 max-w-[240px]" title="${reason}">
+                ${reason}
+              </div>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap text-right">
+              <a href="mailto:${encodeURIComponent(email)}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all shadow-sm shrink-0">
+                <span class="material-symbols-outlined text-[16px]">send</span>
+                <span>Send Mail</span>
+              </a>
+            </td>
+          `;
+          emailTableBody.appendChild(row);
+        });
+      } else {
+        emailTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-text-muted">
+              <div class="flex flex-col items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[36px] text-text-muted">mail_lock</span>
+                <span class="font-headline-sm text-headline-sm text-text-primary">No leads with email addresses yet.</span>
+                <span class="font-body-sm text-body-sm text-text-secondary">Generate leads from a LinkedIn post to discover public email contacts.</span>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Render History table (all historical qualified leads)
+    function renderHistoryTable(leads) {
+      if (!historyTableBody) return;
+
+      const countBadge = document.getElementById('history-leads-count-badge');
+      if (countBadge) {
+        countBadge.textContent = `${(leads || []).length} Total Leads`;
+      }
+
+      historyTableBody.innerHTML = '';
+      if (leads && leads.length > 0) {
+        let lastDateLabel = null;
+
+        leads.forEach(lead => {
+          const dateLabel = lead.run_date_label || 'History Vault';
+
+          if (dateLabel !== lastDateLabel) {
+            lastDateLabel = dateLabel;
+            const headerRow = document.createElement('tr');
+            headerRow.className = 'bg-surface-subtle/80 border-y border-border-default';
+            headerRow.innerHTML = `
+              <td colspan="7" class="py-2.5 px-4 font-headline-sm text-headline-sm text-text-primary">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[18px] text-primary-container">calendar_today</span>
+                  <span>${dateLabel}</span>
+                </div>
+              </td>
+            `;
+            historyTableBody.appendChild(headerRow);
+          }
+
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-surface-canvas/60 transition-colors group';
+
+          const initials = lead.name ? lead.name.substring(0, 2).toUpperCase() : '??';
+          const name = lead.name || 'Unknown';
+          const company = lead.company || '-';
+          const role = lead.role || '-';
+          const need = lead.business_need || '-';
+          const intent = lead.intent || '-';
+          const score = lead.lead_score || 0;
+
+          const profileUrl = lead.profile_url || '';
+          const profileHtml = profileUrl ? 
+            `<a href="${profileUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-primary-container hover:underline font-label-sm text-label-sm">
+               <span>View Profile</span>
+               <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+             </a>` : '<span class="text-text-muted text-label-sm">-</span>';
+
+          row.innerHTML = `
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md font-label-md text-label-sm bg-status-score-high-bg text-status-score-high-text font-mono font-semibold">
+                ${score}/100
+              </span>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-label-md text-[11px] shrink-0 font-medium">
+                  ${initials}
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-label-md text-label-md text-text-primary truncate">${name}</span>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap font-medium text-text-primary">${company}</td>
+            <td class="py-3.5 px-4 whitespace-nowrap text-text-secondary">${role}</td>
+            <td class="py-3.5 px-4 text-text-secondary">
+              <div class="line-clamp-1 max-w-[360px]" title="${need}">
+                ${need}
+              </div>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm">
+                ${intent}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap text-right">
+              ${profileHtml}
+            </td>
+          `;
+          historyTableBody.appendChild(row);
+        });
+      } else {
+        historyTableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-12 text-center text-text-muted">
+              <div class="flex flex-col items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[36px] text-text-muted">history_toggle_off</span>
+                <span class="font-headline-sm text-headline-sm text-text-primary">No historical leads recorded yet.</span>
+                <span class="font-body-sm text-body-sm text-text-secondary">Run lead generation on a LinkedIn post to save data to output/*.xlsx.</span>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', () => {
+        if (!currentDownloadUrl) {
+          alert('Please generate leads first before downloading Excel.');
+          return;
+        }
+        window.location.href = currentDownloadUrl;
+      });
+    }
+
+    if (generateBtn) {
+      generateBtn.addEventListener('click', async () => {
+        const commentsText = commentsInput ? commentsInput.value.trim() : '';
+        if (!commentsText) {
+          alert('Please paste LinkedIn comments before generating leads.');
+          return;
+        }
+
+        const originalHTML = generateBtn.innerHTML;
+        generateBtn.disabled = true;
+        generateBtn.classList.add('opacity-80', 'cursor-not-allowed');
+        generateBtn.innerHTML = `
+          <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Generating leads...</span>
+        `;
+        
+        try {
+          const response = await fetch('/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ comments_text: commentsText })
+          });
+          
+          const result = await response.json();
+          
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Failed to generate leads.');
+          }
+
+          // Update metrics
+          metricSpans[0].textContent = result.comments_analyzed;
+          metricSpans[1].textContent = result.qualified_leads_count;
+          metricSpans[2].innerHTML = `${result.avg_lead_intent}<span class="font-body-sm text-body-sm text-text-muted font-normal">/100</span>`;
+          metricSpans[3].textContent = `${result.processing_time}s`;
+          
+          currentDownloadUrl = result.download_url;
+
+          // Render dashboard table for current run
+          renderDashboardTable(result.leads || []);
+
+          // Refresh historical email and all leads from output/*.xlsx
+          fetchHistoricalEmailLeads();
+          fetchHistoricalAllLeads();
+
+          generateBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[18px]">check</span>
+            <span>Completed (${result.qualified_leads_count} Leads)</span>
+          `;
+          
+          setTimeout(() => {
+            generateBtn.innerHTML = originalHTML;
+          }, 2500);
+
+        } catch (error) {
+          alert(error.message);
+          generateBtn.innerHTML = originalHTML;
+        } finally {
+          generateBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+          generateBtn.disabled = false;
+        }
+      });
+    }
+
+    // Initial load fetch
+    fetchHistoricalEmailLeads();
+    fetchHistoricalAllLeads();
+  })();
+</script>
+</body>
+</html>

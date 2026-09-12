@@ -1,0 +1,7 @@
+[tool.pyright]
+venvPath = "D:/Programming/FameWebs_Internship/linkedin_lead_generator"
+venv = "venv"
+extraPaths = [
+    "D:/Programming/FameWebs_Internship/linkedin_lead_generator/venv/Lib/site-packages",
+    "./venv/Lib/site-packages"
+]
