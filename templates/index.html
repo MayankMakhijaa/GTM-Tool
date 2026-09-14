@@ -16,6 +16,12 @@
 <span>Dashboard</span>
 </a>
 
+<!-- Profile Optimization Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="profile-optimization" id="nav-profile-optimization" href="#">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+<span>Profile Optimization</span>
+</a>
+
 <!-- Email Nav Link -->
 <a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="email" id="nav-email" href="#">
 <span class="material-symbols-outlined text-[20px]">mail</span>
@@ -263,6 +269,137 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 </div>
 </div>
 
+<!-- Profile Optimization View Container -->
+<div id="view-profile-optimization" class="flex flex-col gap-space-lg w-full hidden">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Profile Optimization</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-sm text-label-sm text-text-secondary">AI Career Brand Engine</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Analyze your LinkedIn profile and improve your positioning, content, and discoverability.</p>
+</div>
+
+<!-- LinkedIn Session Control Bar -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm border border-border-default/60">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-text-primary font-semibold">LinkedIn Session:</span>
+<div id="session-status-badge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium">
+<span class="w-2 h-2 rounded-full bg-status-warning-text animate-pulse" id="session-status-dot"></span>
+<span id="session-status-text">Checking Status...</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button id="open-session-btn" type="button" class="h-9 px-4 rounded-xl bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-label-sm transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px] text-primary-container">open_in_new</span>
+<span>Open LinkedIn Session</span>
+</button>
+<button id="check-session-btn" type="button" class="h-9 px-3 rounded-xl bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-muted hover:text-text-primary transition-all flex items-center justify-center shadow-sm" title="Refresh Session Status">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+</div>
+</div>
+
+<!-- Extraction Input Terminal Card -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-text-primary flex items-center gap-1.5" for="profile-url-input">
+<span class="material-symbols-outlined text-[18px] text-primary-container">link</span>
+<span>LinkedIn Profile URL</span>
+</label>
+<span class="font-label-sm text-label-sm text-text-muted">Target profile URL</span>
+</div>
+<div class="flex flex-col sm:flex-row items-stretch gap-space-sm pt-1">
+<input class="flex-1 h-11 px-3.5 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container" id="profile-url-input" placeholder="https://www.linkedin.com/in/username" type="text"/>
+<button class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="extract-profile-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">person_search</span>
+<span>Extract Profile</span>
+</button>
+</div>
+</div>
+</div>
+
+<!-- CURRENT PROFILE Extracted Verification View -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col gap-space-lg hidden" id="current-profile-container">
+<div class="flex items-center justify-between border-b border-border-default pb-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[24px] text-primary-container">assignment_ind</span>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">CURRENT PROFILE</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-status-score-high-bg text-status-score-high-text font-label-sm text-label-sm">Extracted Information</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Verify before optimization</span>
+</div>
+
+<!-- Extracted Profile Content Sections -->
+<div class="flex flex-col gap-space-md" id="extracted-profile-content">
+<!-- Dynamic Profile Content Rendered Here -->
+</div>
+
+<div class="flex justify-end pt-space-sm border-t border-border-default">
+<button class="h-12 px-8 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-body-md font-semibold transition-all flex items-center justify-center gap-2.5 shadow-md shrink-0 active:scale-[0.98]" id="optimize-profile-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span>Analyze &amp; Optimize Profile</span>
+</button>
+</div>
+</div>
+
+<!-- OPTIMIZATION RESULT COMPARISON VIEW -->
+<div class="flex flex-col gap-space-lg hidden" id="optimization-result-container">
+<!-- Overall Profile Score Card -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-lg border-l-4 border-primary-container">
+<div class="flex items-center gap-space-md">
+<div class="w-16 h-16 rounded-2xl bg-status-score-high-bg text-primary-container flex flex-col items-center justify-center shrink-0 border border-primary-container/20">
+<span class="font-stat-value text-[24px] font-bold leading-tight" id="opt-overall-score">78</span>
+<span class="font-label-sm text-[10px] text-text-muted">/ 100</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Profile Optimization Score</h3>
+<p class="font-body-sm text-body-sm text-text-secondary" id="opt-summary-text">Comprehensive brand impact and recruiter discoverability analysis.</p>
+</div>
+</div>
+
+<!-- Category Scores Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 w-full lg:w-auto shrink-0" id="opt-category-scores">
+<!-- Category score pills rendered dynamically -->
+</div>
+</div>
+
+<!-- CURRENT VS SUGGESTED COMPARISON SECTION -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-space-md bg-surface-card border-b border-border-default flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary-container">compare</span>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">CURRENT vs SUGGESTED Comparison</h2>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Review and select preferred recommendations</span>
+</div>
+
+<!-- Comparison Column Headers -->
+<div class="grid grid-cols-1 lg:grid-cols-2 bg-surface-canvas border-b border-border-default font-table-header text-table-header uppercase text-text-secondary">
+<div class="p-3.5 px-6 flex items-center gap-2 border-r border-border-default/50">
+<span class="w-2 h-2 rounded-full bg-text-muted"></span>
+<span>CURRENT (Extracted LinkedIn Info)</span>
+</div>
+<div class="p-3.5 px-6 flex items-center gap-2 text-primary-container font-semibold">
+<span class="w-2 h-2 rounded-full bg-status-success-text"></span>
+<span>SUGGESTED (AI Recommendation)</span>
+</div>
+</div>
+
+<!-- Comparison Rows List -->
+<div class="divide-y divide-border-default" id="comparison-rows-container">
+<!-- Comparison Cards Rendered Dynamically -->
+</div>
+</div>
+</div>
+</div>
+
 <!-- Email Leads View Container -->
 <div id="view-email-leads" class="flex flex-col gap-space-lg w-full hidden">
 <!-- Page Header -->
@@ -391,14 +528,86 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
     const metricSpans = document.querySelectorAll('.font-stat-value');
 
     const navDashboard = document.getElementById('nav-dashboard');
+    const navProfileOptimization = document.getElementById('nav-profile-optimization');
     const navEmail = document.getElementById('nav-email');
     const navHistory = document.getElementById('nav-history');
 
     const viewDashboard = document.getElementById('view-dashboard');
+    const viewProfileOptimization = document.getElementById('view-profile-optimization');
     const viewEmailLeads = document.getElementById('view-email-leads');
     const viewHistory = document.getElementById('view-history');
 
+    // Profile Optimization DOM Elements
+    const extractProfileBtn = document.getElementById('extract-profile-btn');
+    const optimizeProfileBtn = document.getElementById('optimize-profile-btn');
+    const profileUrlInput = document.getElementById('profile-url-input');
+    const currentProfileContainer = document.getElementById('current-profile-container');
+    const extractedProfileContent = document.getElementById('extracted-profile-content');
+    const optimizationResultContainer = document.getElementById('optimization-result-container');
+    const optOverallScore = document.getElementById('opt-overall-score');
+    const optSummaryText = document.getElementById('opt-summary-text');
+    const optCategoryScores = document.getElementById('opt-category-scores');
+    const comparisonRowsContainer = document.getElementById('comparison-rows-container');
+
+    // LinkedIn Session DOM Elements
+    const sessionStatusBadge = document.getElementById('session-status-badge');
+    const sessionStatusDot = document.getElementById('session-status-dot');
+    const sessionStatusText = document.getElementById('session-status-text');
+    const openSessionBtn = document.getElementById('open-session-btn');
+    const checkSessionBtn = document.getElementById('check-session-btn');
+
+    let currentExtractedData = null;
     let currentDownloadUrl = null;
+
+    async function checkLinkedInSessionStatus() {
+      if (!sessionStatusText) return;
+      sessionStatusText.textContent = 'Checking...';
+      if (sessionStatusBadge) {
+        sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-subtle text-text-muted font-label-sm text-label-sm font-medium';
+      }
+      try {
+        const res = await fetch('/api/linkedin-session-status');
+        const data = await res.json();
+        if (res.ok && data.success && data.data) {
+          const isAuth = data.data.authenticated;
+          if (isAuth) {
+            sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm font-semibold border border-status-success-border';
+            if (sessionStatusDot) sessionStatusDot.className = 'w-2 h-2 rounded-full bg-status-success-text';
+            sessionStatusText.textContent = 'Connected';
+          } else {
+            sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium border border-status-warning-border';
+            if (sessionStatusDot) sessionStatusDot.className = 'w-2 h-2 rounded-full bg-status-warning-text';
+            sessionStatusText.textContent = 'Not Connected';
+          }
+        }
+      } catch (err) {
+        console.error('Failed to check LinkedIn session status:', err);
+        if (sessionStatusText) sessionStatusText.textContent = 'Status Unknown';
+      }
+    }
+
+    if (openSessionBtn) {
+      openSessionBtn.addEventListener('click', async () => {
+        openSessionBtn.disabled = true;
+        openSessionBtn.classList.add('opacity-70', 'cursor-not-allowed');
+        alert('Opening Playwright Chromium browser on your desktop...\n\nPlease log into your LinkedIn account in the newly opened browser window. Once logged in, return here and click Refresh.');
+        try {
+          await fetch('/api/open-linkedin-session', { method: 'POST' });
+        } catch (err) {
+          console.error('Error opening session browser:', err);
+        } finally {
+          openSessionBtn.disabled = false;
+          openSessionBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+          checkLinkedInSessionStatus();
+        }
+      });
+    }
+
+    if (checkSessionBtn) {
+      checkSessionBtn.addEventListener('click', () => {
+        checkLinkedInSessionStatus();
+      });
+    }
 
     // Fetch historical email leads from /api/email-leads
     async function fetchHistoricalEmailLeads() {
@@ -429,6 +638,7 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
     // Switch active tabs
     function switchTab(target) {
       viewDashboard.classList.add('hidden');
+      if (viewProfileOptimization) viewProfileOptimization.classList.add('hidden');
       viewEmailLeads.classList.add('hidden');
       viewHistory.classList.add('hidden');
 
@@ -437,10 +647,15 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 
       // Reset active classes for top-level links
       if (navDashboard) navDashboard.className = inactiveClass;
+      if (navProfileOptimization) navProfileOptimization.className = inactiveClass;
       if (navEmail) navEmail.className = inactiveClass;
       if (navHistory) navHistory.className = inactiveClass;
 
-      if (target === 'email') {
+      if (target === 'profile-optimization') {
+        if (viewProfileOptimization) viewProfileOptimization.classList.remove('hidden');
+        if (navProfileOptimization) navProfileOptimization.className = activeClass;
+        checkLinkedInSessionStatus();
+      } else if (target === 'email') {
         viewEmailLeads.classList.remove('hidden');
         if (navEmail) navEmail.className = activeClass;
         fetchHistoricalEmailLeads();
@@ -452,6 +667,355 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
         viewDashboard.classList.remove('hidden');
         if (navDashboard) navDashboard.className = activeClass;
       }
+    }
+
+    if (navProfileOptimization) {
+      navProfileOptimization.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab('profile-optimization');
+      });
+    }
+
+    // Render Extracted Profile Verification View
+    function renderExtractedProfile(data) {
+      const p = (data && data.profile) ? data.profile : (data || {});
+      let html = '';
+
+      html += `
+        <div class="p-space-md bg-surface-canvas rounded-xl flex items-start justify-between gap-space-md border border-border-default/60">
+          <div class="flex items-center gap-space-md">
+            <div class="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-headline-lg text-[18px] shrink-0 font-bold overflow-hidden shadow-sm">
+              ${p.profile_photo_url ? `<img src="${p.profile_photo_url}" class="w-full h-full object-cover" />` : (p.name ? p.name.substring(0,2).toUpperCase() : 'PRO')}
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <h3 class="font-headline-sm text-headline-sm text-text-primary">${p.name || 'Profile Name Not Extracted'}</h3>
+              ${p.headline ? `<p class="font-body-md text-body-md text-primary-container font-medium">${p.headline}</p>` : '<p class="font-body-md text-body-md text-text-muted italic">Headline not available</p>'}
+              ${p.current_position ? `<span class="font-label-sm text-label-sm text-text-secondary">${p.current_position}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (p.about) {
+        html += `
+          <div class="p-space-md bg-surface-canvas rounded-xl flex flex-col gap-1.5 border border-border-default/60">
+            <h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider">About</h4>
+            <p class="font-body-md text-body-md text-text-primary whitespace-pre-line">${p.about}</p>
+          </div>
+        `;
+      }
+
+      if (p.top_skills && p.top_skills.length > 0) {
+        html += `
+          <div class="p-space-md bg-surface-canvas rounded-xl flex flex-col gap-1.5 border border-border-default/60">
+            <h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider mb-1">Top Skills (${p.top_skills.length})</h4>
+            <div class="flex flex-wrap gap-2">
+              ${p.top_skills.map(s => `<span class="px-3 py-1 rounded-lg bg-surface-card border border-border-default font-label-sm text-label-sm text-primary-container font-medium">${s}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (p.experience && p.experience.length > 0) {
+        html += `
+          <div class="p-space-md bg-surface-canvas rounded-xl flex flex-col gap-space-xs border border-border-default/60">
+            <h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider mb-1">Experience (${p.experience.length})</h4>
+            <div class="flex flex-col gap-3 divide-y divide-border-default/60">
+        `;
+        p.experience.forEach(exp => {
+          html += `
+            <div class="pt-2.5 first:pt-0 flex flex-col gap-0.5">
+              <div class="flex items-center justify-between">
+                <span class="font-label-md text-label-md text-text-primary font-semibold">${exp.title || exp.role || 'Role'}</span>
+                <span class="font-label-sm text-label-sm text-text-muted">${exp.start_date || exp.dates || ''}</span>
+              </div>
+              <span class="font-body-sm text-body-sm text-primary-container font-medium">${exp.company || ''} ${exp.location ? '• ' + exp.location : ''}</span>
+              ${exp.description ? `<p class="font-body-sm text-body-sm text-text-secondary pt-1 whitespace-pre-line">${exp.description}</p>` : ''}
+            </div>
+          `;
+        });
+        html += `</div></div>`;
+      }
+
+      if (p.education && p.education.length > 0) {
+        html += `
+          <div class="p-space-md bg-surface-canvas rounded-xl flex flex-col gap-space-xs border border-border-default/60">
+            <h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider mb-1">Education (${p.education.length})</h4>
+            <div class="flex flex-col gap-2 divide-y divide-border-default/60">
+        `;
+        p.education.forEach(edu => {
+          html += `
+            <div class="pt-2 first:pt-0 flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="font-label-md text-label-md text-text-primary font-medium">${edu.institution || ''}</span>
+                <span class="font-body-sm text-body-sm text-text-secondary">${edu.degree || ''} ${edu.field_of_study ? '• ' + edu.field_of_study : ''}</span>
+                ${edu.description ? `<p class="font-body-sm text-body-sm text-text-muted pt-0.5">${edu.description}</p>` : ''}
+              </div>
+              <span class="font-label-sm text-label-sm text-text-muted shrink-0">${edu.start_date || edu.dates || ''}</span>
+            </div>
+          `;
+        });
+        html += `</div></div>`;
+      }
+
+      if (p.skills && p.skills.length > 0) {
+        html += `
+          <div class="p-space-md bg-surface-canvas rounded-xl flex flex-col gap-1.5 border border-border-default/60">
+            <h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider mb-1">Full Skills (${p.skills.length})</h4>
+            <div class="flex flex-wrap gap-2">
+              ${p.skills.map(s => {
+                const sName = typeof s === 'object' ? s.name : s;
+                return `<span class="px-3 py-1 rounded-lg bg-surface-card border border-border-default font-label-sm text-label-sm text-text-primary">${sName}</span>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (p.certifications && p.certifications.length > 0) {
+        html += `
+          <div class="p-space-md bg-surface-canvas rounded-xl flex flex-col gap-space-xs border border-border-default/60">
+            <h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider mb-1">Certifications (${p.certifications.length})</h4>
+            <div class="flex flex-col gap-2">
+              ${p.certifications.map(c => `
+                <div class="flex items-center justify-between">
+                  <span class="font-label-md text-label-md text-text-primary font-medium">${typeof c === 'object' ? c.name : c}</span>
+                  ${typeof c === 'object' && c.issuing_organization ? `<span class="font-body-sm text-body-sm text-text-secondary">${c.issuing_organization}</span>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (p.honors_awards && p.honors_awards.length > 0) {
+        html += `
+          <div class="p-space-md bg-surface-canvas rounded-xl flex flex-col gap-space-xs border border-border-default/60">
+            <h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider mb-1">Honors & Awards (${p.honors_awards.length})</h4>
+            <div class="flex flex-col gap-2">
+              ${p.honors_awards.map(h => `
+                <div class="flex flex-col">
+                  <span class="font-label-md text-label-md text-text-primary font-medium">${h.title}</span>
+                  ${h.issuer ? `<span class="font-body-sm text-body-sm text-text-secondary">${h.issuer}</span>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (p.featured && p.featured.length > 0) {
+        html += `
+          <div class="p-space-md bg-surface-canvas rounded-xl flex flex-col gap-space-xs border border-border-default/60">
+            <h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider mb-1">Featured Items (${p.featured.length})</h4>
+            <div class="flex flex-col gap-2">
+              ${p.featured.map(f => `
+                <div class="p-2.5 rounded-lg bg-surface-card border border-border-default flex flex-col gap-0.5">
+                  <span class="font-label-md text-label-md text-text-primary font-medium">${typeof f === 'object' ? f.title : f}</span>
+                  ${typeof f === 'object' && f.description ? `<p class="font-body-sm text-body-sm text-text-secondary line-clamp-2">${f.description}</p>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      extractedProfileContent.innerHTML = html;
+    }
+
+    // Render Optimization Result Comparison
+    function renderOptimizationResult(data) {
+      optOverallScore.textContent = data.overall_score || 78;
+      optSummaryText.textContent = data.summary_assessment || "Strategic positioning and discoverability analysis completed.";
+
+      const cats = data.category_scores || {};
+      let catHtml = '';
+      Object.keys(cats).forEach(key => {
+        const score = cats[key];
+        catHtml += `
+          <div class="p-2 px-3.5 rounded-xl bg-surface-canvas flex flex-col items-center justify-center border border-border-default/60 shadow-sm">
+            <span class="font-label-sm text-[11px] text-text-muted capitalize">${key}</span>
+            <span class="font-label-md text-label-md font-bold text-primary-container">${score}/100</span>
+          </div>
+        `;
+      });
+      optCategoryScores.innerHTML = catHtml;
+
+      const recs = data.recommendations || [];
+      comparisonRowsContainer.innerHTML = '';
+
+      recs.forEach((rec) => {
+        const card = document.createElement('div');
+        card.className = 'grid grid-cols-1 lg:grid-cols-2 p-space-md gap-space-md hover:bg-surface-canvas/30 transition-colors group';
+
+        const prioColor = rec.priority === 'high' ? 'bg-status-score-high-bg text-status-score-high-text' : (rec.priority === 'medium' ? 'bg-status-success-bg text-status-success-text' : 'bg-surface-subtle text-text-muted');
+
+        const currentText = rec.current && rec.current.trim() !== '' ? rec.current : 'Not available';
+        const suggestedText = rec.suggested && rec.suggested.trim() !== '' ? rec.suggested : 'No changes recommended';
+
+        card.innerHTML = `
+          <!-- Left Column: CURRENT -->
+          <div class="flex flex-col gap-2 lg:pr-space-md border-b lg:border-b-0 lg:border-r border-border-default/60 pb-space-md lg:pb-0">
+            <div class="flex items-center justify-between">
+              <span class="font-label-md text-label-md font-semibold text-text-primary uppercase tracking-wider">${rec.title || rec.section}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-surface-subtle text-text-muted">Current</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-secondary whitespace-pre-line border border-border-default/40">
+              ${currentText}
+            </div>
+          </div>
+
+          <!-- Right Column: SUGGESTED -->
+          <div class="flex flex-col gap-2 justify-between">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="font-label-md text-label-md font-semibold text-primary-container uppercase tracking-wider">AI Suggestion</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-label-sm font-semibold capitalize ${prioColor}">${rec.priority || 'medium'} Priority</span>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-status-success-bg/40 font-body-md text-body-md text-text-primary whitespace-pre-line border border-status-success-border/60">
+                ${suggestedText}
+              </div>
+
+              ${rec.reason ? `
+                <div class="p-2.5 px-3 rounded-lg bg-surface-canvas flex items-start gap-2 text-text-secondary font-body-sm text-body-sm">
+                  <span class="material-symbols-outlined text-[16px] text-primary-container shrink-0 mt-0.5">info</span>
+                  <span><strong>WHY:</strong> ${rec.reason}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+              <button type="button" class="use-suggestion-btn px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                <span>Use Suggestion</span>
+              </button>
+            </div>
+          </div>
+        `;
+
+        const btn = card.querySelector('.use-suggestion-btn');
+        if (btn) {
+          let selected = false;
+          btn.addEventListener('click', () => {
+            selected = !selected;
+            if (selected) {
+              btn.className = 'use-suggestion-btn px-4 py-2 rounded-xl bg-status-success-bg text-status-success-text font-label-md text-label-md border border-status-success-border flex items-center gap-1.5 shadow-sm';
+              btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">task_alt</span><span>Selected / Applied</span>`;
+            } else {
+              btn.className = 'use-suggestion-btn px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]';
+              btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span><span>Use Suggestion</span>`;
+            }
+          });
+        }
+
+        comparisonRowsContainer.appendChild(card);
+      });
+    }
+
+    // Extract Profile Event Handler
+    if (extractProfileBtn) {
+      extractProfileBtn.addEventListener('click', async () => {
+        const url = profileUrlInput ? profileUrlInput.value.trim() : '';
+        if (!url) {
+          alert('Please enter a valid LinkedIn profile URL.');
+          return;
+        }
+
+        const originalHTML = extractProfileBtn.innerHTML;
+        extractProfileBtn.disabled = true;
+        extractProfileBtn.classList.add('opacity-80', 'cursor-not-allowed');
+        extractProfileBtn.innerHTML = `
+          <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Extracting profile...</span>
+        `;
+
+        try {
+          const res = await fetch('/api/extract-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile_url: url })
+          });
+          const result = await res.json();
+
+          if (!res.ok || !result.success) {
+            throw new Error(result.error || 'Profile extraction failed. Please verify your LinkedIn session and try again.');
+          }
+
+          currentExtractedData = result.data;
+          renderExtractedProfile(currentExtractedData);
+
+          currentProfileContainer.classList.remove('hidden');
+          currentProfileContainer.scrollIntoView({ behavior: 'smooth' });
+
+          extractProfileBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[18px]">check</span>
+            <span>Extracted</span>
+          `;
+          setTimeout(() => { extractProfileBtn.innerHTML = originalHTML; }, 2000);
+
+        } catch (err) {
+          alert(err.message || 'Profile extraction failed. Please verify your LinkedIn session and try again.');
+          extractProfileBtn.innerHTML = originalHTML;
+        } finally {
+          extractProfileBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+          extractProfileBtn.disabled = false;
+        }
+      });
+    }
+
+    // Optimize Profile Event Handler
+    if (optimizeProfileBtn) {
+      optimizeProfileBtn.addEventListener('click', async () => {
+        if (!currentExtractedData) {
+          alert('Please extract a profile first.');
+          return;
+        }
+
+        const originalHTML = optimizeProfileBtn.innerHTML;
+        optimizeProfileBtn.disabled = true;
+        optimizeProfileBtn.classList.add('opacity-80', 'cursor-not-allowed');
+        optimizeProfileBtn.innerHTML = `
+          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Analyzing & Optimizing...</span>
+        `;
+
+        try {
+          const res = await fetch('/api/optimize-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile: currentExtractedData })
+          });
+          const result = await res.json();
+
+          if (!res.ok || !result.success) {
+            throw new Error(result.error || 'Profile optimization failed.');
+          }
+
+          renderOptimizationResult(result.data);
+          optimizationResultContainer.classList.remove('hidden');
+          optimizationResultContainer.scrollIntoView({ behavior: 'smooth' });
+
+          optimizeProfileBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[20px]">check</span>
+            <span>Optimization Complete</span>
+          `;
+          setTimeout(() => { optimizeProfileBtn.innerHTML = originalHTML; }, 2500);
+
+        } catch (err) {
+          alert(err.message || 'Profile optimization failed.');
+          optimizeProfileBtn.innerHTML = originalHTML;
+        } finally {
+          optimizeProfileBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+          optimizeProfileBtn.disabled = false;
+        }
+      });
     }
 
     if (navDashboard) {

@@ -9,6 +9,12 @@ from parser import parse_pasted_comments
 from analyzer import analyze_comments
 from excel import generate_excel
 from historical import get_historical_email_leads, get_all_historical_leads
+from profile_extractor import (
+    extract_linkedin_profile,
+    check_linkedin_session,
+    launch_interactive_linkedin_login
+)
+from profile_optimizer import optimize_linkedin_profile
 
 load_dotenv()
 
@@ -21,6 +27,54 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/api/linkedin-session-status", methods=["GET"])
+def api_linkedin_session_status():
+    status_data = check_linkedin_session()
+    return jsonify({"success": True, "data": status_data})
+
+@app.route("/api/open-linkedin-session", methods=["POST"])
+def api_open_linkedin_session():
+    result = launch_interactive_linkedin_login()
+    return jsonify(result)
+
+@app.route("/api/extract-profile", methods=["POST"])
+def api_extract_profile():
+    data = request.get_json()
+    if not data or not isinstance(data, dict):
+        return jsonify({"success": False, "error": "Please provide a valid JSON payload."}), 400
+
+    profile_url = str(data.get("profile_url") or "").strip()
+    if not profile_url:
+        return jsonify({"success": False, "error": "Please enter a valid LinkedIn profile URL."}), 400
+
+    try:
+        extraction_data = extract_linkedin_profile(profile_url)
+        return jsonify({"success": True, "data": extraction_data})
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Profile extraction failed: {str(e)}. Please verify your LinkedIn session and try again."
+        }), 500
+
+@app.route("/api/optimize-profile", methods=["POST"])
+def api_optimize_profile():
+    data = request.get_json()
+    if not data or not isinstance(data, dict):
+        return jsonify({"success": False, "error": "Please provide a valid profile object."}), 400
+
+    extracted_profile = data.get("profile") or data
+    if not extracted_profile:
+        return jsonify({"success": False, "error": "Extracted profile data is missing."}), 400
+
+    try:
+        optimization_data = optimize_linkedin_profile(extracted_profile)
+        return jsonify({"success": True, "data": optimization_data})
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Profile optimization failed: {str(e)}"
+        }), 500
 
 @app.route("/generate", methods=["POST"])
 def generate():
