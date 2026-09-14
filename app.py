@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory, Response, stream_with_context
 from flask_cors import CORS
 import os
 import time
+import json
 from typing import List, Dict, Any
 from dotenv import load_dotenv
 
@@ -11,8 +12,10 @@ from excel import generate_excel
 from historical import get_historical_email_leads, get_all_historical_leads
 from profile_extractor import (
     extract_linkedin_profile,
+    extract_linkedin_profile_generator,
     check_linkedin_session,
-    launch_interactive_linkedin_login
+    launch_interactive_linkedin_login,
+    logout_linkedin_session
 )
 from profile_optimizer import optimize_linkedin_profile
 
@@ -37,6 +40,26 @@ def api_linkedin_session_status():
 def api_open_linkedin_session():
     result = launch_interactive_linkedin_login()
     return jsonify(result)
+
+@app.route("/api/logout-linkedin-session", methods=["POST"])
+def api_logout_linkedin_session():
+    result = logout_linkedin_session()
+    return jsonify(result)
+
+@app.route("/api/extract-profile-stream", methods=["GET"])
+def api_extract_profile_stream():
+    profile_url = str(request.args.get("profile_url") or "").strip()
+    if not profile_url:
+        return jsonify({"success": False, "error": "Please enter a valid LinkedIn profile URL."}), 400
+
+    def generate():
+        try:
+            for event in extract_linkedin_profile_generator(profile_url):
+                yield f"data: {json.dumps(event)}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'event': 'error', 'error': str(e)})}\n\n"
+
+    return Response(stream_with_context(generate()), mimetype="text/event-stream")
 
 @app.route("/api/extract-profile", methods=["POST"])
 def api_extract_profile():

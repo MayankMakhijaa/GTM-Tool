@@ -24,6 +24,39 @@ def _is_nav_text(text: str) -> bool:
     return any(b == t_clean for b in ["home", "my network", "jobs", "messaging", "notifications", "me", "for business"])
 
 
+VERIFICATION_PATTERNS = [
+    r"^verify\s+in\s+\d+\s+minutes?$",
+    r"^verification\s+pending$",
+    r"^verify\s+now$",
+    r"^get\s+verified$",
+    r"^verify\s+your\s+identity$",
+    r"^identity\s+verified$",
+]
+
+VERIFICATION_EXACT_TEXTS = {
+    "verify in 2 minutes",
+    "verify in 1 minute",
+    "verification pending",
+    "get verified",
+    "verify now",
+    "verified",
+    "verify your identity",
+    "identity verified"
+}
+
+
+def _is_verification_text(text: Optional[str]) -> bool:
+    if not text:
+        return False
+    t_clean = text.strip().lower()
+    if t_clean in VERIFICATION_EXACT_TEXTS:
+        return True
+    for pat in VERIFICATION_PATTERNS:
+        if re.match(pat, t_clean, re.IGNORECASE):
+            return True
+    return False
+
+
 def _is_authwall_or_login(page: Page) -> bool:
     """Checks if current page is a LinkedIn login prompt or authwall."""
     url = page.url.lower()
@@ -66,7 +99,8 @@ def _find_section_by_keywords(page: Page, keywords: List[str]):
 def check_linkedin_session() -> Dict[str, Any]:
     """
     Checks if the persistent Playwright browser profile is logged into LinkedIn.
-    Returns status: 'Connected' (True) or 'Not Connected' (False).
+    Returns status: 'Connected' (True) or 'Not Connected' (False), along with
+    the authenticated profile's name and photo URL if available.
     """
     os.makedirs(BROWSER_PROFILE_DIR, exist_ok=True)
     with sync_playwright() as p:
@@ -94,10 +128,66 @@ def check_linkedin_session() -> Dict[str, Any]:
             authenticated = not is_unauth
             res_url = page.url
             res_title = page.title()
+
+            user_name = None
+            user_photo = None
+            user_profile_url = None
+
+            if authenticated:
+                # Extract authenticated profile URL from feed links
+                links = page.query_selector_all("a[href*='/in/']")
+                for a in links:
+                    href = (a.get_attribute("href") or "").strip()
+                    if "/in/" in href and not any(k in href for k in ["/edit/", "/details/", "/overlay/"]):
+                        if href.startswith("/"):
+                            href = "https://www.linkedin.com" + href
+                        if not href.endswith("/in/me/"):
+                            user_profile_url = href.split("?")[0]
+                            break
+
+                # 1. Try extracting name & photo from feed DOM
+                imgs = page.query_selector_all("img")
+                for img in imgs:
+                    alt = (img.get_attribute("alt") or "").strip()
+                    src = (img.get_attribute("src") or "").strip()
+
+                    if alt and src.startswith("http"):
+                        alt_lower = alt.lower()
+                        if alt_lower.startswith("photo of "):
+                            user_name = alt[9:].strip()
+                            user_photo = src
+                            break
+                        elif not any(alt_lower.startswith(prefix) for prefix in ["view ", "linkedin", "image", "logo", "icon", "company", "ad"]):
+                            if len(alt) <= 60 and " " in alt and not any(c in alt for c in ["\n", "\r", "\t", "•"]):
+                                user_name = alt
+                                user_photo = src
+                                break
+
+                # 2. If name or profile_url is still missing, navigate to /in/me/
+                if not user_name or not user_profile_url:
+                    try:
+                        page.goto("https://www.linkedin.com/in/me/", timeout=12000, wait_until="domcontentloaded")
+                        page.wait_for_timeout(1500)
+                        if not user_profile_url and "/in/" in page.url:
+                            user_profile_url = page.url.split("?")[0]
+
+                        p_title = page.title()
+                        if p_title and " | " in p_title and not any(k in p_title.lower() for k in ["login", "sign in", "authwall", "linkedin"]):
+                            user_name = p_title.split(" | ")[0].strip()
+                        if not user_photo:
+                            p_img = page.query_selector("img.pv-top-card-profile-picture__image, img.pv-top-card__photo, img[alt*='profile picture']")
+                            if p_img:
+                                user_photo = p_img.get_attribute("src")
+                    except Exception:
+                        pass
+
             context.close()
             return {
                 "authenticated": authenticated,
                 "status": "Connected" if authenticated else "Not Connected",
+                "name": user_name,
+                "profile_photo_url": user_photo,
+                "profile_url": user_profile_url,
                 "url": res_url,
                 "title": res_title
             }
@@ -107,8 +197,23 @@ def check_linkedin_session() -> Dict[str, Any]:
             return {
                 "authenticated": False,
                 "status": "Not Connected",
+                "name": None,
+                "profile_photo_url": None,
                 "error": str(e)
             }
+
+
+def logout_linkedin_session() -> Dict[str, Any]:
+    """
+    Invalidates / clears the persistent Playwright browser profile.
+    """
+    import shutil
+    try:
+        if os.path.exists(BROWSER_PROFILE_DIR):
+            shutil.rmtree(BROWSER_PROFILE_DIR, ignore_errors=True)
+        return {"success": True, "message": "Session logged out successfully."}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 def launch_interactive_linkedin_login() -> Dict[str, Any]:
@@ -585,20 +690,20 @@ def _extract_skills_from_detail_page(context, base_url: str) -> List[Dict[str, A
     return [{"name": s, "endorsements": None} for s in master_skills]
 
 
-def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
+def extract_linkedin_profile_generator(profile_url: str):
     """
-    Extract visible LinkedIn profile details using Playwright.
-    Connects via persistent context if browser_profile exists.
-    Returns a structured ProfileExtraction dictionary.
+    Generator that progressively extracts a LinkedIn profile section by section,
+    yielding progress dictionaries for real-time streaming to the UI.
     """
     if not profile_url or not profile_url.strip():
-        raise ValueError("Please enter a valid LinkedIn profile URL.")
+        yield {"event": "error", "error": "Please enter a valid LinkedIn profile URL."}
+        return
 
     url = profile_url.strip()
     if not url.startswith("http"):
         url = "https://" + url
 
-    print(f"\n[PROFILE EXTRACTOR DEBUG] Initializing Playwright extraction for URL: {url}")
+    yield {"event": "status", "message": "Connecting to LinkedIn..."}
 
     with sync_playwright() as p:
         user_data_dir = BROWSER_PROFILE_DIR if os.path.exists(BROWSER_PROFILE_DIR) else None
@@ -606,7 +711,6 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
         browser = None
         
         if user_data_dir:
-            print(f"[PROFILE EXTRACTOR DEBUG] Using persistent browser profile from: {user_data_dir}")
             context = p.chromium.launch_persistent_context(
                 user_data_dir=user_data_dir,
                 headless=True,
@@ -616,7 +720,6 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
             )
             page = context.pages[0] if context.pages else context.new_page()
         else:
-            print("[PROFILE EXTRACTOR DEBUG] No browser_profile directory found. Launching standard Chromium context.")
             browser = p.chromium.launch(
                 headless=True,
                 args=["--disable-blink-features=AutomationControlled"]
@@ -632,28 +735,24 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
 
             final_url = page.url
             page_title = page.title()
-            print(f"[PROFILE EXTRACTOR DEBUG] Final URL after navigation: {final_url}")
-            print(f"[PROFILE EXTRACTOR DEBUG] Page Title: {page_title}")
 
-            # 1. Session / Authwall verification
             if _is_authwall_or_login(page):
-                print("[PROFILE EXTRACTOR DEBUG] ERROR: LinkedIn redirected to authwall/login. User is unauthenticated in Playwright session.")
-                raise RuntimeError("LinkedIn session is not authenticated. Please log in to your LinkedIn account in the browser session and try again.")
+                yield {"event": "error", "error": "LinkedIn session is not authenticated. Please log in to your LinkedIn account in the browser session and try again."}
+                return
 
-            # 2. Section-by-section scrollIntoView
-            print("[PROFILE EXTRACTOR DEBUG] Performing section-by-section scrollIntoView to trigger lazy DOM rendering...")
             sections = page.query_selector_all("main section, div.scaffold-layout__main section, section")
             for s in sections:
                 try:
                     s.evaluate("el => el.scrollIntoView({behavior: 'smooth', block: 'center'})")
-                    page.wait_for_timeout(350)
+                    page.wait_for_timeout(250)
                 except Exception:
                     pass
 
             page.evaluate("window.scrollTo(0, 0)")
-            page.wait_for_timeout(400)
+            page.wait_for_timeout(250)
 
-            # 3. Name
+            # --- 1. Name & Photo ---
+            yield {"event": "section_start", "section": "name", "label": "Name"}
             name: Optional[str] = None
             if page_title and " | " in page_title and not any(k in page_title.lower() for k in ["login", "sign up", "sign in", "authwall", "linkedin"]):
                 name = page_title.split(" | ")[0].strip()
@@ -661,29 +760,11 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
             if not name:
                 for s in sections[:3]:
                     txt = s.inner_text().strip()
-                    lines = [l.strip() for l in txt.split("\n") if l.strip() and not _is_nav_text(l)]
+                    lines = [l.strip() for l in txt.split("\n") if l.strip() and not _is_nav_text(l) and not _is_verification_text(l)]
                     if lines and not any(bad in lines[0].lower() for bad in ["notification", "cookie", "sign in"]):
                         name = lines[0]
                         break
 
-            # 4. Headline
-            headline: Optional[str] = None
-            headline_el = page.query_selector("div.text-body-medium[data-generated-suggestion-target], .pv-text-details__left-panel div.text-body-medium")
-            if headline_el:
-                headline = _clean_text(headline_el.inner_text())
-
-            if not headline:
-                for s in sections[:3]:
-                    txt = s.inner_text().strip()
-                    lines = [l.strip() for l in txt.split("\n") if l.strip() and not _is_nav_text(l)]
-                    for l in lines[1:5]:
-                        if l and not any(bad in l.lower() for bad in ["1st", "2nd", "3rd", "contact info", "followers", "connections", "mutual", "message", "follow"]):
-                            headline = l
-                            break
-                    if headline:
-                        break
-
-            # 5. Profile Photo URL
             photo_url: Optional[str] = None
             photo_selectors = [
                 "img.pv-top-card-profile-picture__image",
@@ -699,12 +780,38 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                         photo_url = src
                         break
 
-            # 6. About Section
+            yield {"event": "section_complete", "section": "name", "label": "Name", "data": name, "photo_url": photo_url}
+
+            # --- 2. Headline ---
+            yield {"event": "section_start", "section": "headline", "label": "Headline"}
+            headline: Optional[str] = None
+            headline_els = page.query_selector_all("div.text-body-medium[data-generated-suggestion-target], .pv-text-details__left-panel div.text-body-medium, div.text-body-medium")
+            for el in headline_els:
+                txt = _clean_text(el.inner_text())
+                if txt and not _is_nav_text(txt) and not _is_verification_text(txt):
+                    headline = txt
+                    break
+
+            if not headline:
+                for s in sections[:3]:
+                    txt = s.inner_text().strip()
+                    lines = [l.strip() for l in txt.split("\n") if l.strip() and not _is_nav_text(l) and not _is_verification_text(l)]
+                    for l in lines[1:5]:
+                        if l and not any(bad in l.lower() for bad in ["1st", "2nd", "3rd", "contact info", "followers", "connections", "mutual", "message", "follow"]):
+                            headline = l
+                            break
+                    if headline:
+                        break
+
+            yield {"event": "section_complete", "section": "headline", "label": "Headline", "data": headline}
+
+            # --- 3. About & Top Skills ---
+            yield {"event": "section_start", "section": "about", "label": "About"}
             about: Optional[str] = None
             about_sec = _find_section_by_keywords(page, ["about", "summary"])
             if about_sec:
                 raw_about = about_sec.inner_text().strip()
-                lines = [l.strip() for l in raw_about.split("\n") if l.strip() and not _is_nav_text(l)]
+                lines = [l.strip() for l in raw_about.split("\n") if l.strip() and not _is_nav_text(l) and not _is_verification_text(l)]
                 filtered_lines = []
                 for l in lines:
                     if l.lower() in ["featured", "activity", "experience", "education", "skills"]:
@@ -714,7 +821,6 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                 if filtered_lines:
                     about = "\n".join(filtered_lines)
 
-            # 7. Top Skills Summary
             top_skills: List[str] = []
             top_skills_els = page.query_selector_all("div.pv-top-card--list-bullet span, button:has-text('Top skills') + span")
             for ts in top_skills_els:
@@ -722,9 +828,12 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                 if ts_txt and ts_txt not in top_skills and "top skills" not in ts_txt.lower() and not _is_nav_text(ts_txt):
                     top_skills.append(ts_txt)
 
+            yield {"event": "section_complete", "section": "about", "label": "About", "data": about, "top_skills": top_skills}
+
             active_context = context if context else page.context
 
-            # 8. Experience Section (Dedicated details page first)
+            # --- 4. Experience ---
+            yield {"event": "section_start", "section": "experience", "label": "Experience"}
             experience_items: List[Dict[str, Any]] = []
             exp_lines: List[str] = []
             if active_context:
@@ -736,7 +845,10 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                     exp_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
             experience_items = _parse_experience(exp_lines)
 
-            # 9. Education Section (Dedicated details page first)
+            yield {"event": "section_complete", "section": "experience", "label": "Experience", "data": experience_items}
+
+            # --- 5. Education ---
+            yield {"event": "section_start", "section": "education", "label": "Education"}
             education_items: List[Dict[str, Any]] = []
             edu_lines: List[str] = []
             if active_context:
@@ -748,7 +860,10 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                     edu_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
             education_items = _parse_education(edu_lines)
 
-            # 10. Full Skills Section (Dedicated DOM element extraction from /details/skills/)
+            yield {"event": "section_complete", "section": "education", "label": "Education", "data": education_items}
+
+            # --- 6. Skills ---
+            yield {"event": "section_start", "section": "skills", "label": "Skills"}
             skills_items: List[Dict[str, Any]] = []
             if active_context:
                 skills_items = _extract_skills_from_detail_page(active_context, final_url)
@@ -759,8 +874,25 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                     skills_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
                     skills_items = _parse_skills(skills_lines)
 
+            yield {"event": "section_complete", "section": "skills", "label": "Skills", "data": skills_items}
 
-            # 11. Honors & Awards Section
+            # --- 7. Certifications ---
+            yield {"event": "section_start", "section": "certifications", "label": "Certifications"}
+            cert_items: List[Dict[str, Any]] = []
+            cert_lines: List[str] = []
+            if active_context:
+                cert_lines = _extract_detail_page_lines(active_context, final_url, "certifications")
+            if not cert_lines:
+                cert_sec = _find_section_by_keywords(page, ["licenses_and_certifications", "certifications", "licenses"])
+                if cert_sec:
+                    raw_txt = cert_sec.inner_text().strip()
+                    cert_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
+            cert_items = _parse_certifications(cert_lines)
+
+            yield {"event": "section_complete", "section": "certifications", "label": "Certifications", "data": cert_items}
+
+            # --- 8. Projects & Additional Sections ---
+            yield {"event": "section_start", "section": "projects", "label": "Projects"}
             honors_items: List[Dict[str, Any]] = []
             honors_sec = _find_section_by_keywords(page, ["honors", "awards", "honors_and_awards"])
             if honors_sec:
@@ -775,20 +907,6 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                             "description": ""
                         })
 
-            # 12. Certifications Section (Dedicated details page first)
-            cert_items: List[Dict[str, Any]] = []
-            cert_lines: List[str] = []
-            if active_context:
-                cert_lines = _extract_detail_page_lines(active_context, final_url, "certifications")
-            if not cert_lines:
-                cert_sec = _find_section_by_keywords(page, ["licenses_and_certifications", "certifications", "licenses"])
-                if cert_sec:
-                    raw_txt = cert_sec.inner_text().strip()
-                    cert_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
-            cert_items = _parse_certifications(cert_lines)
-
-
-            # 13. Featured Section
             featured_items: List[Dict[str, Any]] = []
             feat_sec = _find_section_by_keywords(page, ["featured"])
             if feat_sec:
@@ -803,29 +921,14 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                             "url": ""
                         })
 
-            # Determine current position
+            yield {"event": "section_complete", "section": "projects", "label": "Projects", "data": []}
+
             current_pos: Optional[str] = None
             if experience_items:
                 top_exp = experience_items[0]
                 current_pos = f"{top_exp['title']} @ {top_exp['company']}" if top_exp.get("company") else top_exp['title']
 
-            # Critical Debugging Summary Output
-            print("\n========================================")
-            print("## PROFILE EXTRACTION SUMMARY")
-            print("========================================")
-            print(f"Name: {'FOUND (' + name + ')' if name else 'MISSING'}")
-            print(f"Headline: {'FOUND (' + (headline[:40] + '...') if headline else 'MISSING'}")
-            print(f"About: {'FOUND (' + str(len(about)) + ' chars)' if about else 'MISSING'}")
-            print(f"Top Skills: {len(top_skills)}")
-            print(f"Experience: {len(experience_items)} REAL ENTRIES")
-            print(f"Education: {len(education_items)} REAL ENTRIES")
-            print(f"Skills: {len(skills_items)} REAL SKILLS")
-            print(f"Certifications: {len(cert_items)}")
-            print(f"Featured: {len(featured_items)}")
-            print(f"Honors & Awards: {len(honors_items)}")
-            print("========================================\n")
-
-            return {
+            full_profile = {
                 "tenant_id": "default_tenant",
                 "user_id": "pro_user",
                 "source_url": url,
@@ -855,8 +958,26 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                 }
             }
 
+            yield {"event": "complete", "full_profile": full_profile}
+
         finally:
             if context:
                 context.close()
             elif browser:
                 browser.close()
+
+
+def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
+    """
+    Extract visible LinkedIn profile details using Playwright.
+    Wraps the generator for non-streaming callers.
+    """
+    full_data = None
+    for event in extract_linkedin_profile_generator(profile_url):
+        if event.get("event") == "error":
+            raise RuntimeError(event.get("error"))
+        elif event.get("event") == "complete":
+            full_data = event.get("full_profile")
+    if not full_data:
+        raise RuntimeError("Profile extraction completed without producing output data.")
+    return full_data

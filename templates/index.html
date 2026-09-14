@@ -285,23 +285,37 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 
 <!-- LinkedIn Session Control Bar -->
 <div class="bg-surface-card rounded-xl shadow-sm p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm border border-border-default/60">
-<div class="flex items-center gap-space-md">
-<div class="flex items-center gap-2">
-<span class="font-label-md text-label-md text-text-primary font-semibold">LinkedIn Session:</span>
-<div id="session-status-badge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium">
-<span class="w-2 h-2 rounded-full bg-status-warning-text animate-pulse" id="session-status-dot"></span>
-<span id="session-status-text">Checking Status...</span>
-</div>
-</div>
+<div class="flex flex-col gap-2">
+  <div class="flex items-center gap-2">
+    <span class="font-label-md text-label-md text-text-primary font-semibold">LinkedIn Session:</span>
+    <div id="session-status-badge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium border border-status-warning-border">
+      <span class="w-2 h-2 rounded-full bg-status-warning-text animate-pulse" id="session-status-dot"></span>
+      <span id="session-status-text">Checking Status...</span>
+    </div>
+  </div>
+  <!-- Connected User Profile Info Container -->
+  <div id="connected-profile-info" class="hidden flex items-center gap-3 pt-1">
+    <div id="connected-profile-avatar" class="w-9 h-9 rounded-full bg-primary-container text-on-primary font-bold flex items-center justify-center text-label-md overflow-hidden shrink-0 shadow-sm">
+      <span id="connected-profile-initials">U</span>
+    </div>
+    <div class="flex flex-col leading-tight">
+      <span id="connected-profile-name" class="font-label-md text-label-md text-text-primary font-semibold">User Name</span>
+      <span class="font-label-sm text-[11px] text-text-muted">Connected LinkedIn profile</span>
+    </div>
+  </div>
 </div>
 <div class="flex items-center gap-space-xs">
-<button id="open-session-btn" type="button" class="h-9 px-4 rounded-xl bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-label-sm transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
-<span class="material-symbols-outlined text-[16px] text-primary-container">open_in_new</span>
-<span>Open LinkedIn Session</span>
-</button>
-<button id="check-session-btn" type="button" class="h-9 px-3 rounded-xl bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-muted hover:text-text-primary transition-all flex items-center justify-center shadow-sm" title="Refresh Session Status">
-<span class="material-symbols-outlined text-[16px]">refresh</span>
-</button>
+  <button id="open-session-btn" type="button" class="h-9 px-4 rounded-xl bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-label-sm transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+    <span class="material-symbols-outlined text-[16px] text-primary-container">open_in_new</span>
+    <span>Open LinkedIn Session</span>
+  </button>
+  <button id="logout-session-btn" type="button" class="hidden h-9 px-4 rounded-xl bg-error-container/30 hover:bg-error-container text-on-error-container border border-error-container/50 font-label-sm text-label-sm transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+    <span class="material-symbols-outlined text-[16px]">logout</span>
+    <span>Log Out</span>
+  </button>
+  <button id="check-session-btn" type="button" class="h-9 px-3 rounded-xl bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-muted hover:text-text-primary transition-all flex items-center justify-center shadow-sm" title="Refresh Session Status">
+    <span class="material-symbols-outlined text-[16px]">refresh</span>
+  </button>
 </div>
 </div>
 
@@ -311,17 +325,36 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 <div class="flex items-center justify-between">
 <label class="font-label-md text-label-md text-text-primary flex items-center gap-1.5" for="profile-url-input">
 <span class="material-symbols-outlined text-[18px] text-primary-container">link</span>
-<span>LinkedIn Profile URL</span>
+<span>LinkedIn Profile</span>
 </label>
-<span class="font-label-sm text-label-sm text-text-muted">Target profile URL</span>
+<span class="font-label-sm text-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">lock</span> Authenticated Profile</span>
 </div>
 <div class="flex flex-col sm:flex-row items-stretch gap-space-sm pt-1">
-<input class="flex-1 h-11 px-3.5 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container" id="profile-url-input" placeholder="https://www.linkedin.com/in/username" type="text"/>
-<button class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="extract-profile-btn" type="button">
+<div class="relative flex-1">
+  <input class="w-full h-11 pl-3.5 pr-10 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors border border-border-default/60 cursor-not-allowed opacity-90 font-mono text-sm" id="profile-url-input" placeholder="Connect LinkedIn to load your profile" type="text" readonly disabled/>
+  <span class="material-symbols-outlined text-[18px] text-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" title="Read-only: populated from authenticated LinkedIn session">lock</span>
+</div>
+<button class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-container" id="extract-profile-btn" type="button" disabled>
 <span class="material-symbols-outlined text-[18px]">person_search</span>
 <span>Extract Profile</span>
 </button>
 </div>
+</div>
+
+<!-- Progressive Extraction Visualizer -->
+<div id="extraction-progress-container" class="hidden pt-2">
+  <div class="p-space-md bg-surface-canvas rounded-xl border border-border-default/60 flex flex-col gap-3">
+    <div class="flex items-center justify-between border-b border-border-default/50 pb-2">
+      <span class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px] text-primary-container animate-spin" id="extraction-spinner">sync</span>
+        <span id="extraction-current-status-title">Extracting Profile...</span>
+      </span>
+      <span class="font-label-sm text-[11px] text-text-muted" id="extraction-progress-counter">0 / 8 Sections</span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="extraction-section-checklist">
+      <!-- Progressive checklist items -->
+    </div>
+  </div>
 </div>
 </div>
 
@@ -554,30 +587,150 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
     const sessionStatusDot = document.getElementById('session-status-dot');
     const sessionStatusText = document.getElementById('session-status-text');
     const openSessionBtn = document.getElementById('open-session-btn');
+    const logoutSessionBtn = document.getElementById('logout-session-btn');
     const checkSessionBtn = document.getElementById('check-session-btn');
+    const connectedProfileInfo = document.getElementById('connected-profile-info');
+    const connectedProfileAvatar = document.getElementById('connected-profile-avatar');
+    const connectedProfileName = document.getElementById('connected-profile-name');
+
+    // Progressive Extraction DOM Elements
+    const extractionProgressContainer = document.getElementById('extraction-progress-container');
+    const extractionCurrentStatusTitle = document.getElementById('extraction-current-status-title');
+    const extractionProgressCounter = document.getElementById('extraction-progress-counter');
+    const extractionSectionChecklist = document.getElementById('extraction-section-checklist');
+    const extractionSpinner = document.getElementById('extraction-spinner');
 
     let currentExtractedData = null;
     let currentDownloadUrl = null;
 
+    const defaultChecklistSections = [
+      { id: 'name', label: 'Name' },
+      { id: 'headline', label: 'Headline' },
+      { id: 'about', label: 'About' },
+      { id: 'experience', label: 'Experience' },
+      { id: 'education', label: 'Education' },
+      { id: 'skills', label: 'Skills' },
+      { id: 'certifications', label: 'Certifications' },
+      { id: 'projects', label: 'Projects' }
+    ];
+    let sectionStates = {};
+
+    function initExtractionChecklist() {
+      if (!extractionSectionChecklist) return;
+      sectionStates = {};
+      defaultChecklistSections.forEach(s => {
+        sectionStates[s.id] = { label: s.label, status: 'pending' };
+      });
+      renderChecklistUI();
+    }
+
+    function updateChecklistSection(sectionId, status) {
+      if (!sectionStates[sectionId]) {
+        sectionStates[sectionId] = { label: sectionId, status: status };
+      } else {
+        sectionStates[sectionId].status = status;
+      }
+      renderChecklistUI();
+    }
+
+    function renderChecklistUI() {
+      if (!extractionSectionChecklist) return;
+      let completedCount = 0;
+      const keys = Object.keys(sectionStates);
+      const totalCount = keys.length;
+      let html = '';
+
+      keys.forEach(id => {
+        const item = sectionStates[id];
+        let iconHtml = '';
+        let textClass = 'text-text-muted';
+        let bgClass = 'bg-surface-canvas border-border-default/50';
+
+        if (item.status === 'completed') {
+          completedCount++;
+          iconHtml = `<span class="material-symbols-outlined text-[16px] text-status-success-text shrink-0">check_circle</span>`;
+          textClass = 'text-text-primary font-medium';
+          bgClass = 'bg-status-success-bg/40 border-status-success-border/60';
+        } else if (item.status === 'extracting') {
+          iconHtml = `<span class="material-symbols-outlined text-[16px] text-primary-container animate-spin shrink-0">sync</span>`;
+          textClass = 'text-primary-container font-semibold';
+          bgClass = 'bg-status-score-high-bg border-primary-container/30';
+        } else {
+          iconHtml = `<span class="material-symbols-outlined text-[16px] text-text-muted shrink-0">radio_button_unchecked</span>`;
+        }
+
+        html += `
+          <div class="p-2 px-3 rounded-lg border flex items-center gap-2 text-body-sm ${bgClass}">
+            ${iconHtml}
+            <span class="${textClass} truncate">${item.label}</span>
+          </div>
+        `;
+      });
+
+      extractionSectionChecklist.innerHTML = html;
+      if (extractionProgressCounter) {
+        extractionProgressCounter.textContent = `${completedCount} / ${totalCount} Sections`;
+      }
+    }
+
     async function checkLinkedInSessionStatus() {
       if (!sessionStatusText) return;
       sessionStatusText.textContent = 'Checking...';
-      if (sessionStatusBadge) {
-        sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-subtle text-text-muted font-label-sm text-label-sm font-medium';
-      }
       try {
         const res = await fetch('/api/linkedin-session-status');
         const data = await res.json();
         if (res.ok && data.success && data.data) {
           const isAuth = data.data.authenticated;
+          const name = data.data.name;
+          const photo = data.data.profile_photo_url;
+
           if (isAuth) {
             sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm font-semibold border border-status-success-border';
             if (sessionStatusDot) sessionStatusDot.className = 'w-2 h-2 rounded-full bg-status-success-text';
             sessionStatusText.textContent = 'Connected';
+
+            if (connectedProfileInfo) connectedProfileInfo.classList.remove('hidden');
+            if (connectedProfileName) connectedProfileName.textContent = name || 'Authenticated LinkedIn Profile';
+            if (connectedProfileAvatar) {
+              if (photo) {
+                connectedProfileAvatar.innerHTML = `<img src="${photo}" class="w-full h-full object-cover" />`;
+              } else {
+                const init = name ? name.substring(0, 2).toUpperCase() : 'LI';
+                connectedProfileAvatar.innerHTML = `<span>${init}</span>`;
+              }
+            }
+            if (openSessionBtn) openSessionBtn.classList.add('hidden');
+            if (logoutSessionBtn) logoutSessionBtn.classList.remove('hidden');
+
+            if (profileUrlInput) {
+              if (data.data.profile_url) {
+                profileUrlInput.value = data.data.profile_url;
+              }
+              profileUrlInput.readOnly = true;
+              profileUrlInput.disabled = true;
+            }
+            if (extractProfileBtn) {
+              extractProfileBtn.disabled = false;
+            }
           } else {
             sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium border border-status-warning-border';
             if (sessionStatusDot) sessionStatusDot.className = 'w-2 h-2 rounded-full bg-status-warning-text';
             sessionStatusText.textContent = 'Not Connected';
+
+            if (connectedProfileInfo) connectedProfileInfo.classList.add('hidden');
+            if (connectedProfileName) connectedProfileName.textContent = '';
+            if (openSessionBtn) openSessionBtn.classList.remove('hidden');
+            if (logoutSessionBtn) logoutSessionBtn.classList.add('hidden');
+
+            if (profileUrlInput) {
+              profileUrlInput.value = '';
+              profileUrlInput.placeholder = 'Connect LinkedIn to load your profile';
+              profileUrlInput.readOnly = true;
+              profileUrlInput.disabled = true;
+            }
+            if (extractProfileBtn) {
+              extractProfileBtn.disabled = true;
+            }
           }
         }
       } catch (err) {
@@ -599,6 +752,34 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
           openSessionBtn.disabled = false;
           openSessionBtn.classList.remove('opacity-70', 'cursor-not-allowed');
           checkLinkedInSessionStatus();
+        }
+      });
+    }
+
+    if (logoutSessionBtn) {
+      logoutSessionBtn.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to log out of your LinkedIn session?')) return;
+        logoutSessionBtn.disabled = true;
+        try {
+          const res = await fetch('/api/logout-linkedin-session', { method: 'POST' });
+          const data = await res.json();
+          if (data.success) {
+            currentExtractedData = null;
+            if (profileUrlInput) {
+              profileUrlInput.value = '';
+              profileUrlInput.placeholder = 'Connect LinkedIn to load your profile';
+            }
+            if (extractProfileBtn) {
+              extractProfileBtn.disabled = true;
+            }
+            if (currentProfileContainer) currentProfileContainer.classList.add('hidden');
+            if (optimizationResultContainer) optimizationResultContainer.classList.add('hidden');
+            checkLinkedInSessionStatus();
+          }
+        } catch (err) {
+          console.error('Logout error:', err);
+        } finally {
+          logoutSessionBtn.disabled = false;
         }
       });
     }
@@ -850,8 +1031,35 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 
         const prioColor = rec.priority === 'high' ? 'bg-status-score-high-bg text-status-score-high-text' : (rec.priority === 'medium' ? 'bg-status-success-bg text-status-success-text' : 'bg-surface-subtle text-text-muted');
 
+        const isNoChange = (rec.change_required === false) || (rec.action_type === 'none') || (!rec.suggested) || (rec.suggested.toLowerCase().includes('no changes recommended'));
+        const isAskChatGPT = rec.action_type === 'ask_chatgpt';
+
         const currentText = rec.current && rec.current.trim() !== '' ? rec.current : 'Not available';
-        const suggestedText = rec.suggested && rec.suggested.trim() !== '' ? rec.suggested : 'No changes recommended';
+        const suggestedText = isNoChange ? 'No changes recommended.' : (rec.suggested || '');
+
+        let actionButtonHtml = '';
+        if (isNoChange) {
+          actionButtonHtml = `
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-status-success-bg text-status-success-text font-label-md text-label-md font-semibold border border-status-success-border/60">
+              <span class="material-symbols-outlined text-[16px]">task_alt</span>
+              <span>You're good to go ✓</span>
+            </div>
+          `;
+        } else if (isAskChatGPT) {
+          actionButtonHtml = `
+            <button type="button" class="ask-chatgpt-btn px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-label-md text-label-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]">
+              <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+              <span>Ask ChatGPT</span>
+            </button>
+          `;
+        } else { // Copy
+          actionButtonHtml = `
+            <button type="button" class="copy-suggestion-btn px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]">
+              <span class="material-symbols-outlined text-[16px]">content_copy</span>
+              <span>Copy</span>
+            </button>
+          `;
+        }
 
         card.innerHTML = `
           <!-- Left Column: CURRENT -->
@@ -870,10 +1078,10 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
             <div class="flex flex-col gap-2">
               <div class="flex items-center justify-between">
                 <span class="font-label-md text-label-md font-semibold text-primary-container uppercase tracking-wider">AI Suggestion</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-label-sm font-semibold capitalize ${prioColor}">${rec.priority || 'medium'} Priority</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-label-sm font-semibold capitalize ${prioColor}">${rec.priority && rec.priority !== 'none' ? rec.priority + ' Priority' : 'Verified'}</span>
               </div>
 
-              <div class="p-3.5 rounded-xl bg-status-success-bg/40 font-body-md text-body-md text-text-primary whitespace-pre-line border border-status-success-border/60">
+              <div class="p-3.5 rounded-xl ${isNoChange ? 'bg-surface-canvas border border-border-default/40' : 'bg-status-success-bg/40 border border-status-success-border/60'} font-body-md text-body-md text-text-primary whitespace-pre-line">
                 ${suggestedText}
               </div>
 
@@ -886,26 +1094,32 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
-              <button type="button" class="use-suggestion-btn px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]">
-                <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                <span>Use Suggestion</span>
-              </button>
+              ${actionButtonHtml}
             </div>
           </div>
         `;
 
-        const btn = card.querySelector('.use-suggestion-btn');
-        if (btn) {
-          let selected = false;
-          btn.addEventListener('click', () => {
-            selected = !selected;
-            if (selected) {
-              btn.className = 'use-suggestion-btn px-4 py-2 rounded-xl bg-status-success-bg text-status-success-text font-label-md text-label-md border border-status-success-border flex items-center gap-1.5 shadow-sm';
-              btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">task_alt</span><span>Selected / Applied</span>`;
-            } else {
-              btn.className = 'use-suggestion-btn px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]';
-              btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span><span>Use Suggestion</span>`;
-            }
+        // Event listeners for action buttons
+        const copyBtn = card.querySelector('.copy-suggestion-btn');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(rec.suggested || '');
+            const orig = copyBtn.innerHTML;
+            copyBtn.className = 'copy-suggestion-btn px-4 py-2 rounded-xl bg-status-success-bg text-status-success-text font-label-md text-label-md border border-status-success-border flex items-center gap-1.5 shadow-sm';
+            copyBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check</span><span>Copied!</span>`;
+            setTimeout(() => {
+              copyBtn.className = 'copy-suggestion-btn px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]';
+              copyBtn.innerHTML = orig;
+            }, 2000);
+          });
+        }
+
+        const askBtn = card.querySelector('.ask-chatgpt-btn');
+        if (askBtn) {
+          askBtn.addEventListener('click', () => {
+            const promptText = `I am optimizing my LinkedIn profile for lead generation. Based on my profile analysis, I need to create/add content for section '${rec.title || rec.section}'. Context & Recommendation: ${rec.suggested}. Reason: ${rec.reason || ''}. Please help me draft high-converting content for this section based on these details.`;
+            navigator.clipboard.writeText(promptText);
+            window.open('https://chatgpt.com/', '_blank');
           });
         }
 
@@ -918,7 +1132,7 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
       extractProfileBtn.addEventListener('click', async () => {
         const url = profileUrlInput ? profileUrlInput.value.trim() : '';
         if (!url) {
-          alert('Please enter a valid LinkedIn profile URL.');
+          alert('Please connect your LinkedIn account first to load your profile.');
           return;
         }
 
@@ -933,23 +1147,101 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
           <span>Extracting profile...</span>
         `;
 
-        try {
-          const res = await fetch('/api/extract-profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profile_url: url })
-          });
-          const result = await res.json();
+        if (extractionProgressContainer) extractionProgressContainer.classList.remove('hidden');
+        initExtractionChecklist();
 
-          if (!res.ok || !result.success) {
-            throw new Error(result.error || 'Profile extraction failed. Please verify your LinkedIn session and try again.');
+        let partialProfile = {
+          tenant_id: "default_tenant",
+          user_id: "pro_user",
+          source_url: url,
+          profile: {
+            name: null,
+            profile_photo_url: null,
+            headline: null,
+            about: null,
+            current_position: null,
+            top_skills: [],
+            experience: [],
+            education: [],
+            skills: [],
+            certifications: [],
+            featured: [],
+            honors_awards: []
+          }
+        };
+
+        try {
+          const response = await fetch(`/api/extract-profile-stream?profile_url=${encodeURIComponent(url)}`);
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error || 'Profile extraction failed.');
           }
 
-          currentExtractedData = result.data;
-          renderExtractedProfile(currentExtractedData);
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
 
-          currentProfileContainer.classList.remove('hidden');
-          currentProfileContainer.scrollIntoView({ behavior: 'smooth' });
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split('\n\n');
+            buffer = parts.pop();
+
+            for (const part of parts) {
+              if (part.startsWith('data: ')) {
+                const jsonStr = part.substring(6).trim();
+                if (!jsonStr) continue;
+                const event = JSON.parse(jsonStr);
+
+                if (event.event === 'error') {
+                  throw new Error(event.error);
+                } else if (event.event === 'status') {
+                  if (extractionCurrentStatusTitle) extractionCurrentStatusTitle.textContent = event.message || 'Extracting Profile...';
+                } else if (event.event === 'section_start') {
+                  updateChecklistSection(event.section, 'extracting');
+                  if (extractionCurrentStatusTitle) extractionCurrentStatusTitle.textContent = `Extracting ${event.label || event.section}...`;
+                } else if (event.event === 'section_complete') {
+                  updateChecklistSection(event.section, 'completed');
+
+                  if (event.section === 'name') {
+                    partialProfile.profile.name = event.data;
+                    if (event.photo_url) partialProfile.profile.profile_photo_url = event.photo_url;
+                  } else if (event.section === 'headline') {
+                    partialProfile.profile.headline = event.data;
+                  } else if (event.section === 'about') {
+                    partialProfile.profile.about = event.data;
+                    if (event.top_skills) partialProfile.profile.top_skills = event.top_skills;
+                  } else if (event.section === 'experience') {
+                    partialProfile.profile.experience = event.data || [];
+                    if (partialProfile.profile.experience.length > 0) {
+                      const top = partialProfile.profile.experience[0];
+                      partialProfile.profile.current_position = top.company ? `${top.title} @ ${top.company}` : top.title;
+                    }
+                  } else if (event.section === 'education') {
+                    partialProfile.profile.education = event.data || [];
+                  } else if (event.section === 'skills') {
+                    partialProfile.profile.skills = event.data || [];
+                  } else if (event.section === 'certifications') {
+                    partialProfile.profile.certifications = event.data || [];
+                  } else if (event.section === 'projects') {
+                    partialProfile.profile.projects = event.data || [];
+                  }
+
+                  currentExtractedData = partialProfile;
+                  renderExtractedProfile(currentExtractedData);
+                  currentProfileContainer.classList.remove('hidden');
+
+                } else if (event.event === 'complete') {
+                  currentExtractedData = event.full_profile || partialProfile;
+                  renderExtractedProfile(currentExtractedData);
+                  currentProfileContainer.classList.remove('hidden');
+                  if (extractionCurrentStatusTitle) extractionCurrentStatusTitle.textContent = 'Extraction Complete ✓';
+                  if (extractionSpinner) extractionSpinner.className = 'material-symbols-outlined text-[18px] text-status-success-text';
+                }
+              }
+            }
+          }
 
           extractProfileBtn.innerHTML = `
             <span class="material-symbols-outlined text-[18px]">check</span>
