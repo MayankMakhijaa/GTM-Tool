@@ -471,6 +471,120 @@ def _parse_certifications(lines: List[str]) -> List[Dict[str, Any]]:
 
 
 
+def _extract_skills_from_detail_page(context, base_url: str) -> List[Dict[str, Any]]:
+    """
+    Navigates to /details/skills/ sub-page and extracts skills strictly from verified
+    skill-entry DOM elements. Completely avoids broad container text scraping.
+    """
+    detail_url = base_url.rstrip("/") + "/details/skills/"
+    page = context.new_page()
+    master_skills: List[str] = []
+    
+    try:
+        page.goto(detail_url, timeout=30000, wait_until="domcontentloaded")
+        page.wait_for_timeout(2500)
+
+        if _is_authwall_or_login(page):
+            page.close()
+            return []
+
+        js_dom_harvester = """
+        () => {
+            const currentSkills = [];
+
+            // Primary Method A: Skill edit form anchors inside main (excluding /new/)
+            const editAnchors = Array.from(document.querySelectorAll("main a[href*='/skills/edit/forms/'], main a[href*='/details/skills/edit/forms/']"));
+            const validAnchors = editAnchors.filter(a => !a.getAttribute('href').includes('/new/'));
+
+            validAnchors.forEach(a => {
+                let container = a;
+                for (let i = 0; i < 5; i++) {
+                    if (container.parentElement && !['MAIN', 'BODY'].includes(container.parentElement.tagName)) {
+                        container = container.parentElement;
+                        const txt = container.innerText ? container.innerText.trim() : '';
+                        const lines = txt.split('\\n').map(s => s.trim()).filter(Boolean);
+                        if (lines.length >= 1 && lines.length <= 8) {
+                            break;
+                        }
+                    }
+                }
+                if (container) {
+                    const lines = container.innerText ? container.innerText.split('\\n').map(s => s.trim()).filter(Boolean) : [];
+                    if (lines.length > 0) {
+                        const name = lines[0];
+                        if (name && name.length <= 80 && !currentSkills.includes(name)) {
+                            currentSkills.push(name);
+                        }
+                    }
+                }
+            });
+
+            // Primary Method B: Explicit skill list item DOM elements inside main container
+            const skillItems = Array.from(document.querySelectorAll("main div.pvs-entity, main ul.pvs-list > li, main div.pvs-list__outer-container li"));
+            skillItems.forEach(item => {
+                if (item.closest('nav') || item.closest('footer')) return;
+                const nameEl = item.querySelector("div.display-flex.align-items-center span[aria-hidden='true'], span.mr1 span[aria-hidden='true'], div.hoverable-link-text span[aria-hidden='true'], a span[aria-hidden='true']");
+                let name = nameEl ? nameEl.innerText.trim() : '';
+                if (!name && item.innerText) {
+                    name = item.innerText.split('\\n')[0].trim();
+                }
+                if (name && name.length <= 80 && !currentSkills.includes(name)) {
+                    const lower = name.toLowerCase();
+                    const categoryHeaders = ['skills', 'all', 'industry knowledge', 'tools & technologies', 'interpersonal skills', 'other skills', 'show all'];
+                    if (!categoryHeaders.includes(lower) && !lower.includes('help center') && !lower.includes('settings')) {
+                        currentSkills.push(name);
+                    }
+                }
+            });
+
+            return currentSkills;
+        }
+        """
+
+        def harvest():
+            try:
+                found = page.evaluate(js_dom_harvester)
+                for s in found:
+                    if s and s not in master_skills:
+                        master_skills.append(s)
+            except Exception:
+                pass
+
+        # 1. Harvest initial view
+        harvest()
+
+        # 2. Scroll and harvest on 'All' tab
+        for _ in range(8):
+            page.mouse.wheel(0, 600)
+            page.wait_for_timeout(400)
+            harvest()
+
+        # 3. Click category tabs if present and harvest
+        tabs = ["All", "Industry Knowledge", "Tools & Technologies", "Interpersonal Skills", "Other Skills"]
+        for tab in tabs:
+            try:
+                btn = page.query_selector(f"main button:has-text('{tab}')")
+                if btn:
+                    btn.click()
+                    page.wait_for_timeout(800)
+                    for _ in range(5):
+                        page.mouse.wheel(0, 600)
+                        page.wait_for_timeout(350)
+                        harvest()
+            except Exception:
+                pass
+
+    except Exception as e:
+        print(f"[PROFILE EXTRACTOR DEBUG] DOM Skills fetch info: {e}")
+    finally:
+        try:
+            page.close()
+        except Exception:
+            pass
+
+    return [{"name": s, "endorsements": None} for s in master_skills]
+
+
 def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
     """
     Extract visible LinkedIn profile details using Playwright.
@@ -634,17 +748,17 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
                     edu_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
             education_items = _parse_education(edu_lines)
 
-            # 10. Full Skills Section (Dedicated details page first)
+            # 10. Full Skills Section (Dedicated DOM element extraction from /details/skills/)
             skills_items: List[Dict[str, Any]] = []
-            skills_lines: List[str] = []
             if active_context:
-                skills_lines = _extract_detail_page_lines(active_context, final_url, "skills")
-            if not skills_lines:
+                skills_items = _extract_skills_from_detail_page(active_context, final_url)
+            if not skills_items:
                 skills_sec = _find_section_by_keywords(page, ["skills"])
                 if skills_sec:
                     raw_txt = skills_sec.inner_text().strip()
                     skills_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
-            skills_items = _parse_skills(skills_lines)
+                    skills_items = _parse_skills(skills_lines)
+
 
             # 11. Honors & Awards Section
             honors_items: List[Dict[str, Any]] = []
