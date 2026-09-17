@@ -22,6 +22,12 @@
 <span>Profile Optimization</span>
 </a>
 
+<!-- GTM Opportunities Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="gtm-opportunities" id="nav-gtm-opportunities" href="#">
+<span class="material-symbols-outlined text-[20px]">explore</span>
+<span>GTM Opportunities</span>
+</a>
+
 <!-- Email Nav Link -->
 <a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="email" id="nav-email" href="#">
 <span class="material-symbols-outlined text-[20px]">mail</span>
@@ -336,9 +342,70 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 </div>
 <button class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-container" id="extract-profile-btn" type="button" disabled>
 <span class="material-symbols-outlined text-[18px]">person_search</span>
-<span>Extract Profile</span>
+<span id="extract-profile-btn-text">Extract Profile</span>
 </button>
 </div>
+</div>
+
+<!-- Extraction Type Selection Section -->
+<div class="flex flex-col gap-space-xs pt-3 border-t border-border-default/50">
+  <div class="flex items-center justify-between">
+    <label class="font-label-md text-label-md text-text-primary flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[18px] text-primary-container">tune</span>
+      <span>Extraction Type</span>
+    </label>
+    <span class="font-label-sm text-label-sm text-text-muted">Choose profile scope</span>
+  </div>
+  
+  <div class="flex items-center gap-6 pt-1">
+    <label class="flex items-center gap-2 cursor-pointer font-label-md text-label-md text-text-primary select-none">
+      <input type="radio" name="extraction-type" value="complete" id="ext-type-complete" checked class="w-4 h-4 text-primary-container accent-primary-container focus:ring-primary-container cursor-pointer"/>
+      <span>Complete Extraction</span>
+    </label>
+    <label class="flex items-center gap-2 cursor-pointer font-label-md text-label-md text-text-primary select-none">
+      <input type="radio" name="extraction-type" value="selected" id="ext-type-selected" class="w-4 h-4 text-primary-container accent-primary-container focus:ring-primary-container cursor-pointer"/>
+      <span>Selected Extraction</span>
+    </label>
+  </div>
+
+  <!-- Selected Extraction Checkboxes Container -->
+  <div id="selected-sections-container" class="hidden flex-col gap-2 pt-3">
+    <span class="font-label-sm text-label-sm text-text-secondary font-medium">Select sections to extract and optimize:</span>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="name" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Name</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="headline" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Headline</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="about" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>About</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="experience" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Experience</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="education" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Education</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="skills" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Skills</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="certifications" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Certifications</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="projects" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Projects</span>
+      </label>
+    </div>
+  </div>
 </div>
 
 <!-- Progressive Extraction Visualizer -->
@@ -429,6 +496,185 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 <div class="divide-y divide-border-default" id="comparison-rows-container">
 <!-- Comparison Cards Rendered Dynamically -->
 </div>
+</div>
+</div>
+</div>
+
+<!-- GTM Opportunities View Container -->
+<div id="view-gtm-opportunities" class="flex flex-col gap-space-lg w-full hidden">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">GTM Opportunities</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-text-secondary">AI GTM Agent V1</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Find companies that are relevant to your offer, not just companies that match basic filters.</p>
+</div>
+
+<!-- ICP & Offer Input Workspace Card -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md border border-border-default/60">
+<div class="flex flex-col gap-space-md">
+
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-offer-input">
+<span class="material-symbols-outlined text-[18px] text-primary-container">sell</span>
+<span>What do you sell?</span>
+</label>
+<textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-offer-input" placeholder="e.g. AI automation services for B2B companies"></textarea>
+</div>
+
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-icp-input">
+<span class="material-symbols-outlined text-[18px] text-primary-container">target</span>
+<span>Who are you looking to work with?</span>
+</label>
+<textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-icp-input" placeholder="e.g. US-based B2B SaaS companies with 50–500 employees that are growing and may need automation"></textarea>
+</div>
+
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-context-input">
+<span class="material-symbols-outlined text-[18px] text-primary-container">info</span>
+<span>Optional additional context:</span>
+</label>
+<textarea class="w-full min-h-[60px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-context-input" placeholder="e.g. Looking for companies showing signs of growth, hiring, expansion or operational complexity"></textarea>
+</div>
+
+<div class="flex justify-end pt-2">
+<button class="h-11 px-8 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="gtm-find-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">search</span>
+<span>Find Opportunities</span>
+</button>
+</div>
+
+</div>
+</div>
+
+<!-- Progress Visualizer Card -->
+<div id="gtm-progress-container" class="hidden p-space-md bg-surface-card rounded-xl border border-primary-container/30 shadow-sm flex flex-col gap-3">
+<div class="flex items-center justify-between border-b border-border-default/50 pb-2">
+<span class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary-container animate-spin" id="gtm-progress-spinner">sync</span>
+<span id="gtm-progress-status">Discovering Opportunities...</span>
+</span>
+<span class="font-label-sm text-[11px] text-text-muted" id="gtm-progress-step">Processing Pipeline</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-body-sm">
+<div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-status-score-high-bg border-primary-container/30" id="gtm-step1">
+<span class="material-symbols-outlined text-[16px] text-primary-container animate-spin">sync</span>
+<span class="text-primary-container font-medium truncate">1. Building Search Strategy...</span>
+</div>
+<div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-surface-canvas border-border-default/50" id="gtm-step2">
+<span class="material-symbols-outlined text-[16px] text-text-muted">radio_button_unchecked</span>
+<span class="text-text-muted truncate">2. Collecting Web Data...</span>
+</div>
+<div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-surface-canvas border-border-default/50" id="gtm-step3">
+<span class="material-symbols-outlined text-[16px] text-text-muted">radio_button_unchecked</span>
+<span class="text-text-muted truncate">3. Analyzing Opportunities...</span>
+</div>
+</div>
+</div>
+
+<!-- Opportunities Feed Header -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Discovered Opportunities</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-status-score-high-bg text-status-score-high-text font-label-sm text-label-sm font-semibold" id="gtm-count-badge">0 opportunities found</span>
+</div>
+</div>
+
+<!-- Opportunities Feed Cards List -->
+<div class="flex flex-col gap-space-md" id="gtm-feed-container">
+<!-- Opportunity Feed Cards Rendered Here -->
+<div class="bg-surface-card rounded-xl p-12 text-center text-text-muted flex flex-col items-center justify-center gap-3 border border-border-default/60">
+<span class="material-symbols-outlined text-[42px] text-text-muted">explore</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">No GTM opportunities discovered yet.</span>
+<span class="font-body-sm text-body-sm text-text-secondary max-w-[480px]">Describe what you sell and your target customer above, then click Find Opportunities to run the discovery pipeline.</span>
+</div>
+</div>
+
+</div>
+
+<!-- Opportunity Detail Modal Drawer -->
+<div id="gtm-detail-modal" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-50 flex items-center justify-center p-space-md hidden">
+<div class="bg-surface-card rounded-2xl shadow-2xl max-w-[800px] w-full max-h-[90vh] flex flex-col overflow-hidden border border-border-default">
+<!-- Modal Header -->
+<div class="p-space-md bg-surface-canvas border-b border-border-default flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary font-bold flex items-center justify-center text-headline-sm shrink-0" id="gtm-modal-avatar">
+C
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-headline-sm text-text-primary truncate" id="gtm-modal-company-name">Company Name</h3>
+<a href="#" target="_blank" rel="noopener noreferrer" id="gtm-modal-website-link" class="text-primary-container hover:underline font-label-sm text-label-sm flex items-center gap-0.5">
+<span>Visit Website</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</div>
+<span class="font-label-sm text-label-sm text-text-secondary" id="gtm-modal-subtext">B2B SaaS • Location • Size</span>
+</div>
+</div>
+<button id="gtm-modal-close-btn" type="button" class="w-8 h-8 rounded-full hover:bg-surface-subtle flex items-center justify-center text-text-muted hover:text-text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+
+<!-- Modal Body -->
+<div class="p-space-lg overflow-y-auto flex flex-col gap-space-lg">
+
+<!-- Score Breakdown Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+<div class="p-3 rounded-xl bg-status-score-high-bg border border-primary-container/20 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">Overall</span>
+<span class="font-stat-value text-stat-value text-primary-container" id="gtm-modal-overall-score">0</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">ICP Fit</span>
+<span class="font-label-md text-label-md font-bold text-text-primary" id="gtm-modal-icp-score">0/100</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">Intent</span>
+<span class="font-label-md text-label-md font-bold text-text-primary" id="gtm-modal-intent-score">0/100</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">Timing</span>
+<span class="font-label-md text-label-md font-bold text-text-primary" id="gtm-modal-timing-score">0/100</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">Confidence</span>
+<span class="font-label-md text-label-md font-bold text-text-primary capitalize" id="gtm-modal-confidence">medium</span>
+</div>
+</div>
+
+<!-- Why Now Box -->
+<div class="p-space-md rounded-xl bg-status-success-bg/40 border border-status-success-border/60 flex flex-col gap-1.5">
+<h4 class="font-label-md text-label-md text-status-success-text font-bold uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>WHY NOW?</span>
+</h4>
+<p class="font-body-md text-body-md text-text-primary whitespace-pre-line" id="gtm-modal-why-now">Reasoning...</p>
+</div>
+
+<!-- Recommended Action -->
+<div class="p-space-md rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col gap-1.5">
+<h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-container">lightbulb</span>
+<span>Recommended Action</span>
+</h4>
+<p class="font-body-md text-body-md text-text-primary font-medium" id="gtm-modal-action">Suggested next step...</p>
+</div>
+
+<!-- Signals & Evidence List -->
+<div class="flex flex-col gap-2">
+<h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider">Signals &amp; Public Web Evidence</h4>
+<div class="flex flex-col gap-2.5" id="gtm-modal-evidence-list">
+<!-- Dynamic Evidence Items -->
+</div>
+</div>
+
 </div>
 </div>
 </div>
@@ -562,13 +808,27 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 
     const navDashboard = document.getElementById('nav-dashboard');
     const navProfileOptimization = document.getElementById('nav-profile-optimization');
+    const navGtmOpportunities = document.getElementById('nav-gtm-opportunities');
     const navEmail = document.getElementById('nav-email');
     const navHistory = document.getElementById('nav-history');
 
     const viewDashboard = document.getElementById('view-dashboard');
     const viewProfileOptimization = document.getElementById('view-profile-optimization');
+    const viewGtmOpportunities = document.getElementById('view-gtm-opportunities');
     const viewEmailLeads = document.getElementById('view-email-leads');
     const viewHistory = document.getElementById('view-history');
+
+    // GTM Opportunities DOM Elements
+    const gtmOfferInput = document.getElementById('gtm-offer-input');
+    const gtmIcpInput = document.getElementById('gtm-icp-input');
+    const gtmContextInput = document.getElementById('gtm-context-input');
+    const gtmFindBtn = document.getElementById('gtm-find-btn');
+    const gtmProgressContainer = document.getElementById('gtm-progress-container');
+    const gtmProgressStatus = document.getElementById('gtm-progress-status');
+    const gtmFeedContainer = document.getElementById('gtm-feed-container');
+    const gtmCountBadge = document.getElementById('gtm-count-badge');
+    const gtmDetailModal = document.getElementById('gtm-detail-modal');
+    const gtmModalCloseBtn = document.getElementById('gtm-modal-close-btn');
 
     // Profile Optimization DOM Elements
     const extractProfileBtn = document.getElementById('extract-profile-btn');
@@ -603,6 +863,30 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
     let currentExtractedData = null;
     let currentDownloadUrl = null;
 
+    // Extraction Type DOM Elements
+    const extTypeComplete = document.getElementById('ext-type-complete');
+    const extTypeSelected = document.getElementById('ext-type-selected');
+    const selectedSectionsContainer = document.getElementById('selected-sections-container');
+    const extractProfileBtnText = document.getElementById('extract-profile-btn-text');
+
+    if (extTypeComplete && extTypeSelected) {
+      extTypeComplete.addEventListener('change', () => {
+        if (extTypeComplete.checked) {
+          if (selectedSectionsContainer) selectedSectionsContainer.classList.add('hidden');
+          if (extractProfileBtnText) extractProfileBtnText.textContent = 'Extract Profile';
+        }
+      });
+      extTypeSelected.addEventListener('change', () => {
+        if (extTypeSelected.checked) {
+          if (selectedSectionsContainer) {
+            selectedSectionsContainer.classList.remove('hidden');
+            selectedSectionsContainer.classList.add('flex');
+          }
+          if (extractProfileBtnText) extractProfileBtnText.textContent = 'Extract Selected Sections';
+        }
+      });
+    }
+
     const defaultChecklistSections = [
       { id: 'name', label: 'Name' },
       { id: 'headline', label: 'Headline' },
@@ -615,10 +899,13 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
     ];
     let sectionStates = {};
 
-    function initExtractionChecklist() {
+    function initExtractionChecklist(selectedSectionIds) {
       if (!extractionSectionChecklist) return;
       sectionStates = {};
-      defaultChecklistSections.forEach(s => {
+      const activeSections = (selectedSectionIds && selectedSectionIds.length > 0)
+        ? defaultChecklistSections.filter(s => selectedSectionIds.includes(s.id))
+        : defaultChecklistSections;
+      activeSections.forEach(s => {
         sectionStates[s.id] = { label: s.label, status: 'pending' };
       });
       renderChecklistUI();
@@ -820,6 +1107,7 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
     function switchTab(target) {
       viewDashboard.classList.add('hidden');
       if (viewProfileOptimization) viewProfileOptimization.classList.add('hidden');
+      if (viewGtmOpportunities) viewGtmOpportunities.classList.add('hidden');
       viewEmailLeads.classList.add('hidden');
       viewHistory.classList.add('hidden');
 
@@ -829,6 +1117,7 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
       // Reset active classes for top-level links
       if (navDashboard) navDashboard.className = inactiveClass;
       if (navProfileOptimization) navProfileOptimization.className = inactiveClass;
+      if (navGtmOpportunities) navGtmOpportunities.className = inactiveClass;
       if (navEmail) navEmail.className = inactiveClass;
       if (navHistory) navHistory.className = inactiveClass;
 
@@ -836,6 +1125,10 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
         if (viewProfileOptimization) viewProfileOptimization.classList.remove('hidden');
         if (navProfileOptimization) navProfileOptimization.className = activeClass;
         checkLinkedInSessionStatus();
+      } else if (target === 'gtm-opportunities') {
+        if (viewGtmOpportunities) viewGtmOpportunities.classList.remove('hidden');
+        if (navGtmOpportunities) navGtmOpportunities.className = activeClass;
+        fetchGtmOpportunities();
       } else if (target === 'email') {
         viewEmailLeads.classList.remove('hidden');
         if (navEmail) navEmail.className = activeClass;
@@ -854,6 +1147,13 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
       navProfileOptimization.addEventListener('click', (e) => {
         e.preventDefault();
         switchTab('profile-optimization');
+      });
+    }
+
+    if (navGtmOpportunities) {
+      navGtmOpportunities.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab('gtm-opportunities');
       });
     }
 
@@ -1118,8 +1418,21 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
         if (askBtn) {
           askBtn.addEventListener('click', () => {
             const promptText = `I am optimizing my LinkedIn profile for lead generation. Based on my profile analysis, I need to create/add content for section '${rec.title || rec.section}'. Context & Recommendation: ${rec.suggested}. Reason: ${rec.reason || ''}. Please help me draft high-converting content for this section based on these details.`;
-            navigator.clipboard.writeText(promptText);
-            window.open('https://chatgpt.com/', '_blank');
+            
+            // Clipboard fallback: Always copy prompt to clipboard in case ChatGPT doesn't prefill query parameters
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(promptText).catch(() => {});
+            }
+
+            // Safely URL-encode the prompt using URL API
+            const chatgptUrl = new URL('https://chatgpt.com/');
+            chatgptUrl.searchParams.set('q', promptText);
+
+            window.open(chatgptUrl.toString(), '_blank');
+
+            const origHTML = askBtn.innerHTML;
+            askBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check</span><span>Prompt Copied & Opened</span>`;
+            setTimeout(() => { askBtn.innerHTML = origHTML; }, 3000);
           });
         }
 
@@ -1136,6 +1449,22 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
           return;
         }
 
+        const isSelectedType = extTypeSelected && extTypeSelected.checked;
+        let selectedSections = null;
+
+        if (isSelectedType) {
+          const checkedBoxes = Array.from(document.querySelectorAll('.section-checkbox:checked')).map(cb => cb.value);
+          if (checkedBoxes.length === 0) {
+            alert('Please select at least one section to continue.');
+            return;
+          }
+          selectedSections = checkedBoxes;
+        }
+
+        if (extTypeComplete) extTypeComplete.disabled = true;
+        if (extTypeSelected) extTypeSelected.disabled = true;
+        document.querySelectorAll('.section-checkbox').forEach(cb => cb.disabled = true);
+
         const originalHTML = extractProfileBtn.innerHTML;
         extractProfileBtn.disabled = true;
         extractProfileBtn.classList.add('opacity-80', 'cursor-not-allowed');
@@ -1148,12 +1477,13 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
         `;
 
         if (extractionProgressContainer) extractionProgressContainer.classList.remove('hidden');
-        initExtractionChecklist();
+        initExtractionChecklist(selectedSections);
 
         let partialProfile = {
           tenant_id: "default_tenant",
           user_id: "pro_user",
           source_url: url,
+          selected_sections: selectedSections,
           profile: {
             name: null,
             profile_photo_url: null,
@@ -1171,7 +1501,12 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
         };
 
         try {
-          const response = await fetch(`/api/extract-profile-stream?profile_url=${encodeURIComponent(url)}`);
+          let fetchUrl = `/api/extract-profile-stream?profile_url=${encodeURIComponent(url)}`;
+          if (selectedSections && selectedSections.length > 0) {
+            fetchUrl += `&selected_sections=${encodeURIComponent(selectedSections.join(','))}`;
+          }
+
+          const response = await fetch(fetchUrl);
           if (!response.ok) {
             const errData = await response.json();
             throw new Error(errData.error || 'Profile extraction failed.');
@@ -1253,6 +1588,10 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
           alert(err.message || 'Profile extraction failed. Please verify your LinkedIn session and try again.');
           extractProfileBtn.innerHTML = originalHTML;
         } finally {
+          if (extTypeComplete) extTypeComplete.disabled = false;
+          if (extTypeSelected) extTypeSelected.disabled = false;
+          document.querySelectorAll('.section-checkbox').forEach(cb => cb.disabled = false);
+
           extractProfileBtn.classList.remove('opacity-80', 'cursor-not-allowed');
           extractProfileBtn.disabled = false;
         }
@@ -1649,9 +1988,338 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
       });
     }
 
+    // Fetch GTM Opportunities from /api/gtm-opportunities
+    async function fetchGtmOpportunities() {
+      try {
+        const res = await fetch('/api/gtm-opportunities');
+        const data = await res.json();
+        if (res.ok && data.success) {
+          renderGtmFeed(data.opportunities || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch GTM opportunities:', err);
+      }
+    }
+
+    // Render GTM Opportunities Feed Cards
+    function renderGtmFeed(opps) {
+      if (!gtmFeedContainer) return;
+      if (gtmCountBadge) {
+        gtmCountBadge.textContent = `${(opps || []).length} opportunities found`;
+      }
+
+      gtmFeedContainer.innerHTML = '';
+      if (opps && opps.length > 0) {
+        opps.forEach(opp => {
+          const card = document.createElement('div');
+          card.className = 'bg-surface-card rounded-xl p-space-md shadow-sm border border-border-default/60 hover:border-primary-container/40 transition-all flex flex-col gap-3 group';
+
+          const companyName = opp.company_name || 'Target Company';
+          const initial = companyName.substring(0, 1).toUpperCase();
+          const website = opp.company_url || '#';
+          const category = opp.category_tag || 'Qualified Target';
+          const score = opp.overall_score || 0;
+
+          const subtextParts = [opp.industry, opp.employee_count, opp.location].filter(Boolean);
+          const subtext = subtextParts.length > 0 ? subtextParts.join(' • ') : 'Public Company Record';
+
+          const whyNow = opp.why_now || 'Identified timing and fit alignment.';
+          const recAction = opp.recommended_action || 'Review public evidence and initiate outreach.';
+
+          const signals = Array.isArray(opp.signals) ? opp.signals : [];
+          let signalsHtml = '';
+          if (signals.length > 0) {
+            signalsHtml = signals.slice(0, 2).map(sig => {
+              const sigTitle = sig.title || sig.signal_type || 'Signal';
+              const sigSummary = sig.summary || '';
+              const linkHtml = sig.source_url ? `<a href="${sig.source_url}" target="_blank" rel="noopener noreferrer" class="text-primary-container hover:underline text-[11px] inline-flex items-center gap-0.5 shrink-0 ml-1"><span>${sig.source_title || 'Source'}</span><span class="material-symbols-outlined text-[12px]">open_in_new</span></a>` : '';
+              return `
+                <div class="p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/40 flex items-start gap-2 text-body-sm text-text-secondary">
+                  <span class="material-symbols-outlined text-[16px] text-primary-container shrink-0 mt-0.5">verified</span>
+                  <div class="flex flex-col min-w-0">
+                    <span class="font-medium text-text-primary text-[12px]">${sigTitle}${linkHtml}</span>
+                    ${sigSummary ? `<span class="text-[12px] text-text-secondary line-clamp-1">${sigSummary}</span>` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          card.innerHTML = `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-default/50 pb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary font-bold flex items-center justify-center text-headline-sm shrink-0">
+                  ${initial}
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-headline-sm text-headline-sm text-text-primary truncate">${companyName}</h3>
+                    ${website !== '#' ? `<a href="${website}" target="_blank" rel="noopener noreferrer" class="text-primary-container hover:underline font-label-sm text-label-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[14px]">open_in_new</span></a>` : ''}
+                  </div>
+                  <span class="font-label-sm text-label-sm text-text-secondary">${subtext}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="px-2.5 py-0.5 rounded-full bg-surface-canvas text-text-secondary font-label-sm text-label-sm font-medium border border-border-default/60">${category}</span>
+                <div class="px-3 py-1 rounded-xl bg-status-score-high-bg text-primary-container font-mono font-bold text-label-md border border-primary-container/20 flex items-center gap-1">
+                  <span class="text-[11px] text-text-muted font-normal">Score:</span>
+                  <span>${score}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="p-3 rounded-xl bg-status-success-bg/30 border border-status-success-border/50 flex flex-col gap-1">
+                <span class="font-label-sm text-[11px] text-status-success-text font-bold uppercase tracking-wider flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">schedule</span>
+                  Why Now?
+                </span>
+                <p class="font-body-sm text-body-sm text-text-primary line-clamp-2">${whyNow}</p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1">
+                <span class="font-label-sm text-[11px] text-text-muted font-bold uppercase tracking-wider flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px] text-primary-container">lightbulb</span>
+                  Recommended Action
+                </span>
+                <p class="font-body-sm text-body-sm text-text-primary line-clamp-2">${recAction}</p>
+              </div>
+            </div>
+
+            ${signalsHtml ? `<div class="flex flex-col gap-1.5 pt-1">${signalsHtml}</div>` : ''}
+
+            <div class="flex justify-end pt-1">
+              <button type="button" class="view-gtm-detail-btn px-4 py-1.5 rounded-xl bg-surface-canvas hover:bg-surface-subtle text-text-primary font-label-md text-label-md font-semibold transition-all border border-border-default/60 flex items-center gap-1.5 shadow-sm active:scale-[0.98]">
+                <span>View Deep Analysis</span>
+                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+            </div>
+          `;
+
+          const detailBtn = card.querySelector('.view-gtm-detail-btn');
+          if (detailBtn) {
+            detailBtn.addEventListener('click', () => openGtmDetailModal(opp));
+          }
+
+          gtmFeedContainer.appendChild(card);
+        });
+      } else {
+        gtmFeedContainer.innerHTML = `
+          <div class="bg-surface-card rounded-xl p-12 text-center text-text-muted flex flex-col items-center justify-center gap-3 border border-border-default/60">
+            <span class="material-symbols-outlined text-[42px] text-text-muted">explore</span>
+            <span class="font-headline-sm text-headline-sm text-text-primary">No GTM opportunities discovered yet.</span>
+            <span class="font-body-sm text-body-sm text-text-secondary max-w-[480px]">Describe what you sell and your target customer above, then click Find Opportunities to run the discovery pipeline.</span>
+          </div>
+        `;
+      }
+    }
+
+    // Open GTM Detail Modal Drawer
+    function openGtmDetailModal(opp) {
+      if (!gtmDetailModal) return;
+
+      const avatar = document.getElementById('gtm-modal-avatar');
+      const companyName = document.getElementById('gtm-modal-company-name');
+      const websiteLink = document.getElementById('gtm-modal-website-link');
+      const subtext = document.getElementById('gtm-modal-subtext');
+
+      const overallScore = document.getElementById('gtm-modal-overall-score');
+      const icpScore = document.getElementById('gtm-modal-icp-score');
+      const intentScore = document.getElementById('gtm-modal-intent-score');
+      const timingScore = document.getElementById('gtm-modal-timing-score');
+      const confidence = document.getElementById('gtm-modal-confidence');
+
+      const whyNow = document.getElementById('gtm-modal-why-now');
+      const action = document.getElementById('gtm-modal-action');
+      const evidenceList = document.getElementById('gtm-modal-evidence-list');
+
+      const name = opp.company_name || 'Company';
+      if (avatar) avatar.textContent = name.substring(0, 1).toUpperCase();
+      if (companyName) companyName.textContent = name;
+      if (websiteLink) {
+        websiteLink.href = opp.company_url || '#';
+        websiteLink.style.display = opp.company_url ? 'inline-flex' : 'none';
+      }
+
+      const subParts = [opp.industry, opp.employee_count, opp.location].filter(Boolean);
+      if (subtext) subtext.textContent = subParts.length > 0 ? subParts.join(' • ') : 'Public Web Record';
+
+      if (overallScore) overallScore.textContent = opp.overall_score || 0;
+      if (icpScore) icpScore.textContent = `${opp.icp_fit_score || 0}/100`;
+      if (intentScore) intentScore.textContent = `${opp.intent_score || 0}/100`;
+      if (timingScore) timingScore.textContent = `${opp.timing_score || 0}/100`;
+      if (confidence) confidence.textContent = opp.confidence_level || 'medium';
+
+      if (whyNow) whyNow.textContent = opp.why_now || 'No timing trigger specified.';
+      if (action) action.textContent = opp.recommended_action || 'Review evidence and initiate outreach.';
+
+      if (evidenceList) {
+        evidenceList.innerHTML = '';
+        const signals = Array.isArray(opp.signals) ? opp.signals : [];
+        if (signals.length > 0) {
+          signals.forEach(sig => {
+            const item = document.createElement('div');
+            item.className = 'p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col gap-1';
+
+            const title = sig.title || sig.signal_type || 'Evidence Signal';
+            const summary = sig.summary || '';
+            const sourceTitle = sig.source_title || 'Web Evidence';
+            const sourceUrl = sig.source_url || '';
+
+            const linkHtml = sourceUrl ? `<a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" class="text-primary-container hover:underline text-[12px] inline-flex items-center gap-1"><span>${sourceTitle}</span><span class="material-symbols-outlined text-[13px]">open_in_new</span></a>` : '';
+
+            item.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px] text-primary-container">verified</span>
+                  ${title}
+                </span>
+                ${linkHtml}
+              </div>
+              ${summary ? `<p class="font-body-sm text-body-sm text-text-secondary">${summary}</p>` : ''}
+            `;
+            evidenceList.appendChild(item);
+          });
+        } else {
+          evidenceList.innerHTML = `<p class="font-body-sm text-body-sm text-text-muted italic">No external web signals registered.</p>`;
+        }
+      }
+
+      gtmDetailModal.classList.remove('hidden');
+    }
+
+    if (gtmModalCloseBtn) {
+      gtmModalCloseBtn.addEventListener('click', () => {
+        if (gtmDetailModal) gtmDetailModal.classList.add('hidden');
+      });
+    }
+
+    if (gtmDetailModal) {
+      gtmDetailModal.addEventListener('click', (e) => {
+        if (e.target === gtmDetailModal) {
+          gtmDetailModal.classList.add('hidden');
+        }
+      });
+    }
+
+    // Find Opportunities Event Handler
+    if (gtmFindBtn) {
+      gtmFindBtn.addEventListener('click', async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+
+        const offerEl = document.getElementById('gtm-offer-input');
+        const icpEl = document.getElementById('gtm-icp-input');
+        const contextEl = document.getElementById('gtm-context-input');
+
+        console.log("GTM ICP ELEMENT:", icpEl);
+        console.log("GTM ICP VALUE:", icpEl ? icpEl.value : undefined);
+
+        const offer = offerEl ? offerEl.value.trim() : '';
+        const target_icp = icpEl ? icpEl.value.trim() : '';
+        const additional_context = contextEl ? contextEl.value.trim() : '';
+
+        console.log("GTM Extracted Values:", { offer, target_icp, additional_context });
+
+        if (!offer || !target_icp) {
+          alert('Please specify what you sell and your target audience.');
+          return;
+        }
+
+        const originalHTML = gtmFindBtn.innerHTML;
+        gtmFindBtn.disabled = true;
+        gtmFindBtn.classList.add('opacity-80', 'cursor-not-allowed');
+        gtmFindBtn.innerHTML = `
+          <span class="material-symbols-outlined text-[18px] animate-spin">sync</span>
+          <span>Discovering Opportunities...</span>
+        `;
+
+        const step1 = document.getElementById('gtm-step1');
+        const step2 = document.getElementById('gtm-step2');
+        const step3 = document.getElementById('gtm-step3');
+
+        if (gtmProgressContainer) gtmProgressContainer.classList.remove('hidden');
+
+        setGtmStepState(step1, 'active', '1. Building Search Strategy...');
+        setGtmStepState(step2, 'pending', '2. Collecting Web Data...');
+        setGtmStepState(step3, 'pending', '3. Analyzing Opportunities...');
+
+        const t1 = setTimeout(() => {
+          setGtmStepState(step1, 'completed', '1. Building Search Strategy...');
+          setGtmStepState(step2, 'active', '2. Collecting Web Data...');
+        }, 3000);
+
+        const t2 = setTimeout(() => {
+          setGtmStepState(step2, 'completed', '2. Collecting Web Data...');
+          setGtmStepState(step3, 'active', '3. Analyzing Opportunities...');
+        }, 8000);
+
+        try {
+          const payload = {
+            offer: offer,
+            target_icp: target_icp,
+            icp: target_icp,
+            additional_context: additional_context,
+            context: additional_context
+          };
+
+          console.log("GTM Payload Sending to API:", payload);
+
+          const res = await fetch('/api/gtm-opportunities/find', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+
+          clearTimeout(t1);
+          clearTimeout(t2);
+
+          if (!res.ok || !data.success) {
+            throw new Error(data.error || 'Failed to discover GTM opportunities.');
+          }
+
+          setGtmStepState(step1, 'completed', '1. Building Search Strategy...');
+          setGtmStepState(step2, 'completed', '2. Collecting Web Data...');
+          setGtmStepState(step3, 'completed', '3. Analyzing Opportunities...');
+
+          renderGtmFeed(data.opportunities || []);
+
+          setTimeout(() => {
+            if (gtmProgressContainer) gtmProgressContainer.classList.add('hidden');
+          }, 1500);
+
+        } catch (err) {
+          clearTimeout(t1);
+          clearTimeout(t2);
+          alert(err.message || 'GTM opportunity discovery failed.');
+          if (gtmProgressContainer) gtmProgressContainer.classList.add('hidden');
+        } finally {
+          gtmFindBtn.disabled = false;
+          gtmFindBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+          gtmFindBtn.innerHTML = originalHTML;
+        }
+      });
+    }
+
+    function setGtmStepState(stepEl, state, labelText) {
+      if (!stepEl) return;
+      if (state === 'active') {
+        stepEl.className = 'p-2 px-3 rounded-lg border flex items-center gap-2 bg-status-score-high-bg border-primary-container/30';
+        stepEl.innerHTML = `<span class="material-symbols-outlined text-[16px] text-primary-container animate-spin">sync</span><span class="text-primary-container font-medium truncate">${labelText}</span>`;
+      } else if (state === 'completed') {
+        stepEl.className = 'p-2 px-3 rounded-lg border flex items-center gap-2 bg-status-success-bg/40 border-status-success-border/60';
+        stepEl.innerHTML = `<span class="material-symbols-outlined text-[16px] text-status-success-text">check_circle</span><span class="text-text-primary font-medium truncate">${labelText}</span>`;
+      } else {
+        stepEl.className = 'p-2 px-3 rounded-lg border flex items-center gap-2 bg-surface-canvas border-border-default/50';
+        stepEl.innerHTML = `<span class="material-symbols-outlined text-[16px] text-text-muted">radio_button_unchecked</span><span class="text-text-muted truncate">${labelText}</span>`;
+      }
+    }
+
     // Initial load fetch
     fetchHistoricalEmailLeads();
     fetchHistoricalAllLeads();
+    fetchGtmOpportunities();
   })();
 </script>
 </body>

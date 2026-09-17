@@ -18,6 +18,7 @@ from profile_extractor import (
     logout_linkedin_session
 )
 from profile_optimizer import optimize_linkedin_profile
+from gtm_engine import init_db as init_gtm_db, run_gtm_pipeline, get_all_opportunities
 
 load_dotenv()
 
@@ -26,6 +27,7 @@ CORS(app)
 
 OUTPUT_DIR = os.path.join(os.getcwd(), "output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+init_gtm_db()
 
 @app.route("/")
 def index():
@@ -52,9 +54,14 @@ def api_extract_profile_stream():
     if not profile_url:
         return jsonify({"success": False, "error": "Please enter a valid LinkedIn profile URL."}), 400
 
+    raw_selected = request.args.get("selected_sections")
+    selected_sections = None
+    if raw_selected:
+        selected_sections = [s.strip().lower() for s in raw_selected.split(",") if s.strip()]
+
     def generate():
         try:
-            for event in extract_linkedin_profile_generator(profile_url):
+            for event in extract_linkedin_profile_generator(profile_url, selected_sections=selected_sections):
                 yield f"data: {json.dumps(event)}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'event': 'error', 'error': str(e)})}\n\n"
@@ -170,6 +177,43 @@ def get_history_leads():
         "count": len(leads),
         "leads": leads
     })
+
+@app.route("/api/gtm-opportunities/find", methods=["POST"])
+def api_find_gtm_opportunities():
+    data = request.get_json() or {}
+    offer = str(data.get("offer") or "").strip()
+    target_icp = str(data.get("target_icp") or data.get("icp") or "").strip()
+    additional_context = str(data.get("additional_context") or data.get("context") or "").strip()
+
+    if not offer:
+        return jsonify({"success": False, "error": "Please describe what you sell (your offer)."}), 400
+    if not target_icp:
+        return jsonify({"success": False, "error": "Please describe who you are looking to work with (your target ICP)."}), 400
+
+    try:
+        opportunities = run_gtm_pipeline(offer, target_icp, additional_context)
+        return jsonify({
+            "success": True,
+            "count": len(opportunities),
+            "opportunities": opportunities
+        })
+    except Exception as e:
+        err_str = str(e)
+        if "429" in err_str or "quota" in err_str.lower() or "too_many_requests" in err_str.lower():
+            return jsonify({"success": False, "error": "Gemini API quota exceeded. Please try again after the quota resets."}), 429
+        return jsonify({"success": False, "error": f"GTM Opportunity discovery failed: {str(e)}"}), 500
+
+@app.route("/api/gtm-opportunities", methods=["GET"])
+def api_get_gtm_opportunities():
+    try:
+        opportunities = get_all_opportunities()
+        return jsonify({
+            "success": True,
+            "count": len(opportunities),
+            "opportunities": opportunities
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Failed to fetch opportunities: {str(e)}"}), 500
 
 @app.route("/download/<path:filename>", methods=["GET"])
 def download_file(filename):

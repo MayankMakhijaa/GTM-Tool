@@ -172,6 +172,13 @@ Return a SINGLE JSON object with this exact schema:
         raise ValueError("Gemini returned an empty response.")
 
     result_data = json.loads(result_text)
+    recs = result_data.get("recommendations", [])
+
+    selected_sections = extracted_profile.get("selected_sections")
+    if selected_sections and isinstance(selected_sections, list):
+        sel_set = set(s.lower().strip() for s in selected_sections)
+        filtered_recs = [r for r in recs if r.get("section", "").lower() in sel_set]
+        recs = filtered_recs
 
     return {
         "tenant_id": extracted_profile.get("tenant_id", "default_tenant"),
@@ -181,5 +188,5 @@ Return a SINGLE JSON object with this exact schema:
         "overall_score": result_data.get("overall_score", 75),
         "category_scores": result_data.get("category_scores", {}),
         "summary_assessment": result_data.get("summary_assessment", ""),
-        "recommendations": result_data.get("recommendations", [])
+        "recommendations": recs
     }

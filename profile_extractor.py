@@ -690,10 +690,11 @@ def _extract_skills_from_detail_page(context, base_url: str) -> List[Dict[str, A
     return [{"name": s, "endorsements": None} for s in master_skills]
 
 
-def extract_linkedin_profile_generator(profile_url: str):
+def extract_linkedin_profile_generator(profile_url: str, selected_sections: Optional[List[str]] = None):
     """
     Generator that progressively extracts a LinkedIn profile section by section,
     yielding progress dictionaries for real-time streaming to the UI.
+    If selected_sections is provided, only those sections are extracted and yielded.
     """
     if not profile_url or not profile_url.strip():
         yield {"event": "error", "error": "Please enter a valid LinkedIn profile URL."}
@@ -702,6 +703,8 @@ def extract_linkedin_profile_generator(profile_url: str):
     url = profile_url.strip()
     if not url.startswith("http"):
         url = "https://" + url
+
+    sel_set = set(s.lower().strip() for s in selected_sections) if selected_sections else None
 
     yield {"event": "status", "message": "Connecting to LinkedIn..."}
 
@@ -752,176 +755,184 @@ def extract_linkedin_profile_generator(profile_url: str):
             page.wait_for_timeout(250)
 
             # --- 1. Name & Photo ---
-            yield {"event": "section_start", "section": "name", "label": "Name"}
             name: Optional[str] = None
-            if page_title and " | " in page_title and not any(k in page_title.lower() for k in ["login", "sign up", "sign in", "authwall", "linkedin"]):
-                name = page_title.split(" | ")[0].strip()
-
-            if not name:
-                for s in sections[:3]:
-                    txt = s.inner_text().strip()
-                    lines = [l.strip() for l in txt.split("\n") if l.strip() and not _is_nav_text(l) and not _is_verification_text(l)]
-                    if lines and not any(bad in lines[0].lower() for bad in ["notification", "cookie", "sign in"]):
-                        name = lines[0]
-                        break
-
             photo_url: Optional[str] = None
-            photo_selectors = [
-                "img.pv-top-card-profile-picture__image",
-                "img.pv-top-card__photo",
-                "img[alt*='profile picture']",
-                ".pv-top-card--photo img"
-            ]
-            for sel in photo_selectors:
-                el = page.query_selector(sel)
-                if el:
-                    src = el.get_attribute("src")
-                    if src and src.startswith("http"):
-                        photo_url = src
-                        break
+            if sel_set is None or "name" in sel_set:
+                yield {"event": "section_start", "section": "name", "label": "Name"}
+                if page_title and " | " in page_title and not any(k in page_title.lower() for k in ["login", "sign up", "sign in", "authwall", "linkedin"]):
+                    name = page_title.split(" | ")[0].strip()
 
-            yield {"event": "section_complete", "section": "name", "label": "Name", "data": name, "photo_url": photo_url}
+                if not name:
+                    for s in sections[:3]:
+                        txt = s.inner_text().strip()
+                        lines = [l.strip() for l in txt.split("\n") if l.strip() and not _is_nav_text(l) and not _is_verification_text(l)]
+                        if lines and not any(bad in lines[0].lower() for bad in ["notification", "cookie", "sign in"]):
+                            name = lines[0]
+                            break
+
+                photo_selectors = [
+                    "img.pv-top-card-profile-picture__image",
+                    "img.pv-top-card__photo",
+                    "img[alt*='profile picture']",
+                    ".pv-top-card--photo img"
+                ]
+                for sel in photo_selectors:
+                    el = page.query_selector(sel)
+                    if el:
+                        src = el.get_attribute("src")
+                        if src and src.startswith("http"):
+                            photo_url = src
+                            break
+
+                yield {"event": "section_complete", "section": "name", "label": "Name", "data": name, "photo_url": photo_url}
 
             # --- 2. Headline ---
-            yield {"event": "section_start", "section": "headline", "label": "Headline"}
             headline: Optional[str] = None
-            headline_els = page.query_selector_all("div.text-body-medium[data-generated-suggestion-target], .pv-text-details__left-panel div.text-body-medium, div.text-body-medium")
-            for el in headline_els:
-                txt = _clean_text(el.inner_text())
-                if txt and not _is_nav_text(txt) and not _is_verification_text(txt):
-                    headline = txt
-                    break
-
-            if not headline:
-                for s in sections[:3]:
-                    txt = s.inner_text().strip()
-                    lines = [l.strip() for l in txt.split("\n") if l.strip() and not _is_nav_text(l) and not _is_verification_text(l)]
-                    for l in lines[1:5]:
-                        if l and not any(bad in l.lower() for bad in ["1st", "2nd", "3rd", "contact info", "followers", "connections", "mutual", "message", "follow"]):
-                            headline = l
-                            break
-                    if headline:
+            if sel_set is None or "headline" in sel_set:
+                yield {"event": "section_start", "section": "headline", "label": "Headline"}
+                headline_els = page.query_selector_all("div.text-body-medium[data-generated-suggestion-target], .pv-text-details__left-panel div.text-body-medium, div.text-body-medium")
+                for el in headline_els:
+                    txt = _clean_text(el.inner_text())
+                    if txt and not _is_nav_text(txt) and not _is_verification_text(txt):
+                        headline = txt
                         break
 
-            yield {"event": "section_complete", "section": "headline", "label": "Headline", "data": headline}
+                if not headline:
+                    for s in sections[:3]:
+                        txt = s.inner_text().strip()
+                        lines = [l.strip() for l in txt.split("\n") if l.strip() and not _is_nav_text(l) and not _is_verification_text(l)]
+                        for l in lines[1:5]:
+                            if l and not any(bad in l.lower() for bad in ["1st", "2nd", "3rd", "contact info", "followers", "connections", "mutual", "message", "follow"]):
+                                headline = l
+                                break
+                        if headline:
+                            break
+
+                yield {"event": "section_complete", "section": "headline", "label": "Headline", "data": headline}
 
             # --- 3. About & Top Skills ---
-            yield {"event": "section_start", "section": "about", "label": "About"}
             about: Optional[str] = None
-            about_sec = _find_section_by_keywords(page, ["about", "summary"])
-            if about_sec:
-                raw_about = about_sec.inner_text().strip()
-                lines = [l.strip() for l in raw_about.split("\n") if l.strip() and not _is_nav_text(l) and not _is_verification_text(l)]
-                filtered_lines = []
-                for l in lines:
-                    if l.lower() in ["featured", "activity", "experience", "education", "skills"]:
-                        break
-                    if l.lower() not in ["about", "summary", "see more", "show more", "…see more", "...see more"]:
-                        filtered_lines.append(l)
-                if filtered_lines:
-                    about = "\n".join(filtered_lines)
-
             top_skills: List[str] = []
-            top_skills_els = page.query_selector_all("div.pv-top-card--list-bullet span, button:has-text('Top skills') + span")
-            for ts in top_skills_els:
-                ts_txt = _clean_text(ts.inner_text())
-                if ts_txt and ts_txt not in top_skills and "top skills" not in ts_txt.lower() and not _is_nav_text(ts_txt):
-                    top_skills.append(ts_txt)
+            if sel_set is None or "about" in sel_set:
+                yield {"event": "section_start", "section": "about", "label": "About"}
+                about_sec = _find_section_by_keywords(page, ["about", "summary"])
+                if about_sec:
+                    raw_about = about_sec.inner_text().strip()
+                    lines = [l.strip() for l in raw_about.split("\n") if l.strip() and not _is_nav_text(l) and not _is_verification_text(l)]
+                    filtered_lines = []
+                    for l in lines:
+                        if l.lower() in ["featured", "activity", "experience", "education", "skills"]:
+                            break
+                        if l.lower() not in ["about", "summary", "see more", "show more", "…see more", "...see more"]:
+                            filtered_lines.append(l)
+                    if filtered_lines:
+                        about = "\n".join(filtered_lines)
 
-            yield {"event": "section_complete", "section": "about", "label": "About", "data": about, "top_skills": top_skills}
+                top_skills_els = page.query_selector_all("div.pv-top-card--list-bullet span, button:has-text('Top skills') + span")
+                for ts in top_skills_els:
+                    ts_txt = _clean_text(ts.inner_text())
+                    if ts_txt and ts_txt not in top_skills and "top skills" not in ts_txt.lower() and not _is_nav_text(ts_txt):
+                        top_skills.append(ts_txt)
+
+                yield {"event": "section_complete", "section": "about", "label": "About", "data": about, "top_skills": top_skills}
 
             active_context = context if context else page.context
 
             # --- 4. Experience ---
-            yield {"event": "section_start", "section": "experience", "label": "Experience"}
             experience_items: List[Dict[str, Any]] = []
-            exp_lines: List[str] = []
-            if active_context:
-                exp_lines = _extract_detail_page_lines(active_context, final_url, "experience")
-            if not exp_lines:
-                exp_sec = _find_section_by_keywords(page, ["experience"])
-                if exp_sec:
-                    raw_txt = exp_sec.inner_text().strip()
-                    exp_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
-            experience_items = _parse_experience(exp_lines)
+            if sel_set is None or "experience" in sel_set:
+                yield {"event": "section_start", "section": "experience", "label": "Experience"}
+                exp_lines: List[str] = []
+                if active_context:
+                    exp_lines = _extract_detail_page_lines(active_context, final_url, "experience")
+                if not exp_lines:
+                    exp_sec = _find_section_by_keywords(page, ["experience"])
+                    if exp_sec:
+                        raw_txt = exp_sec.inner_text().strip()
+                        exp_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
+                experience_items = _parse_experience(exp_lines)
 
-            yield {"event": "section_complete", "section": "experience", "label": "Experience", "data": experience_items}
+                yield {"event": "section_complete", "section": "experience", "label": "Experience", "data": experience_items}
 
             # --- 5. Education ---
-            yield {"event": "section_start", "section": "education", "label": "Education"}
             education_items: List[Dict[str, Any]] = []
-            edu_lines: List[str] = []
-            if active_context:
-                edu_lines = _extract_detail_page_lines(active_context, final_url, "education")
-            if not edu_lines:
-                edu_sec = _find_section_by_keywords(page, ["education"])
-                if edu_sec:
-                    raw_txt = edu_sec.inner_text().strip()
-                    edu_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
-            education_items = _parse_education(edu_lines)
+            if sel_set is None or "education" in sel_set:
+                yield {"event": "section_start", "section": "education", "label": "Education"}
+                edu_lines: List[str] = []
+                if active_context:
+                    edu_lines = _extract_detail_page_lines(active_context, final_url, "education")
+                if not edu_lines:
+                    edu_sec = _find_section_by_keywords(page, ["education"])
+                    if edu_sec:
+                        raw_txt = edu_sec.inner_text().strip()
+                        edu_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
+                education_items = _parse_education(edu_lines)
 
-            yield {"event": "section_complete", "section": "education", "label": "Education", "data": education_items}
+                yield {"event": "section_complete", "section": "education", "label": "Education", "data": education_items}
 
             # --- 6. Skills ---
-            yield {"event": "section_start", "section": "skills", "label": "Skills"}
             skills_items: List[Dict[str, Any]] = []
-            if active_context:
-                skills_items = _extract_skills_from_detail_page(active_context, final_url)
-            if not skills_items:
-                skills_sec = _find_section_by_keywords(page, ["skills"])
-                if skills_sec:
-                    raw_txt = skills_sec.inner_text().strip()
-                    skills_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
-                    skills_items = _parse_skills(skills_lines)
+            if sel_set is None or "skills" in sel_set:
+                yield {"event": "section_start", "section": "skills", "label": "Skills"}
+                if active_context:
+                    skills_items = _extract_skills_from_detail_page(active_context, final_url)
+                if not skills_items:
+                    skills_sec = _find_section_by_keywords(page, ["skills"])
+                    if skills_sec:
+                        raw_txt = skills_sec.inner_text().strip()
+                        skills_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
+                        skills_items = _parse_skills(skills_lines)
 
-            yield {"event": "section_complete", "section": "skills", "label": "Skills", "data": skills_items}
+                yield {"event": "section_complete", "section": "skills", "label": "Skills", "data": skills_items}
 
             # --- 7. Certifications ---
-            yield {"event": "section_start", "section": "certifications", "label": "Certifications"}
             cert_items: List[Dict[str, Any]] = []
-            cert_lines: List[str] = []
-            if active_context:
-                cert_lines = _extract_detail_page_lines(active_context, final_url, "certifications")
-            if not cert_lines:
-                cert_sec = _find_section_by_keywords(page, ["licenses_and_certifications", "certifications", "licenses"])
-                if cert_sec:
-                    raw_txt = cert_sec.inner_text().strip()
-                    cert_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
-            cert_items = _parse_certifications(cert_lines)
+            if sel_set is None or "certifications" in sel_set:
+                yield {"event": "section_start", "section": "certifications", "label": "Certifications"}
+                cert_lines: List[str] = []
+                if active_context:
+                    cert_lines = _extract_detail_page_lines(active_context, final_url, "certifications")
+                if not cert_lines:
+                    cert_sec = _find_section_by_keywords(page, ["licenses_and_certifications", "certifications", "licenses"])
+                    if cert_sec:
+                        raw_txt = cert_sec.inner_text().strip()
+                        cert_lines = [l.strip() for l in raw_txt.split("\n") if l.strip() and not _is_nav_text(l)]
+                cert_items = _parse_certifications(cert_lines)
 
-            yield {"event": "section_complete", "section": "certifications", "label": "Certifications", "data": cert_items}
+                yield {"event": "section_complete", "section": "certifications", "label": "Certifications", "data": cert_items}
 
             # --- 8. Projects & Additional Sections ---
-            yield {"event": "section_start", "section": "projects", "label": "Projects"}
-            honors_items: List[Dict[str, Any]] = []
-            honors_sec = _find_section_by_keywords(page, ["honors", "awards", "honors_and_awards"])
-            if honors_sec:
-                lines = [l.strip() for l in honors_sec.inner_text().split("\n") if l.strip() and not _is_nav_text(l)]
-                filtered = [l for l in lines if l.lower() not in ["honors & awards", "show all"]]
-                for idx in range(0, len(filtered), 3):
-                    if idx < len(filtered) and not _is_nav_text(filtered[idx]):
-                        honors_items.append({
-                            "title": filtered[idx],
-                            "issuer": filtered[idx+1] if idx+1 < len(filtered) else "",
-                            "date": filtered[idx+2] if idx+2 < len(filtered) else "",
-                            "description": ""
-                        })
-
             featured_items: List[Dict[str, Any]] = []
-            feat_sec = _find_section_by_keywords(page, ["featured"])
-            if feat_sec:
-                lines = [l.strip() for l in feat_sec.inner_text().split("\n") if l.strip() and not _is_nav_text(l)]
-                filtered = [l for l in lines if l.lower() not in ["featured", "show all"]]
-                for idx in range(0, len(filtered), 2):
-                    if idx < len(filtered) and not _is_nav_text(filtered[idx]):
-                        featured_items.append({
-                            "title": filtered[idx],
-                            "type": "Post",
-                            "description": filtered[idx+1] if idx+1 < len(filtered) else "",
-                            "url": ""
-                        })
+            honors_items: List[Dict[str, Any]] = []
+            if sel_set is None or "projects" in sel_set:
+                yield {"event": "section_start", "section": "projects", "label": "Projects"}
+                honors_sec = _find_section_by_keywords(page, ["honors", "awards", "honors_and_awards"])
+                if honors_sec:
+                    lines = [l.strip() for l in honors_sec.inner_text().split("\n") if l.strip() and not _is_nav_text(l)]
+                    filtered = [l for l in lines if l.lower() not in ["honors & awards", "show all"]]
+                    for idx in range(0, len(filtered), 3):
+                        if idx < len(filtered) and not _is_nav_text(filtered[idx]):
+                            honors_items.append({
+                                "title": filtered[idx],
+                                "issuer": filtered[idx+1] if idx+1 < len(filtered) else "",
+                                "date": filtered[idx+2] if idx+2 < len(filtered) else "",
+                                "description": ""
+                            })
 
-            yield {"event": "section_complete", "section": "projects", "label": "Projects", "data": []}
+                feat_sec = _find_section_by_keywords(page, ["featured"])
+                if feat_sec:
+                    lines = [l.strip() for l in feat_sec.inner_text().split("\n") if l.strip() and not _is_nav_text(l)]
+                    filtered = [l for l in lines if l.lower() not in ["featured", "show all"]]
+                    for idx in range(0, len(filtered), 2):
+                        if idx < len(filtered) and not _is_nav_text(filtered[idx]):
+                            featured_items.append({
+                                "title": filtered[idx],
+                                "type": "Post",
+                                "description": filtered[idx+1] if idx+1 < len(filtered) else "",
+                                "url": ""
+                            })
+
+                yield {"event": "section_complete", "section": "projects", "label": "Projects", "data": []}
 
             current_pos: Optional[str] = None
             if experience_items:
@@ -932,6 +943,7 @@ def extract_linkedin_profile_generator(profile_url: str):
                 "tenant_id": "default_tenant",
                 "user_id": "pro_user",
                 "source_url": url,
+                "selected_sections": list(sel_set) if sel_set is not None else None,
                 "extracted_at": os.popen("powershell Get-Date -Format s").read().strip() if os.name == "nt" else "",
                 "profile": {
                     "name": name,
