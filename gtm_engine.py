@@ -14,7 +14,7 @@ GTM_MODEL = "gemini-3.5-flash"
 
 
 def init_db():
-    """Initializes the SQLite database table 'opportunities' if not exists."""
+    """Initializes SQLite database tables 'opportunities', 'users', and 'user_gtm_context' if not exist."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
@@ -39,8 +39,151 @@ def init_db():
             created_at TEXT
         );
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            linkedin_id TEXT UNIQUE NOT NULL,
+            name TEXT,
+            profile_url TEXT,
+            created_at TEXT NOT NULL,
+            last_login TEXT NOT NULL
+        );
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_gtm_context (
+            user_id INTEGER PRIMARY KEY,
+            offer TEXT NOT NULL,
+            target_icp TEXT NOT NULL,
+            additional_context TEXT,
+            onboarding_completed INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (user_id)
+        );
+    """)
     conn.commit()
     conn.close()
+
+
+def normalize_linkedin_profile_url(url: Optional[str]) -> Optional[str]:
+    """
+    Normalizes a LinkedIn profile URL for reliable identity matching.
+    Example: 'https://WWW.LINKEDIN.COM/in/mohamed-kaashif-73361030a/' -> 'https://www.linkedin.com/in/mohamed-kaashif-73361030a'
+    """
+    if not url or not isinstance(url, str):
+        return None
+    cleaned = url.strip()
+    if not cleaned:
+        return None
+    
+    parsed = urllib.parse.urlparse(cleaned)
+    scheme = (parsed.scheme or "https").lower()
+    netloc = (parsed.netloc or "www.linkedin.com").lower()
+    path = parsed.path.rstrip("/")
+    if path:
+        path = path.lower()
+    
+    return f"{scheme}://{netloc}{path}"
+
+
+def get_or_create_user(linkedin_id: str, name: Optional[str] = None, profile_url: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """
+    Finds or creates a user by normalized profile_url (primary) or linkedin_id (secondary).
+    If multiple rows match the same profile URL, deterministically returns the earliest (lowest user_id).
+    """
+    if not linkedin_id and not profile_url:
+        return None
+
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    now_iso = datetime.now().isoformat()
+
+    norm_url = normalize_linkedin_profile_url(profile_url)
+    user_row = None
+
+    # Priority 1: Match by normalized profile_url (deterministic earliest user_id)
+    if norm_url:
+        cursor.execute(
+            "SELECT * FROM users WHERE profile_url IS NOT NULL AND profile_url != '' ORDER BY user_id ASC"
+        )
+        all_users = cursor.fetchall()
+        for u in all_users:
+            if normalize_linkedin_profile_url(u["profile_url"]) == norm_url:
+                user_row = u
+                break
+
+    # Priority 2: Fallback match by linkedin_id if no profile_url match found
+    if not user_row and linkedin_id:
+        cursor.execute("SELECT * FROM users WHERE linkedin_id = ? ORDER BY user_id ASC", (linkedin_id,))
+        user_row = cursor.fetchone()
+
+    if user_row:
+        user_id = user_row["user_id"]
+        # Update last_login, and update name/profile_url if provided
+        new_name = name or user_row["name"]
+        new_url = profile_url or user_row["profile_url"]
+        cursor.execute(
+            "UPDATE users SET name = ?, profile_url = ?, last_login = ? WHERE user_id = ?",
+            (new_name, new_url, now_iso, user_id)
+        )
+        conn.commit()
+        cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+        user_dict = dict(cursor.fetchone())
+        conn.close()
+        return user_dict
+    else:
+        cursor.execute(
+            "INSERT INTO users (linkedin_id, name, profile_url, created_at, last_login) VALUES (?, ?, ?, ?, ?)",
+            (linkedin_id or f"member_{int(time.time())}", name or "LinkedIn Member", profile_url or "", now_iso, now_iso)
+        )
+        conn.commit()
+        user_id = cursor.lastrowid
+        cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+        user_dict = dict(cursor.fetchone())
+        conn.close()
+        return user_dict
+
+
+def get_user_gtm_context(user_id: int) -> Optional[Dict[str, Any]]:
+    """Retrieves saved GTM context for a user_id."""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_gtm_context WHERE user_id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def save_user_gtm_context(user_id: int, offer: str, target_icp: str, additional_context: str = "") -> Dict[str, Any]:
+    """Saves or updates user GTM context and sets onboarding_completed = 1."""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    now_iso = datetime.now().isoformat()
+
+    cursor.execute("SELECT user_id FROM user_gtm_context WHERE user_id = ?", (user_id,))
+    exists = cursor.fetchone()
+
+    if exists:
+        cursor.execute("""
+            UPDATE user_gtm_context
+            SET offer = ?, target_icp = ?, additional_context = ?, onboarding_completed = 1, updated_at = ?
+            WHERE user_id = ?
+        """, (offer, target_icp, additional_context, now_iso, user_id))
+    else:
+        cursor.execute("""
+            INSERT INTO user_gtm_context (user_id, offer, target_icp, additional_context, onboarding_completed, created_at, updated_at)
+            VALUES (?, ?, ?, ?, 1, ?, ?)
+        """, (user_id, offer, target_icp, additional_context, now_iso, now_iso))
+
+    conn.commit()
+    conn.close()
+    return get_user_gtm_context(user_id) or {}
+
 
 
 def save_opportunities(opportunities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

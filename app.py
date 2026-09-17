@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, send_from_directory, Response, stream_with_context
+from flask import Flask, request, jsonify, render_template, send_from_directory, Response, stream_with_context, session
 from flask_cors import CORS
 import os
 import time
@@ -18,16 +18,35 @@ from profile_extractor import (
     logout_linkedin_session
 )
 from profile_optimizer import optimize_linkedin_profile
-from gtm_engine import init_db as init_gtm_db, run_gtm_pipeline, get_all_opportunities
+from gtm_engine import (
+    init_db as init_gtm_db,
+    run_gtm_pipeline,
+    get_all_opportunities,
+    get_or_create_user,
+    get_user_gtm_context,
+    save_user_gtm_context
+)
 
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "linkedin_lead_gen_secret_key_2026")
 CORS(app)
 
 OUTPUT_DIR = os.path.join(os.getcwd(), "output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-init_gtm_db()
+SESSION_TIMEOUT_SECONDS = 1800  # 30 minutes
+
+@app.before_request
+def check_session_inactivity():
+    if session.get("user_id") and not session.get("app_logged_out"):
+        now = time.time()
+        last_active = session.get("last_activity")
+        if last_active and (now - last_active > SESSION_TIMEOUT_SECONDS):
+            session.clear()
+            session["app_logged_out"] = True
+        else:
+            session["last_activity"] = now
 
 @app.route("/")
 def index():
@@ -35,17 +54,105 @@ def index():
 
 @app.route("/api/linkedin-session-status", methods=["GET"])
 def api_linkedin_session_status():
+    if session.get("app_logged_out"):
+        return jsonify({
+            "success": True,
+            "data": {
+                "authenticated": False,
+                "user": None,
+                "gtm_context": None,
+                "onboarding_completed": False
+            }
+        })
+
     status_data = check_linkedin_session()
+    is_auth = status_data.get("authenticated", False)
+    linkedin_id = status_data.get("linkedin_id")
+
+    user_info = None
+    gtm_ctx = None
+    onboarding_completed = False
+
+    if is_auth:
+        prof_url = status_data.get("profile_url")
+        l_id = linkedin_id or f"session_member_{int(time.time())}"
+        user_info = get_or_create_user(
+            linkedin_id=l_id,
+            name=status_data.get("name"),
+            profile_url=prof_url
+        )
+        if user_info:
+            session["user_id"] = user_info["user_id"]
+            session["linkedin_id"] = user_info.get("linkedin_id", l_id)
+
+        user_id = session.get("user_id")
+        if user_id:
+            gtm_ctx = get_user_gtm_context(user_id)
+            if gtm_ctx and gtm_ctx.get("onboarding_completed") == 1:
+                onboarding_completed = True
+
+    else:
+        session.pop("user_id", None)
+        session.pop("linkedin_id", None)
+
+    status_data["user"] = user_info
+    status_data["gtm_context"] = gtm_ctx
+    status_data["onboarding_completed"] = onboarding_completed
+
     return jsonify({"success": True, "data": status_data})
+
+@app.route("/api/app-logout", methods=["POST"])
+def api_app_logout():
+    """
+    Clears current Flask/application session state and in-memory user context.
+    Does NOT destroy persistent Playwright browser profile or database data.
+    """
+    session.clear()
+    session["app_logged_out"] = True
+    return jsonify({"success": True, "message": "Application session logged out successfully."})
+
+@app.route("/api/onboarding/save-gtm-context", methods=["POST"])
+def api_save_gtm_context():
+    data = request.get_json() or {}
+    offer = str(data.get("offer") or "").strip()
+    target_icp = str(data.get("target_icp") or data.get("icp") or "").strip()
+    additional_context = str(data.get("additional_context") or data.get("context") or "").strip()
+
+    if not offer or not target_icp:
+        return jsonify({"success": False, "error": "Offer and Target ICP are required."}), 400
+
+    user_id = session.get("user_id")
+    if not user_id:
+        # Check if active linkedin session can be identified
+        session_status = check_linkedin_session()
+        l_id = session_status.get("linkedin_id")
+        if l_id:
+            user = get_or_create_user(l_id, name=session_status.get("name"), profile_url=session_status.get("profile_url"))
+            if user:
+                user_id = user["user_id"]
+                session["user_id"] = user_id
+
+    if not user_id:
+        return jsonify({"success": False, "error": "No authenticated user session found."}), 401
+
+    saved_context = save_user_gtm_context(user_id, offer, target_icp, additional_context)
+    return jsonify({"success": True, "data": saved_context})
 
 @app.route("/api/open-linkedin-session", methods=["POST"])
 def api_open_linkedin_session():
+    session.pop("app_logged_out", None)
+    status = check_linkedin_session()
+    if status.get("authenticated"):
+        return jsonify({"success": True, "already_authenticated": True, "message": "LinkedIn session already active."})
+
     result = launch_interactive_linkedin_login()
+    session.pop("app_logged_out", None)
     return jsonify(result)
 
 @app.route("/api/logout-linkedin-session", methods=["POST"])
 def api_logout_linkedin_session():
     result = logout_linkedin_session()
+    session.clear()
     return jsonify(result)
 
 @app.route("/api/extract-profile-stream", methods=["GET"])

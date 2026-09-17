@@ -133,7 +133,27 @@ def check_linkedin_session() -> Dict[str, Any]:
             user_photo = None
             user_profile_url = None
 
+            linkedin_id = None
             if authenticated:
+                try:
+                    content = page.content()
+                    member_match = re.search(r'urn:li:(?:member|fsd_profile|profile):([A-Za-z0-9_\-]+)', content)
+                    if member_match:
+                        linkedin_id = member_match.group(0)
+                    else:
+                        data_id_match = re.search(r'data-member-id=["\']([A-Za-z0-9_\-]+)["\']', content)
+                        if data_id_match:
+                            linkedin_id = f"urn:li:member:{data_id_match.group(1)}"
+                        else:
+                            json_id_match = re.search(r'"memberId"\s*:\s*["\']?([A-Za-z0-9_\-]+)["\']?', content)
+                            if json_id_match:
+                                linkedin_id = f"urn:li:member:{json_id_match.group(1)}"
+                except Exception:
+                    linkedin_id = None
+
+                if not linkedin_id:
+                    print("[Auth] Stable LinkedIn member identity extraction was unavailable in page DOM/script data.")
+
                 # Extract authenticated profile URL from feed links
                 links = page.query_selector_all("a[href*='/in/']")
                 for a in links:
@@ -164,7 +184,7 @@ def check_linkedin_session() -> Dict[str, Any]:
                                 break
 
                 # 2. If name or profile_url is still missing, navigate to /in/me/
-                if not user_name or not user_profile_url:
+                if not user_name or not user_profile_url or not linkedin_id:
                     try:
                         page.goto("https://www.linkedin.com/in/me/", timeout=12000, wait_until="domcontentloaded")
                         page.wait_for_timeout(1500)
@@ -178,6 +198,20 @@ def check_linkedin_session() -> Dict[str, Any]:
                             p_img = page.query_selector("img.pv-top-card-profile-picture__image, img.pv-top-card__photo, img[alt*='profile picture']")
                             if p_img:
                                 user_photo = p_img.get_attribute("src")
+
+                        if not linkedin_id:
+                            p_content = page.content()
+                            p_match = re.search(r'urn:li:(?:member|fsd_profile|profile):([A-Za-z0-9_\-]+)', p_content)
+                            if p_match:
+                                linkedin_id = p_match.group(0)
+                            else:
+                                p_data_id = re.search(r'data-member-id=["\']([A-Za-z0-9_\-]+)["\']', p_content)
+                                if p_data_id:
+                                    linkedin_id = f"urn:li:member:{p_data_id.group(1)}"
+                                else:
+                                    p_json_id = re.search(r'"memberId"\s*:\s*["\']?([A-Za-z0-9_\-]+)["\']?', p_content)
+                                    if p_json_id:
+                                        linkedin_id = f"urn:li:member:{p_json_id.group(1)}"
                     except Exception:
                         pass
 
@@ -185,6 +219,7 @@ def check_linkedin_session() -> Dict[str, Any]:
             return {
                 "authenticated": authenticated,
                 "status": "Connected" if authenticated else "Not Connected",
+                "linkedin_id": linkedin_id,
                 "name": user_name,
                 "profile_photo_url": user_photo,
                 "profile_url": user_profile_url,
@@ -235,8 +270,18 @@ def launch_interactive_linkedin_login() -> Dict[str, Any]:
                 args=["--disable-blink-features=AutomationControlled"]
             )
             page = context.pages[0] if context.pages else context.new_page()
-            page.goto("https://www.linkedin.com/login", timeout=45000)
+            page.goto("https://www.linkedin.com/feed/", timeout=45000, wait_until="domcontentloaded")
             
+            # Check if already authenticated on feed
+            current_url = page.url.lower()
+            if "feed" in current_url or ("in/" in current_url and not "login" in current_url and not "authwall" in current_url):
+                print("[PROFILE EXTRACTOR DEBUG] Persistent session is already logged into LinkedIn!")
+                context.close()
+                time.sleep(0.5)
+                return {"success": True, "message": "Already authenticated."}
+
+            # If not logged in, redirect to login page for manual authentication
+            page.goto("https://www.linkedin.com/login", timeout=45000)
             print("[PROFILE EXTRACTOR DEBUG] Browser opened. Waiting for user to complete manual login...")
             for _ in range(120):
                 if page.is_closed():
@@ -244,18 +289,23 @@ def launch_interactive_linkedin_login() -> Dict[str, Any]:
                 url = page.url.lower()
                 if "feed" in url or ("in/" in url and not "login" in url and not "authwall" in url):
                     print("[PROFILE EXTRACTOR DEBUG] Successful login detected in browser session!")
-                    page.wait_for_timeout(3000)
+                    page.wait_for_timeout(1000)
                     break
                 page.wait_for_timeout(1000)
 
             context.close()
+            time.sleep(0.5)
             return {
                 "success": True,
                 "message": "LinkedIn session updated."
             }
         except Exception as e:
             if context:
-                context.close()
+                try:
+                    context.close()
+                except Exception:
+                    pass
+                time.sleep(0.5)
             return {
                 "success": False,
                 "error": str(e)

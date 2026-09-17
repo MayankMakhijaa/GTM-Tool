@@ -3,11 +3,11 @@
 <html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "status-score-high-text": "#1D4ED8", "background": "#f8f9ff", "on-error-container": "#93000a", "on-background": "#0b1c30", "error-container": "#ffdad6", "on-surface-variant": "#414752", "surface-bright": "#f8f9ff", "secondary-fixed-dim": "#bec6e0", "tertiary-fixed": "#6ffbbe", "on-tertiary-fixed": "#002113", "inverse-on-surface": "#eaf1ff", "surface-subtle": "#F1F5F9", "primary-fixed-dim": "#a8c8ff", "on-tertiary": "#ffffff", "text-secondary": "#475569", "tertiary-fixed-dim": "#4edea3", "on-tertiary-fixed-variant": "#005236", "primary-fixed": "#d6e3ff", "tertiary": "#005b3d", "primary-container": "#0a66c2", "status-success-border": "#A7F3D0", "on-secondary-fixed": "#131b2e", "status-score-high-bg": "#EFF6FF", "surface-tint": "#005eb5", "on-primary-container": "#dbe6ff", "surface-dim": "#cbdbf5", "inverse-surface": "#213145", "on-secondary": "#ffffff", "on-surface": "#0b1c30", "status-success-text": "#047857", "outline": "#727783", "surface-variant": "#d3e4fe", "error": "#ba1a1a", "surface-container-high": "#dce9ff", "secondary-fixed": "#dae2fd", "on-tertiary-container": "#76ffc2", "border-default": "#E2E8F0", "border-focus": "#0A66C2", "surface": "#f8f9ff", "border-hover": "#CBD5E1", "text-primary": "#0F172A", "inverse-primary": "#a8c8ff", "on-primary-fixed": "#001b3d", "secondary": "#565e74", "status-success-bg": "#ECFDF5", "surface-canvas": "#F8FAFC", "on-primary": "#ffffff", "surface-container-lowest": "#ffffff", "on-primary-fixed-variant": "#00468a", "on-error": "#ffffff", "primary": "#004e99", "outline-variant": "#c1c6d4", "text-muted": "#94A3B8", "on-secondary-fixed-variant": "#3f465c", "on-secondary-container": "#5c647a", "surface-card": "#FFFFFF", "surface-container-low": "#eff4ff", "surface-container": "#e5eeff", "secondary-container": "#dae2fd", "surface-container-highest": "#d3e4fe", "tertiary-container": "#007650" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-lg": "1.5rem", "space-sm": "0.5rem", "gutter": "1.5rem", "space-md": "1rem", "space-xs": "0.25rem", "margin": "2rem", "space-xl": "2rem" }, "fontFamily": { "headline-sm": ["Geist"], "headline-lg": ["Geist"], "body-sm": ["Geist"], "headline-lg-mobile": ["Geist"], "body-md": ["Geist"], "label-sm": ["Geist"], "stat-value": ["Geist"], "body-lg": ["Geist"], "table-header": ["Geist"], "table-cell": ["Geist"], "headline-md": ["Geist"], "label-md": ["Geist"] }, "fontSize": { "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "stat-value": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "table-header": ["12px", { "lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600" }], "table-cell": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
-<aside class="fixed left-0 top-0 h-full w-60 bg-surface-card z-50 flex flex-col justify-between py-space-lg px-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+<aside id="app-sidebar" class="fixed left-0 top-0 h-full w-60 bg-surface-card z-50 flex flex-col justify-between py-space-lg px-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] hidden">
 <div class="flex flex-col gap-space-lg">
-<div class="flex items-center gap-space-sm px-space-xs">
+<div class="flex items-center gap-space-sm px-space-xs cursor-pointer" onclick="switchTab('dashboard')">
 <div class="w-8 h-8 rounded-xl bg-primary-container flex items-center justify-center text-on-primary font-headline-sm text-headline-sm">L</div>
-<span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">LinkedIn Lead Gen</span>
+<span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">LinkedIn Growth</span>
 </div>
 <nav class="flex flex-col gap-space-xs" id="main-nav">
 <!-- Dashboard Nav Link -->
@@ -28,6 +28,12 @@
 <span>GTM Opportunities</span>
 </a>
 
+<!-- Lead Gen via Post Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="lead-gen-post" id="nav-lead-gen-post" href="#">
+<span class="material-symbols-outlined text-[20px]">post_add</span>
+<span>Lead Gen via Post</span>
+</a>
+
 <!-- Email Nav Link -->
 <a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="email" id="nav-email" href="#">
 <span class="material-symbols-outlined text-[20px]">mail</span>
@@ -41,23 +47,39 @@
 </a>
 </nav>
 </div>
-<div class="px-space-xs pt-space-md">
+<div class="px-space-xs pt-space-md border-t border-border-default/60 flex flex-col gap-2">
 <div class="p-space-sm rounded-xl bg-surface-canvas flex items-center gap-space-sm">
-<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+<div id="sidebar-user-avatar" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 overflow-hidden text-on-primary font-bold">
 <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
 </div>
 <div class="flex flex-col min-w-0 flex-1">
-<span class="font-label-md text-label-md text-text-primary truncate">Pro User</span>
-<span class="font-label-sm text-label-sm text-text-muted truncate">pro@enterprise.com</span>
+<span id="sidebar-user-name" class="font-label-md text-label-md text-text-primary truncate">LinkedIn Member</span>
+<span id="sidebar-user-status" class="font-label-sm text-label-sm text-status-success-text truncate font-medium">Connected</span>
 </div>
 </div>
+<button id="sidebar-app-logout-btn" type="button" class="w-full py-1.5 px-3 rounded-xl bg-surface-subtle hover:bg-error-container/40 text-text-secondary hover:text-error transition-colors font-label-md text-label-md flex items-center justify-center gap-1.5 border border-border-default/60">
+<span class="material-symbols-outlined text-[16px]">logout</span>
+<span>Log Out</span>
+</button>
 </div>
 </aside>
 
-<div class="pl-60 min-h-screen flex flex-col">
-<header class="fixed top-0 left-60 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 flex items-center justify-end px-margin gap-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+<div id="main-content-wrapper" class="pl-0 min-h-screen flex flex-col transition-all duration-200">
+<header id="app-header" class="fixed top-0 left-0 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 flex items-center justify-between px-margin gap-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] transition-all duration-200">
+<div class="flex items-center gap-2">
+<span id="header-brand-title" class="font-headline-sm text-headline-sm text-text-primary">LinkedIn Lead Generator</span>
+</div>
+<div class="flex items-center gap-3">
+<div id="header-user-badge" class="hidden items-center gap-2 bg-surface-card px-3 py-1.5 rounded-full border border-border-default shadow-sm">
+<div id="header-user-avatar" class="w-6 h-6 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-[11px] font-bold overflow-hidden">
+<span class="material-symbols-outlined text-[14px]">person</span>
+</div>
+<span id="header-user-name" class="font-label-md text-label-md text-text-primary font-semibold truncate max-w-[160px]">LinkedIn Member</span>
+</div>
+<button id="header-app-logout-btn" type="button" class="hidden items-center gap-1 px-3 py-1.5 rounded-full bg-surface-canvas hover:bg-surface-subtle text-text-secondary hover:text-error font-label-sm text-label-sm border border-border-default transition-all">
+<span class="material-symbols-outlined text-[16px]">logout</span>
+<span>Log Out</span>
+</button>
 </div>
 </header>
 
@@ -65,15 +87,156 @@
 <div class="max-w-[1200px] mx-auto px-margin py-space-xl flex flex-col gap-space-xl">
 <div class="flex flex-col w-full">
 
-<!-- Dashboard View Container -->
-<div id="view-dashboard" class="flex flex-col gap-space-lg w-full">
+<!-- 1. Logged-Out Landing / Welcome Page Container -->
+<div id="view-welcome-page" class="flex flex-col gap-space-xl w-full max-w-4xl mx-auto py-12">
+<div class="bg-surface-card rounded-2xl p-8 sm:p-12 shadow-md border border-border-default/80 flex flex-col items-center text-center gap-6">
+<div class="w-16 h-16 rounded-2xl bg-primary-container text-on-primary flex items-center justify-center text-3xl font-bold shadow-sm">
+L
+</div>
+<div class="flex flex-col gap-2 max-w-2xl">
+<h1 class="font-headline-lg text-3xl sm:text-4xl text-text-primary tracking-tight font-bold">
+Welcome Page
+</h1>
+<p class="font-body-md text-lg text-text-secondary">
+Automate B2B lead generation, optimize profile positioning for your ICP, and discover high-intent GTM opportunities using AI.
+</p>
+</div>
+
+<div class="pt-4 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+<button id="logged-out-connect-btn" type="button" class="w-full sm:w-auto h-12 px-8 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-headline-sm text-headline-sm transition-all flex items-center justify-center gap-3 shadow-md active:scale-[0.98]">
+<span class="material-symbols-outlined text-[22px]">login</span>
+<span>Continue with LinkedIn</span>
+</button>
+</div>
+
+<div class="pt-6 border-t border-border-default/60 w-full grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+<div class="p-4 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]">auto_awesome</span>
+<span class="font-headline-sm text-label-md text-text-primary">Profile Optimization</span>
+<span class="font-body-sm text-body-sm text-text-muted">Align your profile headline & about section to attract your target ICP.</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]">explore</span>
+<span class="font-headline-sm text-label-md text-text-primary">GTM Opportunities</span>
+<span class="font-body-sm text-body-sm text-text-muted">Discover buying intent and timing triggers across target companies.</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]">post_add</span>
+<span class="font-headline-sm text-label-md text-text-primary">Lead Gen via Post</span>
+<span class="font-body-sm text-body-sm text-text-muted">Qualify comments from LinkedIn posts and export clean Excel files.</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 2. Main Dashboard Tile / Card View Container -->
+<div id="view-main-dashboard" class="hidden flex-col gap-space-xl w-full">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 id="main-dashboard-welcome-heading" class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Main Dashboard</h1>
+<span class="px-3 py-1 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm font-semibold border border-status-success-border">Active Session</span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Select an application module to begin your outreach workflow.</p>
+</div>
+
+<!-- Card Tile Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
+<!-- Card 1: Profile Optimization -->
+<div onclick="switchTab('profile-optimization')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">auto_awesome</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">Profile Optimization</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Position your LinkedIn profile to attract your target ICP based on your offer and value proposition.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>Open Module</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+
+<!-- Card 2: GTM Opportunities -->
+<div onclick="switchTab('gtm-opportunities')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">explore</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">GTM Opportunities</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Discover target companies with active timing triggers, intent signals, and strategic alignment.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>Explore Opportunities</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+
+<!-- Card 3: Lead Gen via Post -->
+<div onclick="switchTab('lead-gen-post')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">post_add</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">Lead Gen via Post</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Extract, clean, and score raw post comments using AI qualification and export to Excel.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>Launch Generator</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+
+<!-- Card 4: Email -->
+<div onclick="switchTab('email')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">mail</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">Email Leads</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">View consolidated deduplicated leads with public email addresses ready for email outreach.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>View Email Leads</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+
+<!-- Card 5: History -->
+<div onclick="switchTab('history')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">history</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">Lead History</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Access complete deduplicated historical database of leads extracted across all past runs.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>Browse History</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 3. Lead Gen via Post Module Container (formerly Dashboard) -->
+<div id="view-lead-gen-post" class="hidden flex-col gap-space-lg w-full">
 <!-- Page Header -->
 <div class="flex flex-col gap-1">
 <div class="flex items-center justify-between">
-<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Dashboard</h1>
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Lead Gen via Post</h1>
 <div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
 <span class="w-2 h-2 rounded-full bg-status-success-text"></span>
-<span class="font-label-sm text-label-sm text-text-secondary">Engine V1.4 Ready</span>
+<span class="font-label-sm text-label-sm text-text-secondary">Engine Ready</span>
 </div>
 </div>
 <p class="font-body-md text-body-md text-text-secondary">Generate qualified leads from LinkedIn post comments.</p>
@@ -309,19 +472,6 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
       <span class="font-label-sm text-[11px] text-text-muted">Connected LinkedIn profile</span>
     </div>
   </div>
-</div>
-<div class="flex items-center gap-space-xs">
-  <button id="open-session-btn" type="button" class="h-9 px-4 rounded-xl bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-label-sm transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
-    <span class="material-symbols-outlined text-[16px] text-primary-container">open_in_new</span>
-    <span>Open LinkedIn Session</span>
-  </button>
-  <button id="logout-session-btn" type="button" class="hidden h-9 px-4 rounded-xl bg-error-container/30 hover:bg-error-container text-on-error-container border border-error-container/50 font-label-sm text-label-sm transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
-    <span class="material-symbols-outlined text-[16px]">logout</span>
-    <span>Log Out</span>
-  </button>
-  <button id="check-session-btn" type="button" class="h-9 px-3 rounded-xl bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-muted hover:text-text-primary transition-all flex items-center justify-center shadow-sm" title="Refresh Session Status">
-    <span class="material-symbols-outlined text-[16px]">refresh</span>
-  </button>
 </div>
 </div>
 
@@ -790,6 +940,95 @@ C
 </div>
 </div>
 
+<!-- ================= ONBOARDING MODAL 1: 3 QUESTIONS ================= -->
+<div id="modal-onboarding-gtm" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-space-md hidden">
+  <div class="bg-surface-card rounded-2xl shadow-xl border border-border-default/80 max-w-xl w-full p-space-xl flex flex-col gap-space-lg animate-in fade-in zoom-in duration-200">
+    <div class="flex items-center gap-3 border-b border-border-default/60 pb-4">
+      <div class="w-10 h-10 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center font-bold">
+        <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+      </div>
+      <div class="flex flex-col">
+        <h3 class="font-headline-sm text-headline-sm text-text-primary">Welcome to LinkedIn Growth Engine</h3>
+        <p class="font-body-sm text-body-sm text-text-secondary">Please tell us about your offer and ICP to personalize your workspace.</p>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label for="onboarding-offer-input" class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5">
+          <span>1. What are you offering?</span>
+        </label>
+        <textarea id="onboarding-offer-input" rows="2" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md text-body-md text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="e.g. AI-powered B2B lead generation & outreach automation platform for sales teams..."></textarea>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="onboarding-icp-input" class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5">
+          <span>2. Who is your ideal customer (ICP)?</span>
+        </label>
+        <textarea id="onboarding-icp-input" rows="2" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md text-body-md text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="e.g. Founders, VPs of Sales, Growth Leads at B2B SaaS companies (10-200 employees)..."></textarea>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="onboarding-context-input" class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5">
+          <span>3. Any additional context?</span>
+        </label>
+        <textarea id="onboarding-context-input" rows="2" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md text-body-md text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="e.g. Focus on US/EU markets, average contract value $10k-$50k/year..."></textarea>
+      </div>
+    </div>
+
+    <div class="flex justify-end pt-2">
+      <button id="onboarding-gtm-save-btn" type="button" class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center gap-2 shadow-sm active:scale-[0.98]">
+        <span>Save & Continue</span>
+        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ONBOARDING MODAL 2: PROFILE OPTIMIZATION CHOICE ================= -->
+<div id="modal-onboarding-profile-opt" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-space-md hidden">
+  <div class="bg-surface-card rounded-2xl shadow-xl border border-border-default/80 max-w-md w-full p-space-xl flex flex-col gap-space-lg text-center items-center animate-in fade-in zoom-in duration-200">
+    <div class="w-14 h-14 rounded-2xl bg-status-score-high-bg text-primary-container flex items-center justify-center font-bold">
+      <span class="material-symbols-outlined text-[28px]">auto_awesome</span>
+    </div>
+    <div class="flex flex-col gap-2">
+      <h3 class="font-headline-sm text-xl text-text-primary font-semibold">Optimize Your Profile?</h3>
+      <p class="font-body-sm text-body-sm text-text-secondary">Would you like to generate AI profile optimization suggestions targeted to your saved offer and target ICP?</p>
+    </div>
+    <div class="flex flex-col sm:flex-row items-center gap-3 w-full pt-2">
+      <button id="onboarding-opt-yes-btn" type="button" class="w-full h-11 px-5 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]">
+        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+        <span>Yes, Optimize Profile</span>
+      </button>
+      <button id="onboarding-opt-skip-btn" type="button" class="w-full h-11 px-5 rounded-xl bg-surface-canvas hover:bg-surface-subtle text-text-secondary font-label-md text-label-md transition-all border border-border-default">
+        <span>Skip for now</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ONBOARDING MODAL 3: GTM EXPLORATION CHOICE ================= -->
+<div id="modal-onboarding-gtm-explore" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-space-md hidden">
+  <div class="bg-surface-card rounded-2xl shadow-xl border border-border-default/80 max-w-md w-full p-space-xl flex flex-col gap-space-lg text-center items-center animate-in fade-in zoom-in duration-200">
+    <div class="w-14 h-14 rounded-2xl bg-status-success-bg text-status-success-text flex items-center justify-center font-bold">
+      <span class="material-symbols-outlined text-[28px]">rocket_launch</span>
+    </div>
+    <div class="flex flex-col gap-2">
+      <h3 class="font-headline-sm text-xl text-text-primary font-semibold">You're All Set!</h3>
+      <p class="font-body-sm text-body-sm text-text-secondary">Would you like to explore potential GTM opportunities for your target ICP right now?</p>
+    </div>
+    <div class="flex flex-col sm:flex-row items-center gap-3 w-full pt-2">
+      <button id="onboarding-gtm-explore-btn" type="button" class="w-full h-11 px-5 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]">
+        <span class="material-symbols-outlined text-[18px]">explore</span>
+        <span>Explore GTM</span>
+      </button>
+      <button id="onboarding-dashboard-btn" type="button" class="w-full h-11 px-5 rounded-xl bg-surface-canvas hover:bg-surface-subtle text-text-secondary font-label-md text-label-md transition-all border border-border-default">
+        <span>Go to Dashboard</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 </div>
 </div>
 </main>
@@ -812,7 +1051,8 @@ C
     const navEmail = document.getElementById('nav-email');
     const navHistory = document.getElementById('nav-history');
 
-    const viewDashboard = document.getElementById('view-dashboard');
+    const viewWelcomePage = document.getElementById('view-welcome-page');
+    const viewMainDashboard = document.getElementById('view-main-dashboard');
     const viewProfileOptimization = document.getElementById('view-profile-optimization');
     const viewGtmOpportunities = document.getElementById('view-gtm-opportunities');
     const viewEmailLeads = document.getElementById('view-email-leads');
@@ -960,24 +1200,117 @@ C
       }
     }
 
-    async function checkLinkedInSessionStatus() {
-      if (!sessionStatusText) return;
-      sessionStatusText.textContent = 'Checking...';
+    window.switchTab = function(target) {
+      const allViews = {
+        'welcome-page': document.getElementById('view-welcome-page') || document.getElementById('view-logged-out'),
+        'logged-out': document.getElementById('view-welcome-page') || document.getElementById('view-logged-out'),
+        'main-dashboard': document.getElementById('view-main-dashboard'),
+        'lead-gen-post': document.getElementById('view-lead-gen-post'),
+        'profile-optimization': document.getElementById('view-profile-optimization'),
+        'gtm-opportunities': document.getElementById('view-gtm-opportunities'),
+        'email': document.getElementById('view-email-leads'),
+        'history': document.getElementById('view-history')
+      };
+
+      let actualTarget = target;
+      if (target === 'dashboard') {
+        actualTarget = 'main-dashboard';
+      } else if (target === 'logged-out') {
+        actualTarget = 'welcome-page';
+      }
+
+      Object.keys(allViews).forEach(k => {
+        if (allViews[k]) allViews[k].classList.add('hidden');
+      });
+
+      if (allViews[actualTarget]) {
+        allViews[actualTarget].classList.remove('hidden');
+      }
+
+      const isModulePage = ['profile-optimization', 'gtm-opportunities', 'lead-gen-post', 'email', 'history'].includes(actualTarget);
+      const appSidebar = document.getElementById('app-sidebar');
+      const mainContentWrapper = document.getElementById('main-content-wrapper');
+      const appHeader = document.getElementById('app-header');
+
+      if (isModulePage) {
+        if (appSidebar) appSidebar.classList.remove('hidden');
+        if (mainContentWrapper) {
+          mainContentWrapper.classList.remove('pl-0');
+          mainContentWrapper.classList.add('pl-60');
+        }
+        if (appHeader) {
+          appHeader.classList.remove('left-0');
+          appHeader.classList.add('left-60');
+        }
+        console.log(`[FLOW] Navigated to module view '${actualTarget}' -> Sidebar = visible`);
+      } else {
+        if (appSidebar) appSidebar.classList.add('hidden');
+        if (mainContentWrapper) {
+          mainContentWrapper.classList.remove('pl-60');
+          mainContentWrapper.classList.add('pl-0');
+        }
+        if (appHeader) {
+          appHeader.classList.remove('left-60');
+          appHeader.classList.add('left-0');
+        }
+        console.log(`[FLOW] Navigated to home view '${actualTarget}' -> Sidebar = hidden`);
+      }
+
+      const navLinks = document.querySelectorAll('#main-nav a');
+      navLinks.forEach(link => {
+        const p = link.getAttribute('data-path');
+        if (p === target || (target === 'main-dashboard' && p === 'dashboard')) {
+          link.className = 'flex items-center gap-space-sm px-space-sm py-2 rounded-xl transition-colors bg-status-score-high-bg text-primary-container font-label-md';
+        } else {
+          link.className = 'flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md';
+        }
+      });
+
+      // Module Data Fetching Triggers
+      if (actualTarget === 'profile-optimization' && typeof checkLinkedInSessionStatus === 'function') {
+        checkLinkedInSessionStatus({ skipNavigation: true });
+      } else if (actualTarget === 'gtm-opportunities' && typeof fetchGtmOpportunities === 'function') {
+        fetchGtmOpportunities();
+      } else if (actualTarget === 'email' && typeof fetchHistoricalEmailLeads === 'function') {
+        fetchHistoricalEmailLeads();
+      } else if (actualTarget === 'history' && typeof fetchHistoricalAllLeads === 'function') {
+        fetchHistoricalAllLeads();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    let currentUserContext = null;
+    let savedGtmContext = null;
+
+    async function checkLinkedInSessionStatus(options = {}) {
+      if (sessionStatusText) sessionStatusText.textContent = 'Checking...';
       try {
         const res = await fetch('/api/linkedin-session-status');
         const data = await res.json();
         if (res.ok && data.success && data.data) {
           const isAuth = data.data.authenticated;
-          const name = data.data.name;
+          const name = data.data.name || (data.data.user ? data.data.user.name : null) || 'LinkedIn Member';
           const photo = data.data.profile_photo_url;
+          currentUserContext = data.data.user;
+          savedGtmContext = data.data.gtm_context;
+
+          const headerBadge = document.getElementById('header-user-badge');
+          const headerName = document.getElementById('header-user-name');
+          const headerAvatar = document.getElementById('header-user-avatar');
+          const headerLogoutBtn = document.getElementById('header-app-logout-btn');
+
+          const sidebarName = document.getElementById('sidebar-user-name');
+          const sidebarAvatar = document.getElementById('sidebar-user-avatar');
+          const welcomeHeading = document.getElementById('main-dashboard-welcome-heading');
 
           if (isAuth) {
-            sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm font-semibold border border-status-success-border';
+            if (sessionStatusBadge) sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm font-semibold border border-status-success-border';
             if (sessionStatusDot) sessionStatusDot.className = 'w-2 h-2 rounded-full bg-status-success-text';
-            sessionStatusText.textContent = 'Connected';
+            if (sessionStatusText) sessionStatusText.textContent = 'Connected';
 
             if (connectedProfileInfo) connectedProfileInfo.classList.remove('hidden');
-            if (connectedProfileName) connectedProfileName.textContent = name || 'Authenticated LinkedIn Profile';
+            if (connectedProfileName) connectedProfileName.textContent = name;
             if (connectedProfileAvatar) {
               if (photo) {
                 connectedProfileAvatar.innerHTML = `<img src="${photo}" class="w-full h-full object-cover" />`;
@@ -986,6 +1319,23 @@ C
                 connectedProfileAvatar.innerHTML = `<span>${init}</span>`;
               }
             }
+
+            if (headerBadge) headerBadge.classList.remove('hidden');
+            if (headerLogoutBtn) headerLogoutBtn.classList.remove('hidden');
+            if (headerName) headerName.textContent = name;
+            if (headerAvatar) {
+              if (photo) headerAvatar.innerHTML = `<img src="${photo}" class="w-full h-full object-cover" />`;
+              else headerAvatar.innerHTML = `<span>${name.substring(0, 2).toUpperCase()}</span>`;
+            }
+
+            if (sidebarName) sidebarName.textContent = name;
+            if (sidebarAvatar) {
+              if (photo) sidebarAvatar.innerHTML = `<img src="${photo}" class="w-full h-full object-cover" />`;
+              else sidebarAvatar.innerHTML = `<span>${name.substring(0, 2).toUpperCase()}</span>`;
+            }
+
+            if (welcomeHeading) welcomeHeading.textContent = `Welcome, ${name.split(' ')[0]}`;
+
             if (openSessionBtn) openSessionBtn.classList.add('hidden');
             if (logoutSessionBtn) logoutSessionBtn.classList.remove('hidden');
 
@@ -999,15 +1349,50 @@ C
             if (extractProfileBtn) {
               extractProfileBtn.disabled = false;
             }
+
+            // Populate saved GTM context into GTM & Profile Optimization inputs
+            if (savedGtmContext) {
+              if (gtmOfferInput) gtmOfferInput.value = savedGtmContext.offer || '';
+              if (gtmIcpInput) gtmIcpInput.value = savedGtmContext.target_icp || '';
+              if (gtmContextInput) gtmContextInput.value = savedGtmContext.additional_context || '';
+            }
+
+            // Onboarding Check & Navigation
+            const onboardingCompleted = data.data.onboarding_completed;
+            const modalGtm = document.getElementById('modal-onboarding-gtm');
+            const modalOpt = document.getElementById('modal-onboarding-profile-opt');
+            const modalGtmExp = document.getElementById('modal-onboarding-gtm-explore');
+
+            if (typeof resetInactivityTimer === 'function') resetInactivityTimer();
+
+            console.log(`[FLOW] LinkedIn authentication successful. onboarding_completed = ${onboardingCompleted}`);
+
+            if (!onboardingCompleted) {
+              if (modalOpt) modalOpt.classList.add('hidden');
+              if (modalGtmExp) modalGtmExp.classList.add('hidden');
+              if (modalGtm) modalGtm.classList.remove('hidden');
+              if (!options.skipNavigation) switchTab('welcome-page');
+              console.log('[FLOW] First-time user -> Showing 3-question onboarding modal over Welcome Page.');
+            } else {
+              if (modalGtm) modalGtm.classList.add('hidden');
+              if (modalOpt) modalOpt.classList.add('hidden');
+              if (modalGtmExp) modalGtmExp.classList.add('hidden');
+              if (!options.skipNavigation) switchTab('main-dashboard');
+              console.log('[FLOW] Returning user -> Authenticated session active.');
+            }
+
           } else {
-            sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium border border-status-warning-border';
+            if (sessionStatusBadge) sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium border border-status-warning-border';
             if (sessionStatusDot) sessionStatusDot.className = 'w-2 h-2 rounded-full bg-status-warning-text';
-            sessionStatusText.textContent = 'Not Connected';
+            if (sessionStatusText) sessionStatusText.textContent = 'Not Connected';
 
             if (connectedProfileInfo) connectedProfileInfo.classList.add('hidden');
             if (connectedProfileName) connectedProfileName.textContent = '';
             if (openSessionBtn) openSessionBtn.classList.remove('hidden');
             if (logoutSessionBtn) logoutSessionBtn.classList.add('hidden');
+
+            if (headerBadge) headerBadge.classList.add('hidden');
+            if (headerLogoutBtn) headerLogoutBtn.classList.add('hidden');
 
             if (profileUrlInput) {
               profileUrlInput.value = '';
@@ -1018,11 +1403,15 @@ C
             if (extractProfileBtn) {
               extractProfileBtn.disabled = true;
             }
+
+            if (!options.skipNavigation) switchTab('welcome-page');
+            console.log('[FLOW] Unauthenticated -> Displaying Welcome Page.');
           }
         }
       } catch (err) {
         console.error('Failed to check LinkedIn session status:', err);
         if (sessionStatusText) sessionStatusText.textContent = 'Status Unknown';
+        if (!options.skipNavigation) switchTab('welcome-page');
       }
     }
 
@@ -1030,15 +1419,25 @@ C
       openSessionBtn.addEventListener('click', async () => {
         openSessionBtn.disabled = true;
         openSessionBtn.classList.add('opacity-70', 'cursor-not-allowed');
-        alert('Opening Playwright Chromium browser on your desktop...\n\nPlease log into your LinkedIn account in the newly opened browser window. Once logged in, return here and click Refresh.');
         try {
+          // 1. Pre-check if existing session is already authenticated
+          const statusRes = await fetch('/api/linkedin-session-status');
+          const statusData = await statusRes.json();
+
+          if (statusRes.ok && statusData.success && statusData.data && statusData.data.authenticated) {
+            console.log('[FLOW] Session pre-check: Existing authenticated LinkedIn session detected. Proceeding directly.');
+            await checkLinkedInSessionStatus({ isInitialBootstrap: true });
+            return;
+          }
+
+          // 2. If not authenticated, open Playwright Chromium session
           await fetch('/api/open-linkedin-session', { method: 'POST' });
+          await checkLinkedInSessionStatus({ isInitialBootstrap: true });
         } catch (err) {
           console.error('Error opening session browser:', err);
         } finally {
           openSessionBtn.disabled = false;
           openSessionBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-          checkLinkedInSessionStatus();
         }
       });
     }
@@ -1103,45 +1502,7 @@ C
       }
     }
 
-    // Switch active tabs
-    function switchTab(target) {
-      viewDashboard.classList.add('hidden');
-      if (viewProfileOptimization) viewProfileOptimization.classList.add('hidden');
-      if (viewGtmOpportunities) viewGtmOpportunities.classList.add('hidden');
-      viewEmailLeads.classList.add('hidden');
-      viewHistory.classList.add('hidden');
 
-      const inactiveClass = 'flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md';
-      const activeClass = 'flex items-center gap-space-sm px-space-sm py-2 rounded-xl transition-colors bg-status-score-high-bg text-primary-container font-label-md';
-
-      // Reset active classes for top-level links
-      if (navDashboard) navDashboard.className = inactiveClass;
-      if (navProfileOptimization) navProfileOptimization.className = inactiveClass;
-      if (navGtmOpportunities) navGtmOpportunities.className = inactiveClass;
-      if (navEmail) navEmail.className = inactiveClass;
-      if (navHistory) navHistory.className = inactiveClass;
-
-      if (target === 'profile-optimization') {
-        if (viewProfileOptimization) viewProfileOptimization.classList.remove('hidden');
-        if (navProfileOptimization) navProfileOptimization.className = activeClass;
-        checkLinkedInSessionStatus();
-      } else if (target === 'gtm-opportunities') {
-        if (viewGtmOpportunities) viewGtmOpportunities.classList.remove('hidden');
-        if (navGtmOpportunities) navGtmOpportunities.className = activeClass;
-        fetchGtmOpportunities();
-      } else if (target === 'email') {
-        viewEmailLeads.classList.remove('hidden');
-        if (navEmail) navEmail.className = activeClass;
-        fetchHistoricalEmailLeads();
-      } else if (target === 'history') {
-        viewHistory.classList.remove('hidden');
-        if (navHistory) navHistory.className = activeClass;
-        fetchHistoricalAllLeads();
-      } else {
-        viewDashboard.classList.remove('hidden');
-        if (navDashboard) navDashboard.className = activeClass;
-      }
-    }
 
     if (navProfileOptimization) {
       navProfileOptimization.addEventListener('click', (e) => {
@@ -1633,6 +1994,13 @@ C
           optimizationResultContainer.classList.remove('hidden');
           optimizationResultContainer.scrollIntoView({ behavior: 'smooth' });
 
+          // Unhide Modal 3 (GTM Exploration Choice) after profile optimization completes
+          const modal3 = document.getElementById('modal-onboarding-gtm-explore');
+          if (modal3 && (!savedGtmContext || !savedGtmContext.onboarding_completed)) {
+            modal3.classList.remove('hidden');
+            console.log('[FLOW] Profile optimization completed -> Displaying GTM Exploration choice modal');
+          }
+
           optimizeProfileBtn.innerHTML = `
             <span class="material-symbols-outlined text-[20px]">check</span>
             <span>Optimization Complete</span>
@@ -1649,10 +2017,33 @@ C
       });
     }
 
+    const navLeadGenPost = document.getElementById('nav-lead-gen-post');
+
     if (navDashboard) {
       navDashboard.addEventListener('click', (e) => {
         e.preventDefault();
         switchTab('dashboard');
+      });
+    }
+
+    if (navProfileOptimization) {
+      navProfileOptimization.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab('profile-optimization');
+      });
+    }
+
+    if (navGtmOpportunities) {
+      navGtmOpportunities.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab('gtm-opportunities');
+      });
+    }
+
+    if (navLeadGenPost) {
+      navLeadGenPost.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab('lead-gen-post');
       });
     }
 
@@ -1669,6 +2060,239 @@ C
         switchTab('history');
       });
     }
+
+    // Logged Out Connect CTA Button ("Continue with LinkedIn")
+    const loggedOutConnectBtn = document.getElementById('logged-out-connect-btn');
+    if (loggedOutConnectBtn) {
+      loggedOutConnectBtn.addEventListener('click', async () => {
+        loggedOutConnectBtn.disabled = true;
+        loggedOutConnectBtn.classList.add('opacity-70', 'cursor-not-allowed');
+        try {
+          // 1. Pre-check if existing session is already authenticated
+          const statusRes = await fetch('/api/linkedin-session-status');
+          const statusData = await statusRes.json();
+
+          if (statusRes.ok && statusData.success && statusData.data && statusData.data.authenticated) {
+            console.log('[FLOW] Session pre-check: Existing authenticated LinkedIn session detected. Proceeding directly.');
+            await checkLinkedInSessionStatus({ isInitialBootstrap: true });
+            return;
+          }
+
+          // 2. If not authenticated, open Playwright Chromium session
+          await fetch('/api/open-linkedin-session', { method: 'POST' });
+          await checkLinkedInSessionStatus({ isInitialBootstrap: true });
+        } catch (err) {
+          console.error('Error connecting LinkedIn session:', err);
+        } finally {
+          loggedOutConnectBtn.disabled = false;
+          loggedOutConnectBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+        }
+      });
+    }
+
+    // Onboarding Modal 1 Handler: Save 3 Questions
+    const onboardingSaveBtn = document.getElementById('onboarding-gtm-save-btn');
+    if (onboardingSaveBtn) {
+      onboardingSaveBtn.addEventListener('click', async () => {
+        const offerInput = document.getElementById('onboarding-offer-input');
+        const icpInput = document.getElementById('onboarding-icp-input');
+        const contextInput = document.getElementById('onboarding-context-input');
+
+        const offer = offerInput ? offerInput.value.trim() : '';
+        const target_icp = icpInput ? icpInput.value.trim() : '';
+        const additional_context = contextInput ? contextInput.value.trim() : '';
+
+        if (!offer || !target_icp) {
+          alert('Please enter what you are offering and your target ICP.');
+          return;
+        }
+
+        onboardingSaveBtn.disabled = true;
+        onboardingSaveBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+        try {
+          const res = await fetch('/api/onboarding/save-gtm-context', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ offer, target_icp, additional_context })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            throw new Error(data.error || 'Failed to save onboarding responses.');
+          }
+
+          savedGtmContext = data.data;
+
+          // Pre-fill inputs for GTM Opportunities module
+          if (gtmOfferInput) gtmOfferInput.value = offer;
+          if (gtmIcpInput) gtmIcpInput.value = target_icp;
+          if (gtmContextInput) gtmContextInput.value = additional_context;
+
+          const modal1 = document.getElementById('modal-onboarding-gtm');
+          const modal2 = document.getElementById('modal-onboarding-profile-opt');
+
+          if (modal1) modal1.classList.add('hidden');
+          if (modal2) modal2.classList.remove('hidden');
+
+        } catch (err) {
+          alert(err.message || 'Failed to save onboarding answers.');
+        } finally {
+          onboardingSaveBtn.disabled = false;
+          onboardingSaveBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+        }
+      });
+    }
+
+    // Onboarding Modal 2 Handlers: Profile Optimization Choice
+    const onboardingOptYesBtn = document.getElementById('onboarding-opt-yes-btn');
+    const onboardingOptSkipBtn = document.getElementById('onboarding-opt-skip-btn');
+
+    if (onboardingOptYesBtn) {
+      onboardingOptYesBtn.addEventListener('click', () => {
+        const modal2 = document.getElementById('modal-onboarding-profile-opt');
+        if (modal2) modal2.classList.add('hidden');
+
+        console.log('[FLOW] User clicked Yes, Optimize Profile -> Navigating to Profile Optimization view (sidebar = visible)');
+        switchTab('profile-optimization');
+
+        // Trigger profile extraction if connected and input has value
+        if (extractProfileBtn && !extractProfileBtn.disabled) {
+          if (!currentExtractedData && profileUrlInput && profileUrlInput.value) {
+            extractProfileBtn.click();
+          }
+        }
+      });
+    }
+
+    if (onboardingOptSkipBtn) {
+      onboardingOptSkipBtn.addEventListener('click', () => {
+        const modal2 = document.getElementById('modal-onboarding-profile-opt');
+        const modal3 = document.getElementById('modal-onboarding-gtm-explore');
+
+        if (modal2) modal2.classList.add('hidden');
+        if (modal3) modal3.classList.remove('hidden');
+        console.log('[FLOW] User skipped Profile Optimization -> Showing GTM Exploration choice modal');
+      });
+    }
+
+    // Onboarding Modal 3 Handlers: GTM Exploration Choice
+    const onboardingGtmExploreBtn = document.getElementById('onboarding-gtm-explore-btn');
+    const onboardingDashboardBtn = document.getElementById('onboarding-dashboard-btn');
+
+    if (onboardingGtmExploreBtn) {
+      onboardingGtmExploreBtn.addEventListener('click', () => {
+        const modal3 = document.getElementById('modal-onboarding-gtm-explore');
+        if (modal3) modal3.classList.add('hidden');
+
+        if (savedGtmContext) {
+          if (gtmOfferInput) gtmOfferInput.value = savedGtmContext.offer || '';
+          if (gtmIcpInput) gtmIcpInput.value = savedGtmContext.target_icp || '';
+          if (gtmContextInput) gtmContextInput.value = savedGtmContext.additional_context || '';
+        }
+
+        console.log('[FLOW] User clicked Explore GTM Opportunities -> Navigating to GTM Opportunities view (sidebar = visible)');
+        switchTab('gtm-opportunities');
+      });
+    }
+
+    if (onboardingDashboardBtn) {
+      onboardingDashboardBtn.addEventListener('click', () => {
+        const modal1 = document.getElementById('modal-onboarding-gtm');
+        const modal2 = document.getElementById('modal-onboarding-profile-opt');
+        const modal3 = document.getElementById('modal-onboarding-gtm-explore');
+
+        if (modal1) modal1.classList.add('hidden');
+        if (modal2) modal2.classList.add('hidden');
+        if (modal3) modal3.classList.add('hidden');
+
+        console.log('[FLOW] User clicked Go to Dashboard -> Navigating to Main Dashboard (sidebar = hidden)');
+        switchTab('main-dashboard');
+      });
+    }
+
+    // 30-Minute Application Inactivity Timeout Management
+    let inactivityTimer = null;
+    const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
+    function resetInactivityTimer() {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      if (currentUserContext || (sessionStatusText && sessionStatusText.textContent === 'Connected')) {
+        inactivityTimer = setTimeout(() => {
+          console.log('[FLOW] 30-minute application inactivity timeout reached. Expiring application session.');
+          handleAppLogout({ isTimeout: true });
+        }, INACTIVITY_TIMEOUT_MS);
+      }
+    }
+
+    ['pointerdown', 'keydown', 'scroll', 'click'].forEach(eventType => {
+      window.addEventListener(eventType, () => {
+        resetInactivityTimer();
+      }, { passive: true });
+    });
+
+    async function handleAppLogout(options = {}) {
+      if (!options || !options.isTimeout) {
+        if (!confirm('Log out of application workspace?')) return;
+      } else {
+        alert('Application session expired due to 30 minutes of inactivity.\n\nPlease click "Continue with LinkedIn" to re-authenticate.');
+      }
+
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = null;
+      }
+
+      try {
+        await fetch('/api/app-logout', { method: 'POST' });
+        currentUserContext = null;
+        savedGtmContext = null;
+
+        const headerBadge = document.getElementById('header-user-badge');
+        const headerName = document.getElementById('header-user-name');
+        const headerAvatar = document.getElementById('header-user-avatar');
+        const headerLogoutBtn = document.getElementById('header-app-logout-btn');
+
+        if (headerBadge) headerBadge.classList.add('hidden');
+        if (headerLogoutBtn) headerLogoutBtn.classList.add('hidden');
+        if (headerName) headerName.textContent = '';
+        if (headerAvatar) headerAvatar.innerHTML = '';
+
+        const sidebarName = document.getElementById('sidebar-user-name');
+        const sidebarAvatar = document.getElementById('sidebar-user-avatar');
+        if (sidebarName) sidebarName.textContent = '';
+        if (sidebarAvatar) sidebarAvatar.innerHTML = '';
+
+        if (connectedProfileInfo) connectedProfileInfo.classList.add('hidden');
+        if (connectedProfileName) connectedProfileName.textContent = '';
+        if (connectedProfileAvatar) connectedProfileAvatar.innerHTML = '';
+
+        if (openSessionBtn) {
+          openSessionBtn.classList.remove('hidden', 'opacity-70', 'cursor-not-allowed');
+          openSessionBtn.disabled = false;
+        }
+        if (logoutSessionBtn) logoutSessionBtn.classList.add('hidden');
+
+        if (sessionStatusBadge) sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium border border-status-warning-border';
+        if (sessionStatusDot) sessionStatusDot.className = 'w-2 h-2 rounded-full bg-status-warning-text';
+        if (sessionStatusText) sessionStatusText.textContent = 'Not Connected';
+
+        const modal1 = document.getElementById('modal-onboarding-gtm');
+        const modal2 = document.getElementById('modal-onboarding-profile-opt');
+        const modal3 = document.getElementById('modal-onboarding-gtm-explore');
+
+        if (modal1) modal1.classList.add('hidden');
+        if (modal2) modal2.classList.add('hidden');
+        if (modal3) modal3.classList.add('hidden');
+
+        console.log('[FLOW] Application logout -> Redirecting to Welcome Page (sidebar = hidden)');
+        switchTab('welcome-page');
+      } catch (err) {
+        console.error('App logout failed:', err);
+      }
+    }
+
+    if (sidebarAppLogoutBtn) sidebarAppLogoutBtn.addEventListener('click', () => handleAppLogout());
+    if (headerAppLogoutBtn) headerAppLogoutBtn.addEventListener('click', () => handleAppLogout());
 
     // Render Dashboard table (current run)
     function renderDashboardTable(leads) {
