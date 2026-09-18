@@ -685,21 +685,50 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 </div>
 
 <div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-context-input">
-<span class="material-symbols-outlined text-[18px] text-primary-container">info</span>
-<span>Optional additional context:</span>
-</label>
-<textarea class="w-full min-h-[60px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-context-input" placeholder="e.g. Looking for companies showing signs of growth, hiring, expansion or operational complexity"></textarea>
+<span class="font-label-sm text-label-sm text-text-secondary">AI GTM Agent</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Find companies that match your ICP and understand why they may be worth approaching now.</p>
 </div>
 
-<div class="flex justify-end pt-2">
-<button class="h-11 px-8 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="gtm-find-btn" type="button">
-<span class="material-symbols-outlined text-[18px]">search</span>
-<span>Find Opportunities</span>
-</button>
-</div>
-
-</div>
+<!-- Saved Context Summary Card (read-only) -->
+<div id="gtm-context-card" class="bg-surface-card rounded-xl shadow-sm border border-border-default/60 flex flex-col gap-0 overflow-hidden">
+  <div class="flex items-center justify-between px-space-md pt-space-md pb-2">
+    <span class="font-label-md text-label-md text-text-muted uppercase tracking-wider flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px] text-primary-container">tune</span>
+      Using Your Saved Context
+    </span>
+    <span id="gtm-context-status" class="font-label-sm text-label-sm text-text-muted italic"></span>
+  </div>
+  <div class="px-space-md pb-space-md flex flex-col gap-2.5">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+      <div class="p-3 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1 min-h-[70px]">
+        <span class="font-label-sm text-[10px] text-text-muted uppercase tracking-wider flex items-center gap-1">
+          <span class="material-symbols-outlined text-[12px]">sell</span> Offer
+        </span>
+        <p id="gtm-ctx-offer" class="font-body-sm text-body-sm text-text-primary leading-snug"></p>
+      </div>
+      <div class="p-3 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1 min-h-[70px]">
+        <span class="font-label-sm text-[10px] text-text-muted uppercase tracking-wider flex items-center gap-1">
+          <span class="material-symbols-outlined text-[12px]">target</span> ICP
+        </span>
+        <p id="gtm-ctx-icp" class="font-body-sm text-body-sm text-text-primary leading-snug"></p>
+      </div>
+      <div class="p-3 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1 min-h-[70px]">
+        <span class="font-label-sm text-[10px] text-text-muted uppercase tracking-wider flex items-center gap-1">
+          <span class="material-symbols-outlined text-[12px]">info</span> Context
+        </span>
+        <p id="gtm-ctx-context" class="font-body-sm text-body-sm text-text-secondary leading-snug italic"></p>
+      </div>
+    </div>
+    <!-- Action Row -->
+    <div class="flex items-center justify-end pt-1">
+      <button class="h-11 px-8 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="gtm-find-btn" type="button">
+        <span class="material-symbols-outlined text-[18px]">search</span>
+        <span id="gtm-find-btn-text">Find Opportunities</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Progress Visualizer Card -->
@@ -712,19 +741,36 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 <span class="font-label-sm text-[11px] text-text-muted" id="gtm-progress-step">Processing Pipeline</span>
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-body-sm">
-<div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-status-score-high-bg border-primary-container/30" id="gtm-step1">
-<span class="material-symbols-outlined text-[16px] text-primary-container animate-spin">sync</span>
-<span class="text-primary-container font-medium truncate">1. Building Search Strategy...</span>
+<div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-surface-canvas border-border-default/50" id="gtm-step1">
+<span class="material-symbols-outlined text-[16px] text-text-muted">radio_button_unchecked</span>
+<span class="text-text-muted truncate">1. Searching Public Web...</span>
 </div>
 <div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-surface-canvas border-border-default/50" id="gtm-step2">
 <span class="material-symbols-outlined text-[16px] text-text-muted">radio_button_unchecked</span>
-<span class="text-text-muted truncate">2. Collecting Web Data...</span>
+<span class="text-text-muted truncate">2. Collecting Evidence...</span>
 </div>
 <div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-surface-canvas border-border-default/50" id="gtm-step3">
 <span class="material-symbols-outlined text-[16px] text-text-muted">radio_button_unchecked</span>
-<span class="text-text-muted truncate">3. Analyzing Opportunities...</span>
+<span class="text-text-muted truncate">3. Scoring Opportunities...</span>
 </div>
 </div>
+</div>
+
+<!-- Inline Error State -->
+<div id="gtm-error-container" class="hidden bg-surface-card rounded-xl border border-status-error-border/60 p-space-md flex flex-col gap-3">
+  <div class="flex items-start gap-3">
+    <span class="material-symbols-outlined text-[22px] text-status-error-text shrink-0 mt-0.5">error</span>
+    <div class="flex flex-col gap-1">
+      <span class="font-label-md text-label-md text-text-primary font-semibold">Discovery Failed</span>
+      <p id="gtm-error-msg" class="font-body-sm text-body-sm text-text-secondary"></p>
+    </div>
+  </div>
+  <div class="flex justify-end">
+    <button id="gtm-retry-btn" type="button" class="px-5 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center gap-2 shadow-sm active:scale-[0.98]">
+      <span class="material-symbols-outlined text-[16px]">refresh</span>
+      <span>Retry</span>
+    </button>
+  </div>
 </div>
 
 <!-- Opportunities Feed Header -->
@@ -741,7 +787,7 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 <div class="bg-surface-card rounded-xl p-12 text-center text-text-muted flex flex-col items-center justify-center gap-3 border border-border-default/60">
 <span class="material-symbols-outlined text-[42px] text-text-muted">explore</span>
 <span class="font-headline-sm text-headline-sm text-text-primary">No GTM opportunities discovered yet.</span>
-<span class="font-body-sm text-body-sm text-text-secondary max-w-[480px]">Describe what you sell and your target customer above, then click Find Opportunities to run the discovery pipeline.</span>
+<span class="font-body-sm text-body-sm text-text-secondary max-w-[480px]">Click Find Opportunities above to run the AI discovery pipeline using your saved ICP and offer.</span>
 </div>
 </div>
 
@@ -759,7 +805,7 @@ C
 <div class="flex flex-col min-w-0">
 <div class="flex items-center gap-2">
 <h3 class="font-headline-sm text-headline-sm text-text-primary truncate" id="gtm-modal-company-name">Company Name</h3>
-<a href="#" target="_blank" rel="noopener noreferrer" id="gtm-modal-website-link" class="text-primary-container hover:underline font-label-sm text-label-sm flex items-center gap-0.5">
+<a href="#" target="_blank" rel="noopener noreferrer" id="gtm-modal-website-link" class="text-primary-container hover:underline font-label-sm text-label-sm flex items-center gap-0.5 hidden">
 <span>Visit Website</span>
 <span class="material-symbols-outlined text-[14px]">open_in_new</span>
 </a>
@@ -815,6 +861,15 @@ C
 <span>Recommended Action</span>
 </h4>
 <p class="font-body-md text-body-md text-text-primary font-medium" id="gtm-modal-action">Suggested next step...</p>
+</div>
+
+<!-- Reason / Summary -->
+<div class="p-space-md rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col gap-1.5" id="gtm-modal-reason-block">
+<h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-container">analytics</span>
+<span>Evaluation Summary</span>
+</h4>
+<p class="font-body-md text-body-md text-text-secondary" id="gtm-modal-reason"></p>
 </div>
 
 <!-- Signals & Evidence List -->
@@ -1059,9 +1114,6 @@ C
     const viewHistory = document.getElementById('view-history');
 
     // GTM Opportunities DOM Elements
-    const gtmOfferInput = document.getElementById('gtm-offer-input');
-    const gtmIcpInput = document.getElementById('gtm-icp-input');
-    const gtmContextInput = document.getElementById('gtm-context-input');
     const gtmFindBtn = document.getElementById('gtm-find-btn');
     const gtmProgressContainer = document.getElementById('gtm-progress-container');
     const gtmProgressStatus = document.getElementById('gtm-progress-status');
@@ -1269,8 +1321,9 @@ C
       // Module Data Fetching Triggers
       if (actualTarget === 'profile-optimization' && typeof checkLinkedInSessionStatus === 'function') {
         checkLinkedInSessionStatus({ skipNavigation: true });
-      } else if (actualTarget === 'gtm-opportunities' && typeof fetchGtmOpportunities === 'function') {
-        fetchGtmOpportunities();
+      } else if (actualTarget === 'gtm-opportunities') {
+        if (typeof loadGtmContextSummary === 'function') loadGtmContextSummary();
+        if (typeof fetchGtmOpportunities === 'function') fetchGtmOpportunities();
       } else if (actualTarget === 'email' && typeof fetchHistoricalEmailLeads === 'function') {
         fetchHistoricalEmailLeads();
       } else if (actualTarget === 'history' && typeof fetchHistoricalAllLeads === 'function') {
@@ -1350,12 +1403,7 @@ C
               extractProfileBtn.disabled = false;
             }
 
-            // Populate saved GTM context into GTM & Profile Optimization inputs
-            if (savedGtmContext) {
-              if (gtmOfferInput) gtmOfferInput.value = savedGtmContext.offer || '';
-              if (gtmIcpInput) gtmIcpInput.value = savedGtmContext.target_icp || '';
-              if (gtmContextInput) gtmContextInput.value = savedGtmContext.additional_context || '';
-            }
+            // GTM context display is loaded separately via /api/gtm-context when the GTM view is opened
 
             // Onboarding Check & Navigation
             const onboardingCompleted = data.data.onboarding_completed;
@@ -2291,6 +2339,8 @@ C
       }
     }
 
+    const sidebarAppLogoutBtn = document.getElementById('sidebar-app-logout-btn');
+    const headerAppLogoutBtn = document.getElementById('header-app-logout-btn');
     if (sidebarAppLogoutBtn) sidebarAppLogoutBtn.addEventListener('click', () => handleAppLogout());
     if (headerAppLogoutBtn) headerAppLogoutBtn.addEventListener('click', () => handleAppLogout());
 
@@ -2612,6 +2662,35 @@ C
       });
     }
 
+    // ===== GTM OPPORTUNITIES MODULE =====
+
+    // Load read-only context summary from /api/gtm-context
+    async function loadGtmContextSummary() {
+      const offerEl = document.getElementById('gtm-ctx-offer');
+      const icpEl = document.getElementById('gtm-ctx-icp');
+      const contextEl = document.getElementById('gtm-ctx-context');
+      const statusEl = document.getElementById('gtm-context-status');
+
+      try {
+        const res = await fetch('/api/gtm-context');
+        const data = await res.json();
+        if (res.ok && data.success && data.data) {
+          if (offerEl) offerEl.textContent = data.data.offer || '—';
+          if (icpEl) icpEl.textContent = data.data.target_icp || '—';
+          if (contextEl) contextEl.textContent = data.data.additional_context || 'No additional context provided.';
+          if (statusEl) statusEl.textContent = 'Loaded from onboarding';
+        } else {
+          const msg = data.error || 'Context unavailable.';
+          if (offerEl) offerEl.textContent = 'Onboarding required.';
+          if (icpEl) icpEl.textContent = 'Please complete the onboarding flow first.';
+          if (contextEl) contextEl.textContent = '';
+          if (statusEl) statusEl.textContent = msg;
+        }
+      } catch (err) {
+        if (statusEl) statusEl.textContent = 'Could not load context.';
+      }
+    }
+
     // Fetch GTM Opportunities from /api/gtm-opportunities
     async function fetchGtmOpportunities() {
       try {
@@ -2640,23 +2719,25 @@ C
 
           const companyName = opp.company_name || 'Target Company';
           const initial = companyName.substring(0, 1).toUpperCase();
-          const website = opp.company_url || '#';
-          const category = opp.category_tag || 'Qualified Target';
+          const website = opp.website || opp.company_url || '#';
+          const category = opp.industry || opp.category_tag || 'Qualified Target';
           const score = opp.overall_score || 0;
 
-          const subtextParts = [opp.industry, opp.employee_count, opp.location].filter(Boolean);
+          const subtextParts = [opp.industry, opp.company_size || opp.employee_count, opp.location].filter(Boolean);
           const subtext = subtextParts.length > 0 ? subtextParts.join(' • ') : 'Public Company Record';
 
           const whyNow = opp.why_now || 'Identified timing and fit alignment.';
           const recAction = opp.recommended_action || 'Review public evidence and initiate outreach.';
 
-          const signals = Array.isArray(opp.signals) ? opp.signals : [];
+          const rawEvidence = Array.isArray(opp.evidence) && opp.evidence.length > 0 ? opp.evidence : (Array.isArray(opp.signals) ? opp.signals : []);
           let signalsHtml = '';
-          if (signals.length > 0) {
-            signalsHtml = signals.slice(0, 2).map(sig => {
-              const sigTitle = sig.title || sig.signal_type || 'Signal';
-              const sigSummary = sig.summary || '';
-              const linkHtml = sig.source_url ? `<a href="${sig.source_url}" target="_blank" rel="noopener noreferrer" class="text-primary-container hover:underline text-[11px] inline-flex items-center gap-0.5 shrink-0 ml-1"><span>${sig.source_title || 'Source'}</span><span class="material-symbols-outlined text-[12px]">open_in_new</span></a>` : '';
+          if (rawEvidence.length > 0) {
+            signalsHtml = rawEvidence.slice(0, 2).map(ev => {
+              const sigTitle = ev.signal || ev.title || ev.signal_type || 'Signal';
+              const sigSummary = ev.description || ev.snippet || ev.summary || '';
+              const sourceTitle = ev.source_title || 'Source';
+              const sourceUrl = ev.source_url || '';
+              const linkHtml = sourceUrl ? `<a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" class="text-primary-container hover:underline text-[11px] inline-flex items-center gap-0.5 shrink-0 ml-1"><span>${sourceTitle}</span><span class="material-symbols-outlined text-[12px]">open_in_new</span></a>` : '';
               return `
                 <div class="p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/40 flex items-start gap-2 text-body-sm text-text-secondary">
                   <span class="material-symbols-outlined text-[16px] text-primary-container shrink-0 mt-0.5">verified</span>
@@ -2678,7 +2759,7 @@ C
                 <div class="flex flex-col min-w-0">
                   <div class="flex items-center gap-2">
                     <h3 class="font-headline-sm text-headline-sm text-text-primary truncate">${companyName}</h3>
-                    ${website !== '#' ? `<a href="${website}" target="_blank" rel="noopener noreferrer" class="text-primary-container hover:underline font-label-sm text-label-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[14px]">open_in_new</span></a>` : ''}
+                    ${website && website !== '#' ? `<a href="${website}" target="_blank" rel="noopener noreferrer" class="text-primary-container hover:underline font-label-sm text-label-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[14px]">open_in_new</span></a>` : ''}
                   </div>
                   <span class="font-label-sm text-label-sm text-text-secondary">${subtext}</span>
                 </div>
@@ -2733,7 +2814,7 @@ C
           <div class="bg-surface-card rounded-xl p-12 text-center text-text-muted flex flex-col items-center justify-center gap-3 border border-border-default/60">
             <span class="material-symbols-outlined text-[42px] text-text-muted">explore</span>
             <span class="font-headline-sm text-headline-sm text-text-primary">No GTM opportunities discovered yet.</span>
-            <span class="font-body-sm text-body-sm text-text-secondary max-w-[480px]">Describe what you sell and your target customer above, then click Find Opportunities to run the discovery pipeline.</span>
+            <span class="font-body-sm text-body-sm text-text-secondary max-w-[480px]">Click Find Opportunities above to run the AI discovery pipeline using your saved ICP and offer.</span>
           </div>
         `;
       }
@@ -2756,40 +2837,48 @@ C
 
       const whyNow = document.getElementById('gtm-modal-why-now');
       const action = document.getElementById('gtm-modal-action');
+      const reasonEl = document.getElementById('gtm-modal-reason');
       const evidenceList = document.getElementById('gtm-modal-evidence-list');
 
       const name = opp.company_name || 'Company';
       if (avatar) avatar.textContent = name.substring(0, 1).toUpperCase();
       if (companyName) companyName.textContent = name;
+
+      const siteUrl = opp.website || opp.company_url || '';
       if (websiteLink) {
-        websiteLink.href = opp.company_url || '#';
-        websiteLink.style.display = opp.company_url ? 'inline-flex' : 'none';
+        websiteLink.href = siteUrl || '#';
+        if (siteUrl && siteUrl !== '#') {
+          websiteLink.classList.remove('hidden');
+        } else {
+          websiteLink.classList.add('hidden');
+        }
       }
 
-      const subParts = [opp.industry, opp.employee_count, opp.location].filter(Boolean);
+      const subParts = [opp.industry, opp.company_size || opp.employee_count, opp.location].filter(Boolean);
       if (subtext) subtext.textContent = subParts.length > 0 ? subParts.join(' • ') : 'Public Web Record';
 
       if (overallScore) overallScore.textContent = opp.overall_score || 0;
       if (icpScore) icpScore.textContent = `${opp.icp_fit_score || 0}/100`;
       if (intentScore) intentScore.textContent = `${opp.intent_score || 0}/100`;
       if (timingScore) timingScore.textContent = `${opp.timing_score || 0}/100`;
-      if (confidence) confidence.textContent = opp.confidence_level || 'medium';
+      if (confidence) confidence.textContent = opp.confidence || opp.confidence_level || 'medium';
 
       if (whyNow) whyNow.textContent = opp.why_now || 'No timing trigger specified.';
       if (action) action.textContent = opp.recommended_action || 'Review evidence and initiate outreach.';
+      if (reasonEl) reasonEl.textContent = opp.reason || 'Evaluated based on public evidence.';
 
       if (evidenceList) {
         evidenceList.innerHTML = '';
-        const signals = Array.isArray(opp.signals) ? opp.signals : [];
-        if (signals.length > 0) {
-          signals.forEach(sig => {
+        const evList = Array.isArray(opp.evidence) && opp.evidence.length > 0 ? opp.evidence : (Array.isArray(opp.signals) ? opp.signals : []);
+        if (evList.length > 0) {
+          evList.forEach(ev => {
             const item = document.createElement('div');
             item.className = 'p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col gap-1';
 
-            const title = sig.title || sig.signal_type || 'Evidence Signal';
-            const summary = sig.summary || '';
-            const sourceTitle = sig.source_title || 'Web Evidence';
-            const sourceUrl = sig.source_url || '';
+            const title = ev.signal || ev.title || ev.signal_type || 'Evidence Signal';
+            const desc = ev.description || ev.snippet || ev.summary || '';
+            const sourceTitle = ev.source_title || 'Web Evidence';
+            const sourceUrl = ev.source_url || '';
 
             const linkHtml = sourceUrl ? `<a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" class="text-primary-container hover:underline text-[12px] inline-flex items-center gap-1"><span>${sourceTitle}</span><span class="material-symbols-outlined text-[13px]">open_in_new</span></a>` : '';
 
@@ -2801,7 +2890,7 @@ C
                 </span>
                 ${linkHtml}
               </div>
-              ${summary ? `<p class="font-body-sm text-body-sm text-text-secondary">${summary}</p>` : ''}
+              ${desc ? `<p class="font-body-sm text-body-sm text-text-secondary">${desc}</p>` : ''}
             `;
             evidenceList.appendChild(item);
           });
@@ -2827,102 +2916,113 @@ C
       });
     }
 
-    // Find Opportunities Event Handler
-    if (gtmFindBtn) {
-      gtmFindBtn.addEventListener('click', async (e) => {
-        if (e && e.preventDefault) e.preventDefault();
+    // Find Opportunities Pipeline Event Handler
+    async function handleGtmFind() {
+      console.log('[GTM DEBUG] Button clicked');
 
-        const offerEl = document.getElementById('gtm-offer-input');
-        const icpEl = document.getElementById('gtm-icp-input');
-        const contextEl = document.getElementById('gtm-context-input');
+      const errContainer = document.getElementById('gtm-error-container');
+      const errText = document.getElementById('gtm-error-msg');
+      if (errContainer) errContainer.classList.add('hidden');
 
-        console.log("GTM ICP ELEMENT:", icpEl);
-        console.log("GTM ICP VALUE:", icpEl ? icpEl.value : undefined);
+      if (!gtmFindBtn) {
+        console.warn('[GTM DEBUG] Validation blocked request: gtmFindBtn element missing');
+        return;
+      }
 
-        const offer = offerEl ? offerEl.value.trim() : '';
-        const target_icp = icpEl ? icpEl.value.trim() : '';
-        const additional_context = contextEl ? contextEl.value.trim() : '';
+      const originalHTML = gtmFindBtn.innerHTML;
+      gtmFindBtn.disabled = true;
+      gtmFindBtn.classList.add('opacity-80', 'cursor-not-allowed');
+      gtmFindBtn.innerHTML = `
+        <span class="material-symbols-outlined text-[18px] animate-spin">sync</span>
+        <span>Finding Opportunities...</span>
+      `;
 
-        console.log("GTM Extracted Values:", { offer, target_icp, additional_context });
+      const step1 = document.getElementById('gtm-step1');
+      const step2 = document.getElementById('gtm-step2');
+      const step3 = document.getElementById('gtm-step3');
 
-        if (!offer || !target_icp) {
-          alert('Please specify what you sell and your target audience.');
-          return;
-        }
+      if (gtmProgressContainer) gtmProgressContainer.classList.remove('hidden');
 
-        const originalHTML = gtmFindBtn.innerHTML;
-        gtmFindBtn.disabled = true;
-        gtmFindBtn.classList.add('opacity-80', 'cursor-not-allowed');
-        gtmFindBtn.innerHTML = `
-          <span class="material-symbols-outlined text-[18px] animate-spin">sync</span>
-          <span>Discovering Opportunities...</span>
-        `;
+      setGtmStepState(step1, 'active', '1. Searching Public Web...');
+      setGtmStepState(step2, 'pending', '2. Collecting Evidence...');
+      setGtmStepState(step3, 'pending', '3. Scoring Opportunities...');
 
-        const step1 = document.getElementById('gtm-step1');
-        const step2 = document.getElementById('gtm-step2');
-        const step3 = document.getElementById('gtm-step3');
+      const t1 = setTimeout(() => {
+        setGtmStepState(step1, 'completed', '1. Searching Public Web...');
+        setGtmStepState(step2, 'active', '2. Collecting Evidence...');
+      }, 4000);
 
-        if (gtmProgressContainer) gtmProgressContainer.classList.remove('hidden');
+      const t2 = setTimeout(() => {
+        setGtmStepState(step2, 'completed', '2. Collecting Evidence...');
+        setGtmStepState(step3, 'active', '3. Scoring Opportunities...');
+      }, 10000);
 
-        setGtmStepState(step1, 'active', '1. Building Search Strategy...');
-        setGtmStepState(step2, 'pending', '2. Collecting Web Data...');
-        setGtmStepState(step3, 'pending', '3. Analyzing Opportunities...');
+      try {
+        console.log('[GTM DEBUG] Sending POST /api/gtm-opportunities/find');
+        console.log('[GTM DEBUG] Request sent');
 
-        const t1 = setTimeout(() => {
-          setGtmStepState(step1, 'completed', '1. Building Search Strategy...');
-          setGtmStepState(step2, 'active', '2. Collecting Web Data...');
-        }, 3000);
+        const res = await fetch('/api/gtm-opportunities/find', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
 
-        const t2 = setTimeout(() => {
-          setGtmStepState(step2, 'completed', '2. Collecting Web Data...');
-          setGtmStepState(step3, 'active', '3. Analyzing Opportunities...');
-        }, 8000);
+        console.log('[GTM DEBUG] Response status:', res.status);
 
+        let data;
         try {
-          const payload = {
-            offer: offer,
-            target_icp: target_icp,
-            icp: target_icp,
-            additional_context: additional_context,
-            context: additional_context
-          };
-
-          console.log("GTM Payload Sending to API:", payload);
-
-          const res = await fetch('/api/gtm-opportunities/find', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-
-          clearTimeout(t1);
-          clearTimeout(t2);
-
-          if (!res.ok || !data.success) {
-            throw new Error(data.error || 'Failed to discover GTM opportunities.');
-          }
-
-          setGtmStepState(step1, 'completed', '1. Building Search Strategy...');
-          setGtmStepState(step2, 'completed', '2. Collecting Web Data...');
-          setGtmStepState(step3, 'completed', '3. Analyzing Opportunities...');
-
-          renderGtmFeed(data.opportunities || []);
-
-          setTimeout(() => {
-            if (gtmProgressContainer) gtmProgressContainer.classList.add('hidden');
-          }, 1500);
-
-        } catch (err) {
-          clearTimeout(t1);
-          clearTimeout(t2);
-          alert(err.message || 'GTM opportunity discovery failed.');
-          if (gtmProgressContainer) gtmProgressContainer.classList.add('hidden');
-        } finally {
-          gtmFindBtn.disabled = false;
-          gtmFindBtn.classList.remove('opacity-80', 'cursor-not-allowed');
-          gtmFindBtn.innerHTML = originalHTML;
+          data = await res.json();
+          console.log('[GTM DEBUG] Response body:', data);
+        } catch (jsonErr) {
+          console.error('[GTM DEBUG] Invalid JSON response:', jsonErr);
+          throw new Error('Invalid server response format.');
         }
+
+        clearTimeout(t1);
+        clearTimeout(t2);
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || `Server returned HTTP ${res.status}`);
+        }
+
+        setGtmStepState(step1, 'completed', '1. Searching Public Web...');
+        setGtmStepState(step2, 'completed', '2. Collecting Evidence...');
+        setGtmStepState(step3, 'completed', '3. Scoring Opportunities...');
+
+        renderGtmFeed(data.opportunities || []);
+
+        setTimeout(() => {
+          if (gtmProgressContainer) gtmProgressContainer.classList.add('hidden');
+        }, 1200);
+
+      } catch (err) {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        console.error('[GTM DEBUG] FETCH ERROR:', err);
+        if (gtmProgressContainer) gtmProgressContainer.classList.add('hidden');
+        if (errContainer && errText) {
+          errText.innerHTML = `Unable to find opportunities.<br><br><strong>Reason:</strong><br>${err.message || 'GTM opportunity discovery failed.'}`;
+          errContainer.classList.remove('hidden');
+        }
+      } finally {
+        gtmFindBtn.disabled = false;
+        gtmFindBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+        gtmFindBtn.innerHTML = originalHTML;
+      }
+    }
+
+    if (gtmFindBtn) {
+      gtmFindBtn.addEventListener('click', (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        handleGtmFind();
+      });
+    }
+
+    const gtmRetryBtn = document.getElementById('gtm-retry-btn');
+    if (gtmRetryBtn) {
+      gtmRetryBtn.addEventListener('click', (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        handleGtmFind();
       });
     }
 
@@ -2943,6 +3043,7 @@ C
     // Initial load fetch
     fetchHistoricalEmailLeads();
     fetchHistoricalAllLeads();
+    loadGtmContextSummary();
     fetchGtmOpportunities();
   })();
 </script>

@@ -285,20 +285,127 @@ def get_history_leads():
         "leads": leads
     })
 
+@app.route("/api/gtm-context", methods=["GET"])
+def api_get_gtm_context():
+    """
+    Returns the authenticated user's saved GTM context (offer, ICP, additional_context)
+    for read-only display in the GTM frontend.
+    """
+    user_id = session.get("user_id")
+    if not user_id:
+        # Attempt to resolve from active LinkedIn session
+        try:
+            status = check_linkedin_session()
+            if status.get("authenticated"):
+                user = get_or_create_user(
+                    linkedin_id=status.get("linkedin_id", ""),
+                    name=status.get("name"),
+                    profile_url=status.get("profile_url")
+                )
+                if user:
+                    user_id = user["user_id"]
+                    session["user_id"] = user_id
+        except Exception:
+            pass
+
+    if not user_id:
+        return jsonify({"success": False, "error": "Not authenticated."}), 401
+
+    ctx = get_user_gtm_context(user_id)
+    if not ctx or not ctx.get("onboarding_completed"):
+        return jsonify({"success": False, "error": "Onboarding not completed. Please complete onboarding first."}), 400
+
+    return jsonify({
+        "success": True,
+        "data": {
+            "offer": ctx.get("offer", ""),
+            "target_icp": ctx.get("target_icp", ""),
+            "additional_context": ctx.get("additional_context", ""),
+        }
+    })
+
+
 @app.route("/api/gtm-opportunities/find", methods=["POST"])
 def api_find_gtm_opportunities():
-    data = request.get_json() or {}
-    offer = str(data.get("offer") or "").strip()
-    target_icp = str(data.get("target_icp") or data.get("icp") or "").strip()
-    additional_context = str(data.get("additional_context") or data.get("context") or "").strip()
+    """
+    Starts the GTM opportunity discovery pipeline.
+    The frontend sends an empty body {}.
+    The backend resolves the authenticated user and loads offer/ICP/context from the database.
+    """
+    import traceback
+    print("\n[GTM DEBUG] Find Opportunities request received")
 
-    if not offer:
-        return jsonify({"success": False, "error": "Please describe what you sell (your offer)."}), 400
-    if not target_icp:
-        return jsonify({"success": False, "error": "Please describe who you are looking to work with (your target ICP)."}), 400
+    # Resolve authenticated user from session
+    user_id = session.get("user_id")
+    if not user_id:
+        try:
+            status = check_linkedin_session()
+            if status.get("authenticated"):
+                user = get_or_create_user(
+                    linkedin_id=status.get("linkedin_id", ""),
+                    name=status.get("name"),
+                    profile_url=status.get("profile_url")
+                )
+                if user:
+                    user_id = user["user_id"]
+                    session["user_id"] = user_id
+        except Exception as ex:
+            print("[GTM ERROR] Stage: LinkedIn session check")
+            print(f"[GTM ERROR] Exception type: {type(ex).__name__}")
+            print(f"[GTM ERROR] Message: {str(ex)}")
+            traceback.print_exc()
+
+    print(f"[GTM DEBUG] Current user/session: {user_id or 'NOT AUTHENTICATED'}")
+
+    if not user_id:
+        print("[GTM ERROR] Stage: Authentication check")
+        print("[GTM ERROR] Exception type: AuthError")
+        print("[GTM ERROR] Message: Not authenticated. Please connect your LinkedIn session.")
+        return jsonify({"success": False, "error": "Not authenticated. Please connect your LinkedIn session."}), 401
+
+    # Load saved GTM context from database
+    print("[GTM DEBUG] Loading saved GTM context...")
+    try:
+        ctx = get_user_gtm_context(user_id)
+    except Exception as dberr:
+        print("[GTM ERROR] DATABASE FAILURE")
+        print(f"[GTM ERROR] Stage: Loading GTM context from DB")
+        print(f"[GTM ERROR] Exception type: {type(dberr).__name__}")
+        print(f"[GTM ERROR] Message: {str(dberr)}")
+        traceback.print_exc()
+        return jsonify({"success": False, "error": f"Database error loading context: {str(dberr)}"}), 500
+
+    if not ctx:
+        print("[GTM ERROR] Stage: Loading GTM context")
+        print("[GTM ERROR] Exception type: ContextMissingError")
+        print("[GTM ERROR] Message: Onboarding not completed. Please complete the onboarding questions first.")
+        return jsonify({
+            "success": False,
+            "error": "Onboarding not completed. Please complete the onboarding questions first."
+        }), 400
+
+    offer = str(ctx.get("offer") or "").strip()
+    target_icp = str(ctx.get("target_icp") or "").strip()
+    additional_context = str(ctx.get("additional_context") or "").strip()
+
+    print(f"[GTM DEBUG] Offer found: {'YES' if offer else 'NO'}")
+    print(f"[GTM DEBUG] ICP found: {'YES' if target_icp else 'NO'}")
+    print(f"[GTM DEBUG] Additional context found: {'YES' if additional_context else 'NO'}")
+
+    if not offer or not target_icp:
+        print("[GTM ERROR] Stage: Validating GTM context")
+        print("[GTM ERROR] Exception type: ValueError")
+        print("[GTM ERROR] Message: Saved onboarding context is incomplete.")
+        return jsonify({
+            "success": False,
+            "error": "Saved onboarding context is incomplete. Please re-complete the onboarding questions."
+        }), 400
 
     try:
+        print("[GTM DEBUG] Starting GTM engine...")
         opportunities = run_gtm_pipeline(offer, target_icp, additional_context)
+        print("[GTM DEBUG] Sending response to frontend")
+        print("[GTM DEBUG] Request completed successfully")
         return jsonify({
             "success": True,
             "count": len(opportunities),
@@ -306,9 +413,20 @@ def api_find_gtm_opportunities():
         })
     except Exception as e:
         err_str = str(e)
-        if "429" in err_str or "quota" in err_str.lower() or "too_many_requests" in err_str.lower():
-            return jsonify({"success": False, "error": "Gemini API quota exceeded. Please try again after the quota resets."}), 429
-        return jsonify({"success": False, "error": f"GTM Opportunity discovery failed: {str(e)}"}), 500
+        print(f"[GTM ERROR] Stage: GTM pipeline execution")
+        print(f"[GTM ERROR] Exception type: {type(e).__name__}")
+        print(f"[GTM ERROR] Message: {err_str}")
+        traceback.print_exc()
+
+        if "429" in err_str or "quota" in err_str.lower() or "RESOURCE_EXHAUSTED" in err_str:
+            print("[GTM ERROR] GEMINI QUOTA/RATE LIMIT")
+            return jsonify({
+                "success": False,
+                "error": "Gemini API quota exceeded. Please try again after the quota resets."
+            }), 429
+
+        return jsonify({"success": False, "error": f"GTM discovery failed: {str(e)}"}), 500
+
 
 @app.route("/api/gtm-opportunities", methods=["GET"])
 def api_get_gtm_opportunities():

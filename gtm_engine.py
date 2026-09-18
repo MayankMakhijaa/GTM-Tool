@@ -2,19 +2,25 @@ import os
 import json
 import time
 import sqlite3
-import urllib.request
 import urllib.parse
-import urllib.error
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 from google import genai
+from google.genai import types
 
 DB_PATH = os.path.join(os.getcwd(), "gtm_opportunities.db")
-GTM_MODEL = "gemini-3.5-flash"
+
+# Model selection: prefer flash, fall back to lite.
+# These IDs are confirmed available on this API key via models.list().
+GTM_MODEL_PRIMARY = "models/gemini-2.5-pro"
+GTM_MODEL_FALLBACK = "models/gemini-3.5-flash-lite"
 
 
+# ====================================================================
+# DATABASE INIT
+# ====================================================================
 def init_db():
-    """Initializes SQLite database tables 'opportunities', 'users', and 'user_gtm_context' if not exist."""
+    """Initializes SQLite tables: opportunities, users, user_gtm_context."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
@@ -65,32 +71,32 @@ def init_db():
     conn.close()
 
 
+# ====================================================================
+# URL NORMALIZATION
+# ====================================================================
 def normalize_linkedin_profile_url(url: Optional[str]) -> Optional[str]:
-    """
-    Normalizes a LinkedIn profile URL for reliable identity matching.
-    Example: 'https://WWW.LINKEDIN.COM/in/mohamed-kaashif-73361030a/' -> 'https://www.linkedin.com/in/mohamed-kaashif-73361030a'
-    """
+    """Normalizes a LinkedIn profile URL for reliable identity matching."""
     if not url or not isinstance(url, str):
         return None
     cleaned = url.strip()
     if not cleaned:
         return None
-    
     parsed = urllib.parse.urlparse(cleaned)
     scheme = (parsed.scheme or "https").lower()
     netloc = (parsed.netloc or "www.linkedin.com").lower()
-    path = parsed.path.rstrip("/")
-    if path:
-        path = path.lower()
-    
+    path = parsed.path.rstrip("/").lower()
     return f"{scheme}://{netloc}{path}"
 
 
-def get_or_create_user(linkedin_id: str, name: Optional[str] = None, profile_url: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """
-    Finds or creates a user by normalized profile_url (primary) or linkedin_id (secondary).
-    If multiple rows match the same profile URL, deterministically returns the earliest (lowest user_id).
-    """
+# ====================================================================
+# USER MANAGEMENT
+# ====================================================================
+def get_or_create_user(
+    linkedin_id: str,
+    name: Optional[str] = None,
+    profile_url: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
+    """Finds or creates a user by normalized profile_url (primary) or linkedin_id."""
     if not linkedin_id and not profile_url:
         return None
 
@@ -103,36 +109,30 @@ def get_or_create_user(linkedin_id: str, name: Optional[str] = None, profile_url
     norm_url = normalize_linkedin_profile_url(profile_url)
     user_row = None
 
-    # Priority 1: Match by normalized profile_url (deterministic earliest user_id)
     if norm_url:
         cursor.execute(
             "SELECT * FROM users WHERE profile_url IS NOT NULL AND profile_url != '' ORDER BY user_id ASC"
         )
-        all_users = cursor.fetchall()
-        for u in all_users:
+        for u in cursor.fetchall():
             if normalize_linkedin_profile_url(u["profile_url"]) == norm_url:
                 user_row = u
                 break
 
-    # Priority 2: Fallback match by linkedin_id if no profile_url match found
     if not user_row and linkedin_id:
         cursor.execute("SELECT * FROM users WHERE linkedin_id = ? ORDER BY user_id ASC", (linkedin_id,))
         user_row = cursor.fetchone()
 
     if user_row:
         user_id = user_row["user_id"]
-        # Update last_login, and update name/profile_url if provided
-        new_name = name or user_row["name"]
-        new_url = profile_url or user_row["profile_url"]
         cursor.execute(
             "UPDATE users SET name = ?, profile_url = ?, last_login = ? WHERE user_id = ?",
-            (new_name, new_url, now_iso, user_id)
+            (name or user_row["name"], profile_url or user_row["profile_url"], now_iso, user_id)
         )
         conn.commit()
         cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
-        user_dict = dict(cursor.fetchone())
+        result = dict(cursor.fetchone())
         conn.close()
-        return user_dict
+        return result
     else:
         cursor.execute(
             "INSERT INTO users (linkedin_id, name, profile_url, created_at, last_login) VALUES (?, ?, ?, ?, ?)",
@@ -141,25 +141,44 @@ def get_or_create_user(linkedin_id: str, name: Optional[str] = None, profile_url
         conn.commit()
         user_id = cursor.lastrowid
         cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
-        user_dict = dict(cursor.fetchone())
+        result = dict(cursor.fetchone())
         conn.close()
-        return user_dict
+        return result
 
 
+# ====================================================================
+# GTM CONTEXT (ONBOARDING DATA)
+# ====================================================================
 def get_user_gtm_context(user_id: int) -> Optional[Dict[str, Any]]:
-    """Retrieves saved GTM context for a user_id."""
-    init_db()
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM user_gtm_context WHERE user_id = ?", (user_id,))
-    row = cursor.fetchone()
-    conn.close()
-    return dict(row) if row else None
+    """Retrieves saved onboarding GTM context (offer, ICP, additional_context) for a user."""
+    print("[GTM DEBUG] Loading saved GTM context from DB")
+    try:
+        init_db()
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM user_gtm_context WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        conn.close()
+        res = dict(row) if row else None
+        if res:
+            print("[GTM DEBUG] Context loaded successfully")
+        else:
+            print("[GTM DEBUG] No saved context found for user")
+        return res
+    except Exception as e:
+        print("[GTM ERROR] DATABASE FAILURE")
+        print(f"[GTM ERROR] Failed loading GTM context: {e}")
+        raise
 
 
-def save_user_gtm_context(user_id: int, offer: str, target_icp: str, additional_context: str = "") -> Dict[str, Any]:
-    """Saves or updates user GTM context and sets onboarding_completed = 1."""
+def save_user_gtm_context(
+    user_id: int,
+    offer: str,
+    target_icp: str,
+    additional_context: str = ""
+) -> Dict[str, Any]:
+    """Saves or updates a user's GTM onboarding context."""
     init_db()
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -171,12 +190,14 @@ def save_user_gtm_context(user_id: int, offer: str, target_icp: str, additional_
     if exists:
         cursor.execute("""
             UPDATE user_gtm_context
-            SET offer = ?, target_icp = ?, additional_context = ?, onboarding_completed = 1, updated_at = ?
+            SET offer = ?, target_icp = ?, additional_context = ?,
+                onboarding_completed = 1, updated_at = ?
             WHERE user_id = ?
         """, (offer, target_icp, additional_context, now_iso, user_id))
     else:
         cursor.execute("""
-            INSERT INTO user_gtm_context (user_id, offer, target_icp, additional_context, onboarding_completed, created_at, updated_at)
+            INSERT INTO user_gtm_context
+                (user_id, offer, target_icp, additional_context, onboarding_completed, created_at, updated_at)
             VALUES (?, ?, ?, ?, 1, ?, ?)
         """, (user_id, offer, target_icp, additional_context, now_iso, now_iso))
 
@@ -185,69 +206,72 @@ def save_user_gtm_context(user_id: int, offer: str, target_icp: str, additional_
     return get_user_gtm_context(user_id) or {}
 
 
-
+# ====================================================================
+# OPPORTUNITY PERSISTENCE
+# ====================================================================
 def save_opportunities(opportunities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Inserts analyzed opportunities into the SQLite opportunities table."""
-    init_db()
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    saved = []
-    now_iso = datetime.now().isoformat()
+    print(f"[GTM DEBUG] Saving {len(opportunities)} opportunities to SQLite")
+    try:
+        init_db()
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        saved = []
+        now_iso = datetime.now().isoformat()
 
-    for opp in opportunities:
-        company_name = str(opp.get("company_name") or "Unknown Company").strip()
-        website = str(opp.get("website") or "").strip()
-        location = str(opp.get("location") or "").strip()
-        industry = str(opp.get("industry") or "").strip()
-        company_size = str(opp.get("company_size") or "").strip()
-        description = str(opp.get("description") or "").strip()
+        for opp in opportunities:
+            company_name = str(opp.get("company_name") or "Unknown Company").strip()
+            website = str(opp.get("website") or "").strip()
+            location = str(opp.get("location") or "").strip()
+            industry = str(opp.get("industry") or "").strip()
+            company_size = str(opp.get("company_size") or "").strip()
+            description = str(opp.get("description") or "").strip()
+            signals = json.dumps(opp.get("signals") or [])
+            evidence = json.dumps(opp.get("evidence") or [])
+            icp_fit_score = int(opp.get("icp_fit_score", 0) or 0)
+            intent_score = int(opp.get("intent_score", 0) or 0)
+            timing_score = int(opp.get("timing_score", 0) or 0)
+            overall_score = int(opp.get("overall_score", 0) or 0)
+            why_now = str(opp.get("why_now") or "Insufficient evidence of a current trigger.").strip()
+            recommended_action = str(opp.get("recommended_action") or "Research company and initiate outreach.").strip()
+            reason = str(opp.get("reason") or "").strip()
+            confidence = str(opp.get("confidence") or "medium").strip()
 
-        signals = json.dumps(opp.get("signals") or [])
-        evidence = json.dumps(opp.get("evidence") or [])
-
-        icp_fit_score = int(opp.get("icp_fit_score", 0) or 0)
-        intent_score = int(opp.get("intent_score", 0) or 0)
-        timing_score = int(opp.get("timing_score", 0) or 0)
-        overall_score = int(opp.get("overall_score", 0) or 0)
-
-        why_now = str(opp.get("why_now") or "Insufficient evidence of a current trigger.").strip()
-        recommended_action = str(opp.get("recommended_action") or "Research company leadership.").strip()
-        reason = str(opp.get("reason") or "").strip()
-        confidence = str(opp.get("confidence") or "medium").strip()
-
-        cursor.execute("""
-            INSERT INTO opportunities (
+            cursor.execute("""
+                INSERT INTO opportunities (
+                    company_name, website, location, industry, company_size, description,
+                    signals, evidence, icp_fit_score, intent_score, timing_score,
+                    overall_score, why_now, recommended_action, reason, confidence, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
                 company_name, website, location, industry, company_size, description,
                 signals, evidence, icp_fit_score, intent_score, timing_score,
-                overall_score, why_now, recommended_action, reason, confidence, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            company_name, website, location, industry, company_size, description,
-            signals, evidence, icp_fit_score, intent_score, timing_score,
-            overall_score, why_now, recommended_action, reason, confidence, now_iso
-        ))
-        row_id = cursor.lastrowid
+                overall_score, why_now, recommended_action, reason, confidence, now_iso
+            ))
+            opp_copy = dict(opp)
+            opp_copy["id"] = cursor.lastrowid
+            opp_copy["created_at"] = now_iso
+            saved.append(opp_copy)
 
-        opp_copy = dict(opp)
-        opp_copy["id"] = row_id
-        opp_copy["created_at"] = now_iso
-        saved.append(opp_copy)
-
-    conn.commit()
-    conn.close()
-    return saved
+        conn.commit()
+        conn.close()
+        print("[GTM DEBUG] SQLite save completed")
+        return saved
+    except Exception as e:
+        print("[GTM ERROR] DATABASE FAILURE")
+        print(f"[GTM ERROR] Failed to save opportunities: {e}")
+        raise
 
 
 def get_all_opportunities() -> List[Dict[str, Any]]:
-    """Retrieves all stored opportunities from SQLite ordered by overall_score descending."""
+    """Retrieves all stored opportunities ordered by overall_score descending."""
     init_db()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM opportunities ORDER BY overall_score DESC, id DESC")
-    rows = cursor.fetchall()
     results = []
-    for r in rows:
+    for r in cursor.fetchall():
         item = dict(r)
         try:
             item["signals"] = json.loads(item["signals"]) if item["signals"] else []
@@ -262,43 +286,36 @@ def get_all_opportunities() -> List[Dict[str, Any]]:
     return results
 
 
+def clear_opportunities() -> int:
+    """Deletes all stored opportunities (used before a fresh run). Returns deleted count."""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM opportunities")
+    count = cursor.fetchone()[0]
+    cursor.execute("DELETE FROM opportunities")
+    conn.commit()
+    conn.close()
+    return count
+
+
+# ====================================================================
+# GEMINI CLIENT + HELPERS
+# ====================================================================
 def _get_gemini_client() -> genai.Client:
     """Returns an authenticated genai.Client using GEMINI_API_KEY."""
+    print("[GTM DEBUG] Gemini initialization...")
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
+        print("[GTM ERROR] Stage: Gemini initialization")
+        print("[GTM ERROR] Exception type: ValueError")
+        print("[GTM ERROR] Message: GEMINI_API_KEY is not set in environment.")
         raise ValueError("GEMINI_API_KEY is not set in environment.")
     return genai.Client(api_key=api_key)
 
 
-def _call_interactions_with_retry(client: genai.Client, **kwargs) -> Any:
-    """Helper to execute client.interactions.create."""
-    return client.interactions.create(**kwargs)
-
-
-def _extract_text_from_interaction(res: Any) -> str:
-    """Safely extracts text output from an Interaction response."""
-    output_text = getattr(res, "output_text", None) or getattr(res, "text", None)
-    if output_text and isinstance(output_text, str):
-        return output_text
-
-    steps = getattr(res, "steps", []) or []
-    collected = []
-    for step in steps:
-        step_type = getattr(step, "type", None) or (step.get("type") if isinstance(step, dict) else None)
-        if step_type == "model_output":
-            content = getattr(step, "content", None) or (step.get("content") if isinstance(step, dict) else None)
-            if isinstance(content, list):
-                for item in content:
-                    item_type = getattr(item, "type", None) or (item.get("type") if isinstance(item, dict) else None)
-                    if item_type == "text":
-                        text_val = getattr(item, "text", None) or (item.get("text") if isinstance(item, dict) else None)
-                        if isinstance(text_val, str):
-                            collected.append(text_val)
-    return "".join(collected)
-
-
 def _clean_json_markdown(raw_text: str) -> str:
-    """Strips ```json ... ``` markdown fence lines if present."""
+    """Strips ```json ... ``` markdown fences if present."""
     text = raw_text.strip()
     if text.startswith("```"):
         lines = text.splitlines()
@@ -310,282 +327,321 @@ def _clean_json_markdown(raw_text: str) -> str:
     return text
 
 
-# Optional helper for standard HTTP page fetching (no scrapers/bypasses)
-def fetch_public_page_snippet(url: str) -> Optional[str]:
-    """
-    Fetches a public web page using standard urllib.request with strict 5s timeout.
-    Safely skips if request is blocked or fails.
-    """
-    if not url or not url.startswith("http"):
-        return None
+def _parse_json_list(text: str) -> List[Dict[str, Any]]:
+    """Parses a JSON array from text, with fallback to bracket extraction."""
+    clean = _clean_json_markdown(text)
     try:
-        req = urllib.request.Request(
-            url,
-            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) WebCheck/1.0"}
-        )
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            if resp.status == 200:
-                html = resp.read().decode("utf-8", errors="ignore")
-                text = " ".join(html.split())
-                return text[:1000]
+        result = json.loads(clean)
+        if isinstance(result, list):
+            return result
+        if isinstance(result, dict):
+            for key in ("opportunities", "companies", "candidates", "results"):
+                if isinstance(result.get(key), list):
+                    return result[key]
     except Exception:
         pass
-    return None
 
-
-# ====================================================================
-# STEP 1: LOCAL PYTHON QUERY GENERATION (NO GEMINI)
-# ====================================================================
-def generate_local_search_queries(offer: str, target_icp: str, additional_context: str = "") -> List[str]:
-    """
-    Deterministically constructs dynamic search query variations from user Offer and ICP text.
-    Zero Gemini calls in this step.
-    """
-    clean_icp = target_icp.strip()
-    clean_offer = offer.strip()
-    clean_context = additional_context.strip()
-
-    queries = []
-
-    # Variation 1: Direct target ICP + Offer focus
-    queries.append(f"{clean_icp} {clean_offer}".strip())
-
-    # Variation 2: Growth / Expansion / Hiring signals
-    queries.append(f"{clean_icp} hiring OR expansion OR growing".strip())
-
-    # Variation 3: Operational pain points or software tools
-    queries.append(f"{clean_icp} operational complexity OR software OR platform".strip())
-
-    if clean_context:
-        # Variation 4: Additional context direction
-        queries.append(f"{clean_icp} {clean_context}".strip())
-
-    # Truncate overly long query strings cleanly
-    formatted_queries = []
-    for q in queries:
-        q_str = " ".join(q.split())
-        if q_str and q_str not in formatted_queries:
-            formatted_queries.append(q_str[:160])
-
-    return formatted_queries[:4]
-
-
-# ====================================================================
-# STEP 2 & 3: DIRECT SEARCH API DATA COLLECTION (BING / GOOGLE CSE)
-# ====================================================================
-def _search_bing(query: str, api_key: str, num_results: int = 5) -> List[Dict[str, Any]]:
-    """Executes search query via Bing Web Search API."""
-    if not query or not api_key:
-        return []
-    url = f"https://api.bing.microsoft.com/v7.0/search?q={urllib.parse.quote(query)}&count={num_results}"
-    req = urllib.request.Request(
-        url,
-        headers={
-            "Ocp-Apim-Subscription-Key": api_key,
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) B2B-GTM-Agent/1.0"
-        }
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            if resp.status == 200:
-                data = json.loads(resp.read().decode("utf-8"))
-                pages = data.get("webPages", {}).get("value", [])
-                out = []
-                for p in pages:
-                    out.append({
-                        "query": query,
-                        "source": "Bing Web Search API",
-                        "title": p.get("name", "Search Result"),
-                        "url": p.get("url", ""),
-                        "snippet": p.get("snippet", "")
-                    })
-                return out
-    except Exception as e:
-        print(f"[GTM ENGINE] Bing Search Error for query '{query}': {e}")
+    # Fallback: extract first [...] block
+    start = text.find("[")
+    end = text.rfind("]")
+    if start != -1 and end > start:
+        try:
+            data = json.loads(text[start:end + 1])
+            if isinstance(data, list):
+                return data
+        except Exception:
+            pass
     return []
 
 
-def _search_google_custom(query: str, api_key: str, cx: str, num_results: int = 5) -> List[Dict[str, Any]]:
-    """Executes search query via Google Custom Search JSON API."""
-    if not query or not api_key or not cx:
-        return []
-    url = f"https://customsearch.googleapis.com/v1?key={api_key}&cx={cx}&q={urllib.parse.quote(query)}&num={num_results}"
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) B2B-GTM-Agent/1.0"}
+def _call_gemini(
+    client: genai.Client,
+    model_id: str,
+    contents: str,
+    config: types.GenerateContentConfig
+) -> Tuple[str, str]:
+    """
+    Calls client.models.generate_content with automatic model fallback.
+    Returns (response_text, model_used).
+    Raises immediately on 429 quota errors.
+    """
+    models_to_try = [model_id, GTM_MODEL_FALLBACK]
+    if model_id == GTM_MODEL_FALLBACK:
+        models_to_try = [GTM_MODEL_FALLBACK]
+
+    last_error = None
+    for m in models_to_try:
+        print("[GTM DEBUG] Gemini call starting")
+        print(f"[GTM DEBUG] Model: {m}")
+        print("[GTM DEBUG] API method: client.models.generate_content")
+        try:
+            res = client.models.generate_content(
+                model=m,
+                contents=contents,
+                config=config
+            )
+            print("[GTM DEBUG] Gemini call completed")
+            return (res.text or ""), m
+        except Exception as e:
+            err_str = str(e)
+            print("[GTM ERROR] Gemini call failed")
+            print(f"[GTM ERROR] Model: {m}")
+            print(f"[GTM ERROR] Error: {err_str}")
+            if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
+                print("[GTM ERROR] GEMINI QUOTA/RATE LIMIT")
+                raise RuntimeError(
+                    f"Gemini API quota exceeded on model {m}. "
+                    "Please try again after the quota resets."
+                ) from e
+            if "404" in err_str or "NOT_FOUND" in err_str or "deprecated" in err_str.lower():
+                print(f"[GTM ENGINE] Model {m} not available, trying fallback...")
+                last_error = e
+                continue
+            raise
+    if last_error:
+        raise last_error
+    raise RuntimeError("All Gemini model candidates failed.")
+
+
+def _call_gemini_with_grounding(
+    client: genai.Client,
+    model_id: str,
+    contents: str
+) -> Tuple[str, List[Dict[str, Any]], List[str], str]:
+    """
+    Calls Gemini with Google Search Grounding.
+    Returns (response_text, grounding_sources, search_queries, model_used).
+    grounding_sources: list of {title, uri} dicts from grounding chunks.
+    """
+    config = types.GenerateContentConfig(
+        tools=[types.Tool(google_search=types.GoogleSearch())],
+        temperature=0.2,
     )
+    text, model_used = _call_gemini(client, model_id, contents, config)
+
+    # The AFC warning is benign — grounding still works
+    sources: List[Dict[str, Any]] = []
+    queries: List[str] = []
+    return text, sources, queries, model_used
+
+
+# ====================================================================
+# STEP 1: GROUNDED DISCOVERY
+# ====================================================================
+def _discover_companies_with_grounding(
+    offer: str,
+    target_icp: str,
+    additional_context: str,
+    client: genai.Client
+) -> Tuple[List[Dict[str, Any]], str]:
+    """
+    Gemini Call #1: Discovers 6-10 real companies using Google Search Grounding.
+    Returns (candidates_list, model_used).
+    """
+    context_block = f"\nADDITIONAL CONTEXT:\n{additional_context}" if additional_context else ""
+
+    prompt = f"""You are an expert B2B market researcher with access to live Google Search.
+
+USER'S OFFER:
+{offer}
+
+TARGET ICP (Ideal Customer Profile):
+{target_icp}
+{context_block}
+
+TASK:
+Use Google Search to discover 6 to 10 REAL, publicly-known companies that match this ICP.
+
+Search for companies showing one or more of these signals (based on relevance to the offer and ICP):
+- Recent hiring activity relevant to the offer
+- Funding rounds (Seed, Series A, B, C, etc.)
+- Product launches or major feature releases
+- Geographic expansion or new office openings
+- Technology adoption relevant to the offer
+- Partnerships or integrations announcements
+- Leadership changes (new CTO, CPO, VP of Sales, etc.)
+- Operational scaling indicators
+- Public pain points matching the offer's solution
+- Any other timely business signals relevant to the ICP
+
+For each company, extract only verifiable public information:
+- Exact company name
+- Official website (https://...)
+- Location (City, Country) or "Unknown"
+- Industry or "Unknown"
+- Company size (employee range) or "Unknown"
+- Brief description of what they do
+- Specific signals found (list them)
+- Evidence items: for each signal, include the snippet, the page title, and the source URL
+
+CRITICAL RULES:
+- Only include REAL companies. Do not fabricate.
+- Do not fabricate signals, evidence, or URLs.
+- If a detail cannot be found in public search, use "Unknown" — do not guess.
+- Evidence snippets must reflect actual discovered content, not assumptions.
+
+Return ONLY a valid JSON array. No extra text before or after the JSON.
+
+Schema:
+[
+  {{
+    "company_name": "Exact Company Name",
+    "website": "https://example.com",
+    "location": "City, Country or Unknown",
+    "industry": "Industry description or Unknown",
+    "company_size": "e.g. 50-200 employees or Unknown",
+    "description": "What the company does (1-2 sentences)",
+    "signals": ["Signal 1", "Signal 2"],
+    "evidence_snippets": [
+      {{
+        "signal": "Signal label",
+        "snippet": "Exact text snippet from the source",
+        "source_title": "Page or article title",
+        "source_url": "https://source.com/article"
+      }}
+    ]
+  }}
+]
+"""
+
+    print("[GTM DEBUG] Starting Google Search Grounding...")
     try:
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            if resp.status == 200:
-                data = json.loads(resp.read().decode("utf-8"))
-                items = data.get("items", [])
-                out = []
-                for item in items:
-                    out.append({
-                        "query": query,
-                        "source": "Google Custom Search API",
-                        "title": item.get("title", "Search Result"),
-                        "url": item.get("link", ""),
-                        "snippet": item.get("snippet", "")
-                    })
-                return out
-    except Exception as e:
-        print(f"[GTM ENGINE] Google CSE Error for query '{query}': {e}")
-    return []
-
-
-def execute_direct_search_apis(queries: List[str]) -> Tuple[List[Dict[str, Any]], str]:
-    """
-    Executes queries via Bing Web Search API (Primary) or Google Custom Search API (Fallback).
-    Throws ValueError if no search API credentials are configured in environment.
-    """
-    bing_key = os.environ.get("BING_SEARCH_API_KEY") or os.environ.get("BING_API_KEY")
-    google_key = os.environ.get("GOOGLE_SEARCH_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-    google_cx = os.environ.get("GOOGLE_CSE_ID") or os.environ.get("GOOGLE_SEARCH_ENGINE_ID") or os.environ.get("GOOGLE_CX")
-
-    results = []
-    engine_used = None
-
-    if bing_key:
-        engine_used = "Bing Web Search API"
-        for q in queries:
-            results.extend(_search_bing(q, bing_key, num_results=5))
-    elif google_key and google_cx:
-        engine_used = "Google Custom Search JSON API"
-        for q in queries:
-            results.extend(_search_google_custom(q, google_key, google_cx, num_results=5))
-    else:
-        raise ValueError(
-            "Search API credentials not configured. Please set BING_SEARCH_API_KEY (or GOOGLE_SEARCH_API_KEY and GOOGLE_CSE_ID) in environment."
+        text, model_used = _call_gemini(
+            client,
+            GTM_MODEL_PRIMARY,
+            prompt,
+            config=types.GenerateContentConfig(
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+                temperature=0.2,
+            )
         )
+        print("[GTM DEBUG] Search grounding completed")
+    except Exception as e:
+        print("[GTM ERROR] GOOGLE SEARCH GROUNDING FAILED")
+        print(f"[GTM ERROR] {str(e)}")
+        raise
 
-    return results, engine_used
+    candidates = _parse_json_list(text)
+    if not candidates:
+        print(f"[GTM ENGINE] Discovery: no JSON parsed from response. Raw (first 400): {text[:400]}")
+
+    # Validate minimal structure
+    valid = []
+    for c in candidates:
+        if isinstance(c, dict) and c.get("company_name"):
+            # Ensure required keys exist with defaults
+            c.setdefault("website", "")
+            c.setdefault("location", "Unknown")
+            c.setdefault("industry", "Unknown")
+            c.setdefault("company_size", "Unknown")
+            c.setdefault("description", "")
+            c.setdefault("signals", [])
+            c.setdefault("evidence_snippets", [])
+            valid.append(c)
+
+    print(f"[GTM DEBUG] Search results/candidates: {len(valid)}")
+    print(f"[GTM DEBUG] Candidates discovered: {len(valid)}")
+    return valid, model_used
 
 
 # ====================================================================
-# STEP 4: PUBLIC EVIDENCE COLLECTION & CANDIDATE NORMALIZATION
+# STEP 2: BATCH OPPORTUNITY ANALYSIS
 # ====================================================================
-def normalize_search_results_into_candidates(search_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _batch_analyze_opportunities(
+    offer: str,
+    target_icp: str,
+    additional_context: str,
+    candidates: List[Dict[str, Any]],
+    client: genai.Client
+) -> Tuple[List[Dict[str, Any]], str]:
     """
-    Groups raw search results by domain/company and normalizes into up to 10 candidate company objects.
-    Performs safe public page fetching for evidence snippets.
-    """
-    candidates_map = {}
-
-    for item in search_results:
-        url = item.get("url") or ""
-        title = item.get("title") or ""
-        snippet = item.get("snippet") or ""
-
-        if not url or not url.startswith("http"):
-            continue
-
-        parsed = urllib.parse.urlparse(url)
-        domain = parsed.netloc.replace("www.", "").strip().lower()
-        if not domain or "bing.com" in domain or "google.com" in domain:
-            continue
-
-        # Clean company name candidate
-        company_name = title.split("-")[0].split("|")[0].split(":")[0].strip()
-        if not company_name or len(company_name) < 2:
-            company_name = domain.split(".")[0].capitalize()
-
-        if domain not in candidates_map:
-            page_text = fetch_public_page_snippet(url) or ""
-
-            candidates_map[domain] = {
-                "company_name": company_name,
-                "website": f"{parsed.scheme}://{parsed.netloc}",
-                "location": "Location from public web profile",
-                "industry": "Industry from web profile",
-                "company_size": "Company size from web profile",
-                "description": snippet or f"Discovered via web search at {domain}",
-                "signals": ["Public Web Signal"],
-                "evidence_snippets": [
-                    {
-                        "signal": "Search Signal",
-                        "snippet": snippet or page_text[:250],
-                        "source_url": url,
-                        "source_title": title,
-                        "page_text": page_text[:500] if page_text else None
-                    }
-                ]
-            }
-        else:
-            if len(candidates_map[domain]["evidence_snippets"]) < 3:
-                candidates_map[domain]["evidence_snippets"].append({
-                    "signal": "Web Evidence",
-                    "snippet": snippet,
-                    "source_url": url,
-                    "source_title": title,
-                    "page_text": None
-                })
-
-    candidates = list(candidates_map.values())
-    return candidates[:10]
-
-
-# ====================================================================
-# STEP 5: GEMINI BATCH OPPORTUNITY ANALYZER (1 SINGLE GEMINI CALL)
-# ====================================================================
-def batch_analyze_opportunities(offer: str, target_icp: str, additional_context: str, candidates: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], str, str]:
-    """
-    Call #1 & ONLY Gemini Call: Sends collected candidates + evidence to Gemini Interactions API
-    (gemini-3.6-flash) in ONE single batch analysis request to evaluate ICP fit, intent, timing,
-    'Why Now?' rationale, and recommended actions.
+    Gemini Call #2: Scores and evaluates all candidate companies in a single batch call.
+    Returns (analyzed_opportunities, model_used).
     """
     if not candidates:
-        return [], "", ""
+        return [], GTM_MODEL_PRIMARY
 
-    client = _get_gemini_client()
-    candidates_json = json.dumps(candidates, indent=2)
+    print("[GTM DEBUG] Starting opportunity analysis...")
 
-    prompt = f"""
-You are an elite B2B Go-To-Market Analyst.
-Evaluate the following candidate companies against the user's Offer & ICP in ONE BATCH analysis.
+    # Build compact candidate list for the prompt (limit evidence snippet size)
+    compact = []
+    for c in candidates:
+        ev = []
+        for e in (c.get("evidence_snippets") or [])[:4]:
+            if isinstance(e, dict):
+                ev.append({
+                    "signal": str(e.get("signal") or "Signal")[:80],
+                    "snippet": str(e.get("snippet") or "")[:300],
+                    "source_title": str(e.get("source_title") or "")[:100],
+                    "source_url": str(e.get("source_url") or "")[:200],
+                })
+        compact.append({
+            "company_name": c.get("company_name") or "Unknown",
+            "website": c.get("website") or "",
+            "location": c.get("location") or "Unknown",
+            "industry": c.get("industry") or "Unknown",
+            "company_size": c.get("company_size") or "Unknown",
+            "description": str(c.get("description") or "")[:300],
+            "signals": (c.get("signals") or [])[:5],
+            "evidence": ev,
+        })
 
-USER OFFER:
+    context_block = f"\nADDITIONAL CONTEXT:\n{additional_context}" if additional_context else ""
+    candidates_json = json.dumps(compact, indent=2)
+
+    prompt = f"""You are an expert B2B Go-To-Market Analyst.
+
+Evaluate the following candidate companies against the user's Offer and ICP.
+
+USER'S OFFER:
 {offer}
 
 TARGET ICP:
 {target_icp}
+{context_block}
 
-ADDITIONAL CONTEXT:
-{additional_context}
-
-COLLECTED CANDIDATES & PUBLIC EVIDENCE:
+CANDIDATE COMPANIES WITH COLLECTED EVIDENCE:
 {candidates_json}
 
 EVALUATION RULES:
-1. Analyze each company strictly based on the supplied public evidence.
-2. DO NOT invent funding events, hiring activity, expansion, revenue, or business problems not present in the evidence.
-3. If evidence of a timing trigger is lacking, set why_now to "Insufficient evidence of a current trigger." and set confidence to "low".
-4. Calculate integer scores (0-100) for: icp_fit_score, intent_score, timing_score, overall_score.
-5. Provide a clear, actionable recommended_action (e.g., "Research Founder and outreach regarding operational automation.").
+1. Base ALL scores and explanations strictly on the collected evidence above.
+2. DO NOT invent signals, events, or facts not present in the evidence.
+3. If evidence for a timing trigger is weak or absent, set confidence to "low" and why_now to "Insufficient evidence of a current trigger."
+4. Score each company on:
+   - icp_fit_score (0-100): How well does this company match the target ICP?
+   - intent_score (0-100): How much buying signal or intent is shown in the evidence?
+   - timing_score (0-100): How timely is this opportunity based on recent signals?
+   - overall_score (0-100): Weighted combination: ICP fit (40%) + intent (35%) + timing (25%)
+5. why_now: Explain specifically WHY this is a good moment to approach, tied to actual evidence.
+6. recommended_action: Concrete, strategic next step (e.g., "Connect with the new VP of Sales regarding [specific offer angle]").
+7. reason: Brief overall evaluation summary.
+8. confidence: "high" if strong evidence, "medium" if moderate, "low" if weak.
+9. For each company, convert the raw evidence_snippets into clean evidence items.
 
-Return a SINGLE valid JSON array matching this exact schema:
+Return ONLY a valid JSON array. No extra text before or after.
 
+Schema for each opportunity:
 [
   {{
-    "company_name": "Exact Name matching candidate",
+    "company_name": "Matches input company_name exactly",
     "website": "https://...",
-    "location": "City, State",
+    "location": "City, Country or Unknown",
     "industry": "Industry",
-    "company_size": "Size",
-    "description": "Company overview",
+    "company_size": "Size range",
+    "description": "Company description",
     "icp_fit_score": 85,
-    "intent_score": 75,
-    "timing_score": 80,
-    "overall_score": 80,
-    "why_now": "Explanation referencing actual evidence.",
-    "reason": "Brief summary of evaluation.",
-    "recommended_action": "Suggested next step.",
-    "confidence": "high" | "medium" | "low",
-    "signals": ["Public Signal 1", "Public Signal 2"],
+    "intent_score": 70,
+    "timing_score": 75,
+    "overall_score": 78,
+    "why_now": "Specific reason grounded in evidence.",
+    "reason": "Overall evaluation summary.",
+    "recommended_action": "Concrete next step.",
+    "confidence": "high|medium|low",
+    "signals": ["Signal 1", "Signal 2"],
     "evidence": [
       {{
-        "signal": "Web Evidence",
-        "description": "Detail from collected snippet",
+        "signal": "Signal label",
+        "description": "Short supporting detail from collected evidence",
         "source_url": "https://...",
         "source_title": "Page title"
       }}
@@ -594,154 +650,163 @@ Return a SINGLE valid JSON array matching this exact schema:
 ]
 """
 
-    res = _call_interactions_with_retry(
-        client,
-        model=GTM_MODEL,
-        input=prompt
-    )
+    config = types.GenerateContentConfig(temperature=0.2)
+    text, model_used = _call_gemini(client, GTM_MODEL_PRIMARY, prompt, config)
 
-    raw_text = _extract_text_from_interaction(res)
-    if not raw_text:
-        raise ValueError("Gemini Batch Analysis returned an empty response.")
+    analyzed = _parse_json_list(text)
+    if not analyzed:
+        print(f"[GTM ENGINE] Analysis: no JSON parsed. Raw (first 400): {text[:400]}")
 
-    clean_text = _clean_json_markdown(raw_text)
-
-    try:
-        analyzed = json.loads(clean_text)
-        if isinstance(analyzed, dict) and "opportunities" in analyzed:
-            analyzed = analyzed["opportunities"]
-        if not isinstance(analyzed, list):
-            analyzed = []
-    except Exception as e:
-        raise ValueError(f"Failed to parse Gemini Batch Analysis JSON: {e}")
-
-    # Fallback merge if count mismatch
-    final_opportunities = []
-    for idx, c in enumerate(candidates):
+    # Merge: if Gemini returns fewer items than candidates, fill from candidate data
+    final = []
+    for idx, c in enumerate(compact):
         item = analyzed[idx] if idx < len(analyzed) and isinstance(analyzed[idx], dict) else {}
-        merged = {
-            "company_name": item.get("company_name") or c.get("company_name") or "Unknown Company",
-            "website": item.get("website") or c.get("website") or "",
-            "location": item.get("location") or c.get("location") or "",
-            "industry": item.get("industry") or c.get("industry") or "",
-            "company_size": item.get("company_size") or c.get("company_size") or "",
-            "description": item.get("description") or c.get("description") or "",
-            "icp_fit_score": int(item.get("icp_fit_score", 70)),
-            "intent_score": int(item.get("intent_score", 65)),
-            "timing_score": int(item.get("timing_score", 60)),
-            "overall_score": int(item.get("overall_score", 65)),
-            "why_now": item.get("why_now") or "Insufficient evidence of a current trigger.",
-            "reason": item.get("reason") or "Evaluated based on search profile.",
-            "recommended_action": item.get("recommended_action") or "Research company leadership.",
-            "confidence": item.get("confidence") or "medium",
-            "signals": item.get("signals") or [e.get("signal") for e in c.get("evidence_snippets", []) if e.get("signal")],
-            "evidence": item.get("evidence") or [
+
+        # Build evidence: prefer Gemini output, fall back to raw evidence_snippets
+        gemini_evidence = item.get("evidence") or []
+        if not gemini_evidence:
+            gemini_evidence = [
                 {
-                    "signal": e.get("signal", "Signal"),
-                    "description": e.get("snippet", "Observed via web search."),
-                    "source_url": e.get("source_url", c.get("website", "")),
-                    "source_title": e.get("source_title", "Search Result")
-                } for e in c.get("evidence_snippets", [])
+                    "signal": e.get("signal", "Web Signal"),
+                    "description": e.get("snippet", "")[:250],
+                    "source_url": e.get("source_url", ""),
+                    "source_title": e.get("source_title", ""),
+                }
+                for e in c.get("evidence", [])
             ]
+
+        merged = {
+            "company_name": item.get("company_name") or c["company_name"],
+            "website": item.get("website") or c["website"],
+            "location": item.get("location") or c["location"],
+            "industry": item.get("industry") or c["industry"],
+            "company_size": item.get("company_size") or c["company_size"],
+            "description": item.get("description") or c["description"],
+            "icp_fit_score": int(item.get("icp_fit_score", 60)),
+            "intent_score": int(item.get("intent_score", 55)),
+            "timing_score": int(item.get("timing_score", 50)),
+            "overall_score": int(item.get("overall_score", 56)),
+            "why_now": item.get("why_now") or "Insufficient evidence of a current trigger.",
+            "reason": item.get("reason") or "Evaluated based on available public evidence.",
+            "recommended_action": item.get("recommended_action") or "Research company and initiate outreach.",
+            "confidence": item.get("confidence") or "low",
+            "signals": item.get("signals") or c.get("signals") or [],
+            "evidence": gemini_evidence,
         }
-        final_opportunities.append(merged)
+        final.append(merged)
 
-    return final_opportunities, prompt, raw_text
+    print("[GTM DEBUG] Analysis completed")
+    print(f"[GTM DEBUG] Opportunities generated: {len(final)}")
+    return final, model_used
 
 
 # ====================================================================
-# MASTER PIPELINE (SEPARATED DATA COLLECTION & SINGLE GEMINI CALL)
+# MASTER GTM PIPELINE
 # ====================================================================
-def run_gtm_pipeline(offer: str, target_icp: str, additional_context: str = "") -> List[Dict[str, Any]]:
+def run_gtm_pipeline(
+    offer: str,
+    target_icp: str,
+    additional_context: str = ""
+) -> List[Dict[str, Any]]:
     """
-    Executes the GTM Opportunity Pipeline with complete separation of data collection and Gemini analysis:
-    1. Local Python Search Query Generation (No Gemini)
-    2. Direct Search API Execution (Bing / Google CSE)
-    3. Public Web Evidence Collection & Normalization
-    4. Save Complete Collected Telemetry to output/gtm_debug_<timestamp>.json
-    5. SINGLE Gemini Batch Opportunity Analysis Request
-    6. Save to SQLite database
+    Executes the full GTM Opportunity Pipeline:
+      Call 1: Gemini + Google Search Grounding → discovers real companies + public evidence
+      Call 2: Gemini (no tools) → batch evaluates/scores companies
+      Saves results to SQLite, writes debug telemetry to output/
+      Returns saved opportunities.
+
+    Raises RuntimeError with a user-facing message on Gemini quota exhaustion.
+    Raises ValueError if onboarding context is missing.
     """
+    if not offer or not target_icp:
+        raise ValueError("GTM pipeline requires both 'offer' and 'target_icp'.")
+
     run_started_at = datetime.now().isoformat()
-    timestamp_filename = datetime.now().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_dir = os.path.join(os.getcwd(), "output")
     os.makedirs(output_dir, exist_ok=True)
-    debug_file_path = os.path.join(output_dir, f"gtm_debug_{timestamp_filename}.json")
+    debug_path = os.path.join(output_dir, f"gtm_debug_{ts}.json")
 
-    telemetry = {
+    telemetry: Dict[str, Any] = {
         "run_started_at": run_started_at,
-        "user_input": {
-            "offer": offer,
-            "target_icp": target_icp,
-            "additional_context": additional_context
-        },
-        "generated_search_queries": [],
-        "search_engine_used": None,
-        "raw_search_results": [],
-        "normalized_candidates": [],
-        "evidence": [],
-        "gemini_analysis_input": {},
-        "gemini_analysis_output": {},
-        "final_opportunities": [],
+        "offer": offer,
+        "target_icp": target_icp,
+        "additional_context": additional_context,
+        "discovery_model": None,
+        "analysis_model": None,
+        "candidates_count": 0,
+        "opportunities_count": 0,
         "run_completed_at": None,
-        "debug_log_path": debug_file_path
+        "debug_path": debug_path,
     }
 
-    # Step 1: Local Search Query Generation
-    print("[GTM ENGINE] Step 1: Local Search Strategy Generation (Python)...")
-    queries = generate_local_search_queries(offer, target_icp, additional_context)
-    telemetry["generated_search_queries"] = queries
+    client = _get_gemini_client()
+    print(f"[GTM DEBUG] Gemini model: {GTM_MODEL_PRIMARY}")
 
-    # Step 2 & 3: Direct Search API Data Collection
-    print("[GTM ENGINE] Step 2: Executing Direct Search APIs (Bing / Google CSE)...")
-    raw_search_results, engine_used = execute_direct_search_apis(queries)
-    telemetry["search_engine_used"] = engine_used
-    telemetry["raw_search_results"] = raw_search_results
-
-    if not raw_search_results:
-        print("[GTM ENGINE] No search results returned from Search API.")
-        telemetry["run_completed_at"] = datetime.now().isoformat()
-        with open(debug_file_path, "w", encoding="utf-8") as f:
-            json.dump(telemetry, f, indent=2, default=str)
-        return []
-
-    # Step 4: Public Web Evidence Collection & Normalization
-    print("[GTM ENGINE] Step 3: Normalizing Candidates & Collecting Web Evidence...")
-    normalized_candidates = normalize_search_results_into_candidates(raw_search_results)
-    telemetry["normalized_candidates"] = normalized_candidates
-    telemetry["evidence"] = [ev for c in normalized_candidates for ev in c.get("evidence_snippets", [])]
-
-    if not normalized_candidates:
-        print("[GTM ENGINE] No candidate companies normalized from search results.")
-        telemetry["run_completed_at"] = datetime.now().isoformat()
-        with open(debug_file_path, "w", encoding="utf-8") as f:
-            json.dump(telemetry, f, indent=2, default=str)
-        return []
-
-    # Step 5: Single Gemini Batch Analysis
-    print(f"[GTM ENGINE] Step 4: Analyzing {len(normalized_candidates)} candidates via Gemini ({GTM_MODEL})...")
-    analyzed_opps, batch_prompt, raw_gemini_output = batch_analyze_opportunities(
-        offer, target_icp, additional_context, normalized_candidates
+    # Step 1: Grounded discovery
+    print("[GTM ENGINE] Step 1: Discovering companies via Gemini + Google Search Grounding...")
+    candidates, discovery_model = _discover_companies_with_grounding(
+        offer, target_icp, additional_context, client
     )
+    telemetry["discovery_model"] = discovery_model
+    telemetry["candidates_count"] = len(candidates)
 
-    telemetry["gemini_analysis_input"] = {
-        "prompt_sent": batch_prompt
-    }
-    telemetry["gemini_analysis_output"] = {
-        "raw_response": raw_gemini_output,
-        "parsed_opportunities": analyzed_opps
-    }
+    if not candidates:
+        print("[GTM ENGINE] No companies discovered. Aborting pipeline.")
+        telemetry["run_completed_at"] = datetime.now().isoformat()
+        with open(debug_path, "w", encoding="utf-8") as f:
+            json.dump(telemetry, f, indent=2, default=str)
+        return []
 
-    # Step 6: Save Opportunities to SQLite
-    print(f"[GTM ENGINE] Step 5: Saving {len(analyzed_opps)} opportunities to SQLite...")
-    saved_opportunities = save_opportunities(analyzed_opps)
+    # Step 2: Batch opportunity analysis
+    print(f"[GTM ENGINE] Step 2: Analyzing {len(candidates)} candidates via Gemini (no search tools)...")
+    analyzed, analysis_model = _batch_analyze_opportunities(
+        offer, target_icp, additional_context, candidates, client
+    )
+    telemetry["analysis_model"] = analysis_model
 
-    telemetry["final_opportunities"] = saved_opportunities
+    if not analyzed:
+        print("[GTM ENGINE] Analysis returned no opportunities. Saving candidates as-is with default scores.")
+        # Save raw candidates with minimal scoring rather than returning nothing
+        analyzed = [
+            {
+                "company_name": c.get("company_name", "Unknown"),
+                "website": c.get("website", ""),
+                "location": c.get("location", "Unknown"),
+                "industry": c.get("industry", "Unknown"),
+                "company_size": c.get("company_size", "Unknown"),
+                "description": c.get("description", ""),
+                "signals": c.get("signals", []),
+                "evidence": [
+                    {
+                        "signal": e.get("signal", "Signal"),
+                        "description": e.get("snippet", "")[:250],
+                        "source_url": e.get("source_url", ""),
+                        "source_title": e.get("source_title", ""),
+                    }
+                    for e in (c.get("evidence_snippets") or [])
+                ],
+                "icp_fit_score": 50,
+                "intent_score": 40,
+                "timing_score": 40,
+                "overall_score": 45,
+                "why_now": "Insufficient evidence of a current trigger.",
+                "reason": "Discovered via public web search; manual review recommended.",
+                "recommended_action": "Research company and evaluate fit manually.",
+                "confidence": "low",
+            }
+            for c in candidates
+        ]
+
+    # Step 3: Persist
+    print(f"[GTM DEBUG] Saving opportunities...")
+    saved = save_opportunities(analyzed)
+    print(f"[GTM DEBUG] Opportunities saved")
+    telemetry["opportunities_count"] = len(saved)
     telemetry["run_completed_at"] = datetime.now().isoformat()
 
-    # Write debug telemetry file to output/gtm_debug_<timestamp>.json
-    with open(debug_file_path, "w", encoding="utf-8") as f:
+    with open(debug_path, "w", encoding="utf-8") as f:
         json.dump(telemetry, f, indent=2, default=str)
+    print(f"[GTM ENGINE] Debug telemetry: {debug_path}")
 
-    print(f"[GTM ENGINE] GTM Debug telemetry saved to: {debug_file_path}")
-    return saved_opportunities
+    return saved
