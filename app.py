@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, send_from_directory, Response, stream_with_context, session
+from flask import Flask, request, jsonify, render_template, send_from_directory, Response, stream_with_context, session, send_file
 from flask_cors import CORS
 import os
 import time
@@ -8,8 +8,9 @@ from dotenv import load_dotenv
 
 from parser import parse_pasted_comments
 from analyzer import analyze_comments
-from excel import generate_excel
+from excel import generate_excel, generate_excel_in_memory
 from historical import get_historical_email_leads, get_all_historical_leads
+import leads_db
 from profile_extractor import (
     extract_linkedin_profile,
     extract_linkedin_profile_generator,
@@ -162,7 +163,7 @@ def api_logout_linkedin_session():
 
 @app.route("/api/extract-profile-stream", methods=["GET"])
 def api_extract_profile_stream():
-    profile_url = str(request.args.get("profile_url") or "").strip()
+    profile_url = (request.args.get("profile_url") or "").strip()
     if not profile_url:
         return jsonify({"success": False, "error": "Please enter a valid LinkedIn profile URL."}), 400
 
@@ -186,7 +187,7 @@ def api_extract_profile():
     if not data or not isinstance(data, dict):
         return jsonify({"success": False, "error": "Please provide a valid JSON payload."}), 400
 
-    profile_url = str(data.get("profile_url") or "").strip()
+    profile_url = (data.get("profile_url") or "").strip()
     if not profile_url:
         return jsonify({"success": False, "error": "Please enter a valid LinkedIn profile URL."}), 400
 
@@ -209,8 +210,10 @@ def api_optimize_profile():
     if not extracted_profile:
         return jsonify({"success": False, "error": "Extracted profile data is missing."}), 400
 
+    gtm_context = data.get("gtm_context")
+
     try:
-        optimization_data = optimize_linkedin_profile(extracted_profile)
+        optimization_data = optimize_linkedin_profile(extracted_profile, gtm_context)
         return jsonify({"success": True, "data": optimization_data})
     except Exception as e:
         return jsonify({
@@ -236,15 +239,24 @@ def generate():
         return jsonify({"success": False, "error": "No valid comments could be extracted from the pasted text. Please check your copy-paste content."}), 400
         
     # 2. Analyze comments deterministically with Gemini
-    analyzed_comments = analyze_comments(parsed_comments)
+    try:
+        analyzed_comments = analyze_comments(parsed_comments)
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Gemini analysis failed: {str(e)}"}), 500
+
     if not isinstance(analyzed_comments, list) or len(analyzed_comments) == 0:
         return jsonify({"success": False, "error": "Lead analysis could not be completed. Please try again."}), 500
         
     # 3. Filter qualified leads
     qualified_leads: List[Dict[str, Any]] = [c for c in analyzed_comments if isinstance(c, dict) and c.get("lead") is True]
         
-    # 4. Generate Excel
-    filename = generate_excel(analyzed_comments)
+    # 4. Insert into database
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"success": False, "error": "Not authenticated."}), 401
+    
+    for lead_data in qualified_leads:
+        leads_db.insert_lead(user_id, lead_data)
     
     # Calculate average intent score
     scores = [c.get("lead_score", 0) for c in qualified_leads if isinstance(c.get("lead_score"), (int, float))]
@@ -261,16 +273,19 @@ def generate():
         "qualified_leads_count": len(qualified_leads),
         "avg_lead_intent": round(avg_score, 1),
         "processing_time": processing_time,
-        "leads": qualified_leads,
-        "download_url": f"/download/{filename}"
+        "leads": qualified_leads
     })
 
 @app.route("/api/email-leads", methods=["GET"])
 def get_email_leads():
     """
-    Returns deduplicated email-qualified leads consolidated from all Excel files in output/
+    Returns deduplicated email-qualified leads from the DB for the current user.
     """
-    leads = get_historical_email_leads()
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"success": False, "error": "Not authenticated."}), 401
+        
+    leads = leads_db.get_email_leads_db(user_id)
     return jsonify({
         "success": True,
         "count": len(leads),
@@ -280,15 +295,46 @@ def get_email_leads():
 @app.route("/api/history-leads", methods=["GET"])
 def get_history_leads():
     """
-    Returns ALL deduplicated historical qualified leads consolidated from all Excel files in output/
-    (regardless of email availability)
+    Returns historical qualified leads for the current user.
+    Supports optional from_date and to_date filters.
     """
-    leads = get_all_historical_leads()
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"success": False, "error": "Not authenticated."}), 401
+        
+    from_date = request.args.get("from_date")
+    to_date = request.args.get("to_date")
+    
+    leads = leads_db.get_history_leads_db(user_id, from_date, to_date)
     return jsonify({
         "success": True,
         "count": len(leads),
         "leads": leads
     })
+
+@app.route("/api/download-excel", methods=["GET"])
+def download_excel():
+    """
+    Generates and returns an Excel export for the user's leads, filtered by date.
+    """
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"success": False, "error": "Not authenticated."}), 401
+        
+    from_date = request.args.get("from_date")
+    to_date = request.args.get("to_date")
+    
+    leads = leads_db.get_history_leads_db(user_id, from_date, to_date)
+    
+    output = generate_excel_in_memory(leads)
+    
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=f"linkedin_leads_{timestamp}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 @app.route("/api/gtm-context", methods=["GET"])
 def api_get_gtm_context():

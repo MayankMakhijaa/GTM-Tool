@@ -1,0 +1,746 @@
+﻿diff --git a/templates/index.html b/templates/index.html
+index 9157206..0a05580 100644
+--- a/templates/index.html
++++ b/templates/index.html
+@@ -475,6 +475,141 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
+ </div>
+ </div>
+ 
++<!-- Editable Saved Context Summary Card -->
++<div id="po-gtm-context-card" class="bg-surface-card rounded-xl shadow-sm border border-border-default/60 flex flex-col gap-0 overflow-hidden">
++  <div class="flex items-center justify-between px-space-md pt-space-md pb-2 border-b border-border-default/50">
++    <div class="flex items-center gap-2">
++      <span class="material-symbols-outlined text-[20px] text-primary-container">tune</span>
++      <h2 class="font-headline-sm text-headline-sm text-text-primary">Your GTM Context</h2>
++    </div>
++    <span id="po-gtm-context-status" class="font-label-sm text-label-sm text-text-muted italic"></span>
++  </div>
++  <div class="p-space-md flex flex-col gap-space-md">
++    <div class="flex flex-col gap-1.5 gtm-field-group transition-opacity duration-200" id="po-gtm-field-group-offer">
++      <div class="flex items-center justify-between">
++        <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="po-gtm-ctx-offer">
++          <span class="material-symbols-outlined text-[16px]">sell</span>
++          <span>Offer</span>
++        </label>
++        <button class="ai-write-btn text-primary-container hover:text-primary font-label-sm text-[12px] flex items-center gap-1 transition-colors" type="button" data-field="Offer" data-target="po-gtm-ctx-offer" data-group="po-gtm-field-group-offer">
++          <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Write with AI
++        </button>
++      </div>
++      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="po-gtm-ctx-offer"></textarea>
++      
++      <div class="ai-panel hidden flex-col gap-3 mt-1 p-4 bg-surface-card border border-primary-container/40 rounded-xl shadow-md z-10 relative">
++        <div class="flex items-center gap-2 mb-1">
++          <span class="material-symbols-outlined text-[16px] text-primary-container">auto_awesome</span>
++          <span class="font-label-md text-text-primary font-semibold">Write with AI</span>
++        </div>
++        <textarea class="ai-instruction w-full min-h-[60px] p-2.5 rounded-lg bg-surface-canvas font-body-sm text-text-primary placeholder:text-text-muted border border-border-default focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none resize-y text-sm" placeholder="Describe what you want to say... (e.g. Make this sound more professional)"></textarea>
++        
++        <div class="ai-preview-container hidden p-3 bg-primary-fixed/20 rounded-lg border border-primary-container/20 mt-1">
++           <span class="font-label-sm text-text-secondary text-[11px] uppercase tracking-wider mb-1 block">Preview</span>
++           <p class="ai-preview-text font-body-sm text-text-primary whitespace-pre-wrap text-sm"></p>
++        </div>
++
++        <div class="flex items-center justify-between mt-1">
++           <button class="ai-cancel-btn text-text-secondary hover:text-text-primary font-label-sm text-sm transition-colors" type="button">Cancel</button>
++           <div class="flex items-center gap-2">
++             <button class="ai-rewrite-btn px-4 py-1.5 rounded-lg bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-sm transition-colors flex items-center gap-1.5" type="button">
++               <span class="material-symbols-outlined text-[16px]">refresh</span> <span class="btn-text">Rewrite</span>
++             </button>
++             <button class="ai-use-btn px-4 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-sm text-sm transition-colors font-medium flex items-center gap-1.5 shadow-sm hidden" type="button">
++               <span class="material-symbols-outlined text-[16px]">check</span> Use Answer
++             </button>
++           </div>
++        </div>
++      </div>
++    </div>
++    <div class="flex flex-col gap-1.5 gtm-field-group transition-opacity duration-200" id="po-gtm-field-group-icp">
++      <div class="flex items-center justify-between">
++        <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="po-gtm-ctx-icp">
++          <span class="material-symbols-outlined text-[16px]">target</span>
++          <span>ICP</span>
++        </label>
++        <button class="ai-write-btn text-primary-container hover:text-primary font-label-sm text-[12px] flex items-center gap-1 transition-colors" type="button" data-field="ICP" data-target="po-gtm-ctx-icp" data-group="po-gtm-field-group-icp">
++          <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Write with AI
++        </button>
++      </div>
++      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="po-gtm-ctx-icp"></textarea>
++      
++      <div class="ai-panel hidden flex-col gap-3 mt-1 p-4 bg-surface-card border border-primary-container/40 rounded-xl shadow-md z-10 relative">
++        <div class="flex items-center gap-2 mb-1">
++          <span class="material-symbols-outlined text-[16px] text-primary-container">auto_awesome</span>
++          <span class="font-label-md text-text-primary font-semibold">Write with AI</span>
++        </div>
++        <textarea class="ai-instruction w-full min-h-[60px] p-2.5 rounded-lg bg-surface-canvas font-body-sm text-text-primary placeholder:text-text-muted border border-border-default focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none resize-y text-sm" placeholder="Describe what you want to say... (e.g. Make this sound more specific)"></textarea>
++        
++        <div class="ai-preview-container hidden p-3 bg-primary-fixed/20 rounded-lg border border-primary-container/20 mt-1">
++           <span class="font-label-sm text-text-secondary text-[11px] uppercase tracking-wider mb-1 block">Preview</span>
++           <p class="ai-preview-text font-body-sm text-text-primary whitespace-pre-wrap text-sm"></p>
++        </div>
++
++        <div class="flex items-center justify-between mt-1">
++           <button class="ai-cancel-btn text-text-secondary hover:text-text-primary font-label-sm text-sm transition-colors" type="button">Cancel</button>
++           <div class="flex items-center gap-2">
++             <button class="ai-rewrite-btn px-4 py-1.5 rounded-lg bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-sm transition-colors flex items-center gap-1.5" type="button">
++               <span class="material-symbols-outlined text-[16px]">refresh</span> <span class="btn-text">Rewrite</span>
++             </button>
++             <button class="ai-use-btn px-4 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-sm text-sm transition-colors font-medium flex items-center gap-1.5 shadow-sm hidden" type="button">
++               <span class="material-symbols-outlined text-[16px]">check</span> Use Answer
++             </button>
++           </div>
++        </div>
++      </div>
++    </div>
++    <div class="flex flex-col gap-1.5 gtm-field-group transition-opacity duration-200" id="po-gtm-field-group-context">
++      <div class="flex items-center justify-between">
++        <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="po-gtm-ctx-context">
++          <span class="material-symbols-outlined text-[16px]">info</span>
++          <span>Additional Context</span>
++        </label>
++        <button class="ai-write-btn text-primary-container hover:text-primary font-label-sm text-[12px] flex items-center gap-1 transition-colors" type="button" data-field="Additional Context" data-target="po-gtm-ctx-context" data-group="po-gtm-field-group-context">
++          <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Write with AI
++        </button>
++      </div>
++      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="po-gtm-ctx-context"></textarea>
++      
++      <div class="ai-panel hidden flex-col gap-3 mt-1 p-4 bg-surface-card border border-primary-container/40 rounded-xl shadow-md z-10 relative">
++        <div class="flex items-center gap-2 mb-1">
++          <span class="material-symbols-outlined text-[16px] text-primary-container">auto_awesome</span>
++          <span class="font-label-md text-text-primary font-semibold">Write with AI</span>
++        </div>
++        <textarea class="ai-instruction w-full min-h-[60px] p-2.5 rounded-lg bg-surface-canvas font-body-sm text-text-primary placeholder:text-text-muted border border-border-default focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none resize-y text-sm" placeholder="Describe what you want to say..."></textarea>
++        
++        <div class="ai-preview-container hidden p-3 bg-primary-fixed/20 rounded-lg border border-primary-container/20 mt-1">
++           <span class="font-label-sm text-text-secondary text-[11px] uppercase tracking-wider mb-1 block">Preview</span>
++           <p class="ai-preview-text font-body-sm text-text-primary whitespace-pre-wrap text-sm"></p>
++        </div>
++
++        <div class="flex items-center justify-between mt-1">
++           <button class="ai-cancel-btn text-text-secondary hover:text-text-primary font-label-sm text-sm transition-colors" type="button">Cancel</button>
++           <div class="flex items-center gap-2">
++             <button class="ai-rewrite-btn px-4 py-1.5 rounded-lg bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-sm transition-colors flex items-center gap-1.5" type="button">
++               <span class="material-symbols-outlined text-[16px]">refresh</span> <span class="btn-text">Rewrite</span>
++             </button>
++             <button class="ai-use-btn px-4 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-sm text-sm transition-colors font-medium flex items-center gap-1.5 shadow-sm hidden" type="button">
++               <span class="material-symbols-outlined text-[16px]">check</span> Use Answer
++             </button>
++           </div>
++        </div>
++      </div>
++    </div>
++    
++    <div class="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-border-default/50 gap-4">
++      <span id="po-gtm-save-status" class="font-label-sm text-label-sm text-status-success-text opacity-0 transition-opacity whitespace-nowrap">Saved successfully!</span>
++      <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-end">
++        <button class="w-full sm:w-auto h-11 px-6 rounded-xl bg-surface-canvas hover:bg-surface-subtle text-text-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 border border-border-default/60 shrink-0 active:scale-[0.98]" id="po-gtm-save-btn" type="button">
++          <span class="material-symbols-outlined text-[18px]">save</span>
++          <span>Save Changes</span>
++        </button>
++        
++      </div>
++    </div>
++  </div>
++</div>
++
+ <!-- Extraction Input Terminal Card -->
+ <div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+ <div class="flex flex-col gap-space-xs">
+@@ -969,9 +1104,127 @@ C
+ <p class="font-body-md text-body-md text-text-secondary">Persistent historical email contacts consolidated across all Excel files in output/.</p>
+ </div>
+ 
++<!-- Email Composer -->
++<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-default/60">
++  <div class="flex items-center justify-between px-space-md pt-space-md pb-2 border-b border-border-default/50">
++    <div class="flex items-center gap-2">
++      <span class="material-symbols-outlined text-[20px] text-primary-container">mail</span>
++      <h2 class="font-headline-sm text-headline-sm text-text-primary">New Email</h2>
++    </div>
++  </div>
++  <div class="flex flex-col">
++    <div class="flex items-center border-b border-border-default/50 px-space-md py-3 gap-4">
++      <span class="font-label-md text-text-secondary w-12 shrink-0">From</span>
++      <span class="font-body-md text-text-primary">Not configured</span>
++    </div>
++    <div class="flex items-center border-b border-border-default/50 px-space-md py-3 gap-4">
++      <span class="font-label-md text-text-secondary w-12 shrink-0">To</span>
++      <span class="font-body-md text-text-primary" id="composer-to-text">Select leads from Email Contacts below</span>
++    </div>
++    <div class="flex items-center border-b border-border-default/50 px-space-md py-2.5 gap-4">
++      <span class="font-label-md text-text-secondary w-12 shrink-0">Subject</span>
++      <input type="text" id="composer-subject" class="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 font-body-md text-text-primary placeholder:text-text-muted" placeholder="Email subject..." value="Quick idea for {{company_name}}">
++    </div>
++    
++    <!-- Banner for Template Mode (N recipients) -->
++    <div id="composer-template-banner" class="hidden bg-surface-canvas/50 border-b border-border-default/50 px-space-md py-2 text-text-secondary text-[13px]">
++      <span class="font-semibold text-primary">Template mode</span> &mdash; <span id="composer-template-banner-count">0 recipients selected</span>. Personalized values will be applied separately for each recipient.
++    </div>
++
++    <!-- Toolbar -->
++    <div id="composer-toolbar" class="flex items-center gap-1.5 px-space-md py-2 bg-surface-canvas border-b border-border-default/50 flex-wrap">
++      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('bold', false, null)" title="Bold">
++        <span class="material-symbols-outlined text-[18px]">format_bold</span>
++      </button>
++      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('italic', false, null)" title="Italic">
++        <span class="material-symbols-outlined text-[18px]">format_italic</span>
++      </button>
++      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('underline', false, null)" title="Underline">
++        <span class="material-symbols-outlined text-[18px]">format_underlined</span>
++      </button>
++      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('strikeThrough', false, null)" title="Strikethrough">
++        <span class="material-symbols-outlined text-[18px]">format_strikethrough</span>
++      </button>
++      <div class="w-px h-5 bg-border-default mx-1"></div>
++      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('insertUnorderedList', false, null)" title="Bullet List">
++        <span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
++      </button>
++      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('insertOrderedList', false, null)" title="Numbered List">
++        <span class="material-symbols-outlined text-[18px]">format_list_numbered</span>
++      </button>
++      <div class="w-px h-5 bg-border-default mx-1"></div>
++      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('justifyLeft', false, null)" title="Align Left">
++        <span class="material-symbols-outlined text-[18px]">format_align_left</span>
++      </button>
++      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('justifyCenter', false, null)" title="Align Center">
++        <span class="material-symbols-outlined text-[18px]">format_align_center</span>
++      </button>
++      <div class="w-px h-5 bg-border-default mx-1"></div>
++      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="const url=prompt('Enter link URL:'); if(url) document.execCommand('createLink', false, url)" title="Insert Link">
++        <span class="material-symbols-outlined text-[18px]">link</span>
++      </button>
++      <label class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors cursor-pointer" title="Insert Image">
++        <span class="material-symbols-outlined text-[18px]">image</span>
++        <input type="file" id="composer-image-input" accept="image/*" class="hidden">
++      </label>
++      <label class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors cursor-pointer" title="Add Attachment">
++        <span class="material-symbols-outlined text-[18px]">attach_file</span>
++        <input type="file" id="composer-attachment-input" class="hidden">
++      </label>
++    </div>
++    
++    <!-- Rich Text Body -->
++    <div id="composer-body" class="p-space-md min-h-[250px] font-body-md text-text-primary focus:outline-none overflow-y-auto" contenteditable="true">
++      <p>Hi <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="first_name" contenteditable="false">[First Name]</span>,</p>
++      <br>
++      <p>Noticed <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="company_name" contenteditable="false">[Company Name]</span> has been scaling <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="business_need" contenteditable="false">[Business Need]</span> lately &mdash; congrats on the growth.</p>
++      <br>
++      <p>Usually at that stage, teams start missing leads simply because there aren't enough hours to follow up with everyone fast enough, and speed-to-lead can make a major difference in conversions.</p>
++      <br>
++      <p>We build AI agents that handle this automatically &mdash; responding to inbound leads in seconds, qualifying them, and booking calls straight into your calendar, 24/7.</p>
++      <br>
++      <p>One client added <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="result_metric" contenteditable="false">[Result Metric]</span> more booked calls in their first month without hiring anyone new.</p>
++      <br>
++      <p>Worth a quick look at how this could work for <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="company_name" contenteditable="false">[Company Name]</span>?</p>
++      <br>
++      <p><span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="sender_name" contenteditable="false">[Your Name]</span></p>
++      <p><span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="sender_role" contenteditable="false">[Your Role]</span></p>
++      <p><span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="sender_link" contenteditable="false">[Your Link]</span></p>
++    </div>
++
++    <!-- Preview Body (Read-only) -->
++    <div id="composer-preview" class="hidden flex-col">
++      <div class="flex items-center justify-between px-space-md py-2 bg-surface-canvas border-b border-border-default/50">
++        <span class="text-[13px] text-text-secondary">Previewing personalized email for <strong id="composer-preview-lead-name" class="text-text-primary"></strong></span>
++        <button type="button" id="btn-edit-template" class="text-[12px] font-semibold text-primary hover:text-primary-container transition-colors border border-primary/30 rounded px-2 py-1 bg-surface-card shadow-sm">
++          Edit Template
++        </button>
++      </div>
++      <div id="composer-preview-body" class="p-space-md min-h-[250px] font-body-md text-text-primary overflow-y-auto prose prose-sm max-w-none bg-surface-canvas/30"></div>
++    </div>
++    
++    <!-- Attachment display -->
++    <div id="composer-attachments-container" class="px-space-md pb-2 flex gap-2 flex-wrap empty:hidden"></div>
++
++    <!-- Footer -->
++    <div class="flex items-center justify-between px-space-md py-3 border-t border-border-default/50 bg-surface-canvas">
++      <div class="text-[11px] font-mono text-text-muted">
++        Variables: <span class="bg-surface-card px-1 py-0.5 rounded border border-border-default">{{first_name}}</span> 
++        <span class="bg-surface-card px-1 py-0.5 rounded border border-border-default">{{company_name}}</span> 
++        <span class="bg-surface-card px-1 py-0.5 rounded border border-border-default">{{business_need}}</span>
++        <span class="bg-surface-card px-1 py-0.5 rounded border border-border-default">{{role}}</span>
++      </div>
++      <button id="btn-simulate-send" type="button" class="px-6 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center gap-2 shadow-sm">
++        <span class="material-symbols-outlined text-[18px]">send</span>
++        <span>Send Email</span>
++      </button>
++    </div>
++  </div>
++</div>
++
+ <!-- Email Leads Table Section -->
+ <div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+-<div class="p-space-md bg-surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
++<div class="p-space-md bg-surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm border-b border-border-default/50">
+ <div class="flex flex-col">
+ <div class="flex items-center gap-space-sm">
+ <h2 class="font-headline-sm text-headline-sm text-text-primary">Email Contacts</h2>
+@@ -979,6 +1232,10 @@ C
+ </div>
+ <p class="font-body-sm text-body-sm text-text-secondary">Consolidated deduplicated leads with public emails from all saved Excel files.</p>
+ </div>
++<div class="flex items-center gap-2">
++<input type="checkbox" id="email-select-all" class="w-4 h-4 rounded border-border-default text-primary focus:ring-primary bg-surface-canvas cursor-pointer">
++<label for="email-select-all" class="font-label-md text-text-primary cursor-pointer" id="email-select-all-label">Select All (0 leads)</label>
++</div>
+ </div>
+ 
+ <!-- Tabular Data -->
+@@ -986,6 +1243,7 @@ C
+ <table class="w-full text-left border-collapse">
+ <thead>
+ <tr class="bg-surface-canvas text-text-secondary font-table-header text-table-header uppercase">
++<th class="py-3 px-4 w-[40px]" scope="col"></th>
+ <th class="py-3 px-4 w-[110px]" scope="col">Lead Score</th>
+ <th class="py-3 px-4 w-[180px]" scope="col">Name</th>
+ <th class="py-3 px-4 w-[170px]" scope="col">Company</th>
+@@ -996,7 +1254,7 @@ C
+ </thead>
+ <tbody id="email-table-body" class="divide-y-0 font-table-cell text-table-cell text-text-primary">
+ <tr>
+-<td colspan="6" class="py-12 text-center text-text-muted">
++<td colspan="7" class="py-12 text-center text-text-muted">
+ <div class="flex flex-col items-center justify-center gap-2">
+ <span class="material-symbols-outlined text-[36px] text-text-muted">mail_lock</span>
+ <span class="font-headline-sm text-headline-sm text-text-primary">No leads with email addresses yet.</span>
+@@ -1034,6 +1292,23 @@ C
+ </div>
+ <p class="font-body-sm text-body-sm text-text-secondary">Comprehensive deduplicated lead database read directly from output/*.xlsx files.</p>
+ </div>
++<div class="flex items-center gap-4 mt-4 sm:mt-0">
++  <div class="flex items-center gap-2">
++    <label class="font-label-sm text-text-secondary">From</label>
++    <input type="date" id="history-from-date" class="h-9 px-3 rounded-lg bg-surface-canvas border border-border-default font-body-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary-container">
++  </div>
++  <div class="flex items-center gap-2">
++    <label class="font-label-sm text-text-secondary">To</label>
++    <input type="date" id="history-to-date" class="h-9 px-3 rounded-lg bg-surface-canvas border border-border-default font-body-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary-container">
++  </div>
++  <button id="history-filter-btn" class="h-9 px-4 rounded-lg bg-surface-subtle border border-border-default text-text-primary font-label-md hover:bg-surface-canvas transition-colors">
++    Filter
++  </button>
++  <button id="history-download-excel-btn" class="h-9 px-4 rounded-lg bg-primary-container text-on-primary-container font-label-md hover:opacity-90 transition-opacity flex items-center gap-2">
++    <span class="material-symbols-outlined text-[18px]">download</span>
++    Download Excel
++  </button>
++</div>
+ </div>
+ 
+ <!-- Tabular Data -->
+@@ -1594,14 +1869,22 @@ C
+         checkLinkedInSessionStatus();
+       });
+     }
++    window.emailLeadsData = {};
+ 
+-    // Fetch historical email leads from /api/email-leads
++    // Fetch email qualified historical leads from /api/email-leads
+     async function fetchHistoricalEmailLeads() {
+       try {
+         const res = await fetch('/api/email-leads');
+         const data = await res.json();
+         if (res.ok && data.success) {
+-          renderEmailTable(data.leads || []);
++          const leads = data.leads || [];
++          window.emailLeadsData = {};
++          leads.forEach(l => {
++            if (l.lead_id) {
++              window.emailLeadsData[l.lead_id] = l;
++            }
++          });
++          renderEmailTable(leads);
+         }
+       } catch (err) {
+         console.error('Failed to fetch historical email leads:', err);
+@@ -1611,7 +1894,14 @@ C
+     // Fetch all historical leads from /api/history-leads
+     async function fetchHistoricalAllLeads() {
+       try {
+-        const res = await fetch('/api/history-leads');
++        const fromDate = document.getElementById('history-from-date')?.value || '';
++        const toDate = document.getElementById('history-to-date')?.value || '';
++        const params = new URLSearchParams();
++        if (fromDate) params.append('from_date', fromDate);
++        if (toDate) params.append('to_date', toDate);
++        
++        const url = `/api/history-leads${params.toString() ? '?' + params.toString() : ''}`;
++        const res = await fetch(url);
+         const data = await res.json();
+         if (res.ok && data.success) {
+           renderHistoryTable(data.leads || []);
+@@ -1620,6 +1910,21 @@ C
+         console.error('Failed to fetch all historical leads:', err);
+       }
+     }
++    
++    document.getElementById('history-filter-btn')?.addEventListener('click', () => {
++      fetchHistoricalAllLeads();
++    });
++    
++    document.getElementById('history-download-excel-btn')?.addEventListener('click', () => {
++      const fromDate = document.getElementById('history-from-date')?.value || '';
++      const toDate = document.getElementById('history-to-date')?.value || '';
++      const params = new URLSearchParams();
++      if (fromDate) params.append('from_date', fromDate);
++      if (toDate) params.append('to_date', toDate);
++      
++      const url = `/api/download-excel${params.toString() ? '?' + params.toString() : ''}`;
++      window.location.href = url;
++    });
+ 
+ 
+ 
+@@ -2101,7 +2406,7 @@ C
+           const res = await fetch('/api/optimize-profile', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+-            body: JSON.stringify({ profile: currentExtractedData })
++            body: JSON.stringify({ profile: currentExtractedData, gtm_context: savedGtmContext })
+           });
+           const result = await res.json();
+ 
+@@ -2509,6 +2814,9 @@ C
+           const email = lead.email.trim();
+ 
+           row.innerHTML = `
++            <td class="py-3.5 px-4 whitespace-nowrap">
++              <input type="checkbox" class="email-row-checkbox w-4 h-4 rounded border-border-default text-primary focus:ring-primary bg-surface-canvas cursor-pointer" data-lead-id="${lead.lead_id || ''}" data-email="${encodeURIComponent(email)}" data-firstname="${encodeURIComponent(lead.name ? lead.name.split(' ')[0] : '')}" data-fullname="${encodeURIComponent(name)}" data-company="${encodeURIComponent(company)}" data-role="${encodeURIComponent(lead.role || '')}" data-need="${encodeURIComponent(need)}" data-score="${score}" data-reason="${encodeURIComponent(reason)}">
++            </td>
+             <td class="py-3.5 px-4 whitespace-nowrap">
+               <span class="inline-flex items-center px-2 py-0.5 rounded-md font-label-md text-label-sm bg-status-score-high-bg text-status-score-high-text font-mono font-semibold">
+                 ${score}/100
+@@ -2547,7 +2855,7 @@ C
+       } else {
+         emailTableBody.innerHTML = `
+           <tr>
+-            <td colspan="6" class="py-12 text-center text-text-muted">
++            <td colspan="7" class="py-12 text-center text-text-muted">
+               <div class="flex flex-col items-center justify-center gap-2">
+                 <span class="material-symbols-outlined text-[36px] text-text-muted">mail_lock</span>
+                 <span class="font-headline-sm text-headline-sm text-text-primary">No leads with email addresses yet.</span>
+@@ -2557,6 +2865,9 @@ C
+           </tr>
+         `;
+       }
++      if (typeof updateComposerToField === 'function') {
++        updateComposerToField();
++      }
+     }
+ 
+     // Render History table (all historical qualified leads)
+@@ -2741,24 +3052,41 @@ C
+       const icpEl = document.getElementById('gtm-ctx-icp');
+       const contextEl = document.getElementById('gtm-ctx-context');
+       const statusEl = document.getElementById('gtm-context-status');
++      
++      const poOfferEl = document.getElementById('po-gtm-ctx-offer');
++      const poIcpEl = document.getElementById('po-gtm-ctx-icp');
++      const poContextEl = document.getElementById('po-gtm-ctx-context');
++      const poStatusEl = document.getElementById('po-gtm-context-status');
+ 
+       try {
+         const res = await fetch('/api/gtm-context');
+         const data = await res.json();
+         if (res.ok && data.success && data.data) {
++          savedGtmContext = data.data; // Keep in sync
+           if (offerEl) offerEl.value = data.data.offer || '';
+           if (icpEl) icpEl.value = data.data.target_icp || '';
+           if (contextEl) contextEl.value = data.data.additional_context || '';
+           if (statusEl) statusEl.textContent = 'Loaded from onboarding';
++          
++          if (poOfferEl) poOfferEl.value = data.data.offer || '';
++          if (poIcpEl) poIcpEl.value = data.data.target_icp || '';
++          if (poContextEl) poContextEl.value = data.data.additional_context || '';
++          if (poStatusEl) poStatusEl.textContent = 'Loaded from onboarding';
+         } else {
+           const msg = data.error || 'Context unavailable.';
+           if (offerEl) offerEl.value = '';
+           if (icpEl) icpEl.value = '';
+           if (contextEl) contextEl.value = '';
+           if (statusEl) statusEl.textContent = msg;
++          
++          if (poOfferEl) poOfferEl.value = '';
++          if (poIcpEl) poIcpEl.value = '';
++          if (poContextEl) poContextEl.value = '';
++          if (poStatusEl) poStatusEl.textContent = msg;
+         }
+       } catch (err) {
+         if (statusEl) statusEl.textContent = 'Could not load context.';
++        if (poStatusEl) poStatusEl.textContent = 'Could not load context.';
+       }
+     }
+ 
+@@ -3279,6 +3607,239 @@ C
+     });
+ 
+ 
++    // ===== Email Composer Logic =====
++    const composerImageInput = document.getElementById('composer-image-input');
++    const composerAttachmentInput = document.getElementById('composer-attachment-input');
++    const composerAttachmentsContainer = document.getElementById('composer-attachments-container');
++    const selectAllCheckbox = document.getElementById('email-select-all');
++    const selectAllLabel = document.getElementById('email-select-all-label');
++    const composerToText = document.getElementById('composer-to-text');
++    const btnSimulateSend = document.getElementById('btn-simulate-send');
++
++    if (composerImageInput) {
++      composerImageInput.addEventListener('change', (e) => {
++        const file = e.target.files[0];
++        if (file) {
++          const reader = new FileReader();
++          reader.onload = (ev) => {
++            document.execCommand('insertImage', false, ev.target.result);
++          };
++          reader.readAsDataURL(file);
++        }
++        composerImageInput.value = '';
++      });
++    }
++
++    let attachments = [];
++    if (composerAttachmentInput) {
++      composerAttachmentInput.addEventListener('change', (e) => {
++        const file = e.target.files[0];
++        if (file) {
++          attachments.push(file.name);
++          renderAttachments();
++        }
++        composerAttachmentInput.value = '';
++      });
++    }
++    
++    function renderAttachments() {
++      if (!composerAttachmentsContainer) return;
++      composerAttachmentsContainer.innerHTML = attachments.map((att, idx) => `
++        <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface-subtle border border-border-default font-label-sm text-text-primary text-[12px]">
++          <span class="material-symbols-outlined text-[14px] text-text-secondary">attachment</span>
++          <span>${att}</span>
++          <button type="button" class="material-symbols-outlined text-[14px] hover:text-status-error-text transition-colors" onclick="removeAttachment(${idx})">close</button>
++        </div>
++      `).join('');
++    }
++    
++    window.removeAttachment = function(idx) {
++      attachments.splice(idx, 1);
++      renderAttachments();
++    };
++
++    const composerToolbar = document.getElementById('composer-toolbar');
++    const composerBody = document.getElementById('composer-body');
++    const composerPreview = document.getElementById('composer-preview');
++    const composerTemplateBanner = document.getElementById('composer-template-banner');
++    const composerTemplateBannerCount = document.getElementById('composer-template-banner-count');
++    const btnEditTemplate = document.getElementById('btn-edit-template');
++    
++    let isForcedTemplateMode = false;
++    
++    if (btnEditTemplate) {
++      btnEditTemplate.addEventListener('click', () => {
++        isForcedTemplateMode = true;
++        const checkboxes = Array.from(emailTableBody.querySelectorAll('.email-row-checkbox')).filter(c => c.checked);
++        updateComposerMode(1, checkboxes);
++      });
++    }
++
++    const extractTemplateString = (html) => {
++      const tempDiv = document.createElement('div');
++      tempDiv.innerHTML = html;
++      const chips = tempDiv.querySelectorAll('.email-placeholder');
++      chips.forEach(chip => {
++        const key = chip.getAttribute('data-placeholder');
++        const textNode = document.createTextNode('{{' + key + '}}');
++        chip.parentNode.replaceChild(textNode, chip);
++      });
++      return tempDiv.innerHTML;
++    };
++
++    function generatePreviewHtmlForLead(leadCheckbox, subjectTpl, bodyTplHtml) {
++        const leadId = leadCheckbox.getAttribute('data-lead-id');
++        const dbLead = (window.emailLeadsData && leadId) ? window.emailLeadsData[leadId] : null;
++        
++        let data = {};
++        if (dbLead) {
++          data = {
++            first_name: dbLead.first_name || (dbLead.name ? dbLead.name.split(' ')[0] : ''),
++            full_name: dbLead.full_name || dbLead.name || '',
++            company_name: dbLead.company || '',
++            role: dbLead.role || '',
++            business_need: dbLead.business_need || '',
++            lead_score: dbLead.score || dbLead.lead_score || '',
++            reason: dbLead.reason || '',
++            email: dbLead.email || ''
++          };
++        } else {
++          // Fallback to DOM attributes if not in DB
++          data = {
++            first_name: decodeURIComponent(leadCheckbox.getAttribute('data-firstname') || ''),
++            full_name: decodeURIComponent(leadCheckbox.getAttribute('data-fullname') || ''),
++            company_name: decodeURIComponent(leadCheckbox.getAttribute('data-company') || ''),
++            role: decodeURIComponent(leadCheckbox.getAttribute('data-role') || ''),
++            business_need: decodeURIComponent(leadCheckbox.getAttribute('data-need') || ''),
++            lead_score: leadCheckbox.getAttribute('data-score') || '',
++            reason: decodeURIComponent(leadCheckbox.getAttribute('data-reason') || ''),
++            email: decodeURIComponent(leadCheckbox.getAttribute('data-email') || '')
++          };
++        }
++        
++        const resolveTemplate = (str) => {
++          return str.replace(/\{\{(first_name|full_name|company_name|role|business_need|lead_score|reason|email|result_metric|sender_name|sender_role|sender_link)\}\}/g, (match, key) => {
++            return data[key] !== undefined ? data[key] : '';
++          });
++        };
++        
++        const bodyStr = extractTemplateString(bodyTplHtml);
++        return {
++          subject: resolveTemplate(subjectTpl),
++          body: resolveTemplate(bodyStr),
++          name: data.full_name || data.first_name || 'Recipient'
++        };
++    }
++
++    function updateComposerMode(checkedCount, checkedBoxes) {
++      if (!composerToolbar || !composerBody || !composerPreview || !composerTemplateBanner) return;
++      
++      if (checkedCount !== 1) {
++        isForcedTemplateMode = false;
++      }
++      
++      if (checkedCount === 1 && !isForcedTemplateMode) {
++        // 1 Recipient: Preview Mode
++        composerToolbar.classList.add('hidden');
++        composerBody.classList.add('hidden');
++        composerTemplateBanner.classList.add('hidden');
++        composerPreview.classList.remove('hidden');
++        composerPreview.classList.add('flex');
++        
++        const previewData = generatePreviewHtmlForLead(
++          checkedBoxes[0], 
++          document.getElementById('composer-subject').value, 
++          composerBody.innerHTML
++        );
++        
++        document.getElementById('composer-preview-lead-name').textContent = previewData.name;
++        document.getElementById('composer-preview-body').innerHTML = previewData.body;
++      } else {
++        // 0 or N Recipients: Template Mode
++        composerToolbar.classList.remove('hidden');
++        composerBody.classList.remove('hidden');
++        composerPreview.classList.add('hidden');
++        composerPreview.classList.remove('flex');
++        
++        if (checkedCount > 1) {
++          composerTemplateBanner.classList.remove('hidden');
++          composerTemplateBannerCount.textContent = `${checkedCount} recipients selected`;
++        } else {
++          composerTemplateBanner.classList.add('hidden');
++        }
++      }
++    }
++
++    function updateComposerToField() {
++      if (!emailTableBody || !composerToText || !selectAllCheckbox || !selectAllLabel) return;
++      const checkboxes = Array.from(emailTableBody.querySelectorAll('.email-row-checkbox'));
++      const total = checkboxes.length;
++      if (total === 0) {
++        selectAllLabel.textContent = `Select All (0 leads)`;
++        composerToText.textContent = 'Select leads from Email Contacts below';
++        updateComposerMode(0, []);
++        return;
++      }
++      
++      const checked = checkboxes.filter(c => c.checked);
++      selectAllCheckbox.checked = (checked.length === total && total > 0);
++      selectAllCheckbox.indeterminate = (checked.length > 0 && checked.length < total);
++      
++      selectAllLabel.textContent = `Select All (${total} leads)`;
++      
++      if (checked.length === 0) {
++        composerToText.textContent = 'Select leads from Email Contacts below';
++      } else {
++        composerToText.textContent = `${checked.length} recipients selected`;
++      }
++      
++      updateComposerMode(checked.length, checked);
++    }
++
++    if (selectAllCheckbox) {
++      selectAllCheckbox.addEventListener('change', (e) => {
++        const checkboxes = emailTableBody.querySelectorAll('.email-row-checkbox');
++        checkboxes.forEach(c => c.checked = e.target.checked);
++        updateComposerToField();
++      });
++    }
++
++    if (emailTableBody) {
++      emailTableBody.addEventListener('change', (e) => {
++        if (e.target.classList.contains('email-row-checkbox')) {
++          updateComposerToField();
++        }
++      });
++    }
++    
++    if (btnSimulateSend) {
++      btnSimulateSend.addEventListener('click', () => {
++        const checkboxes = Array.from(emailTableBody.querySelectorAll('.email-row-checkbox')).filter(c => c.checked);
++        if (checkboxes.length === 0) {
++          alert('Please select at least one recipient from the Email Contacts table.');
++          return;
++        }
++        
++        const subjectTpl = document.getElementById('composer-subject').value;
++        const bodyTplHtml = document.getElementById('composer-body').innerHTML;
++        
++        const previewData = generatePreviewHtmlForLead(checkboxes[0], subjectTpl, bodyTplHtml);
++        
++        document.getElementById('email-preview-subject').textContent = previewData.subject;
++        document.getElementById('email-preview-body').innerHTML = previewData.body;
++        document.getElementById('email-preview-count').textContent = checkboxes.length - 1;
++        
++        const countContainer = document.getElementById('email-preview-count-container');
++        if (checkboxes.length > 1) {
++          countContainer.classList.remove('hidden');
++        } else {
++          countContainer.classList.add('hidden');
++        }
++        
++        document.getElementById('email-preview-modal').classList.remove('hidden');
++      });
++    }
++
+     // Initial load fetch
+     fetchHistoricalEmailLeads();
+     fetchHistoricalAllLeads();
+@@ -3286,5 +3847,34 @@ C
+     fetchGtmOpportunities();
+   })();
+ </script>
++
++<!-- Email Preview Modal (Simulated Send) -->
++<div id="email-preview-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-base/80 backdrop-blur-sm">
++  <div class="bg-surface-card rounded-2xl shadow-lg border border-border-default/60 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
++    <div class="p-space-md border-b border-border-default/50 flex items-center justify-between bg-surface-canvas">
++      <div class="flex items-center gap-2">
++        <span class="material-symbols-outlined text-[20px] text-status-success-text">check_circle</span>
++        <h3 class="font-headline-sm text-headline-sm text-text-primary">Simulated Sending</h3>
++      </div>
++      <button type="button" class="text-text-muted hover:text-text-primary transition-colors" onclick="document.getElementById('email-preview-modal').classList.add('hidden')">
++        <span class="material-symbols-outlined text-[20px]">close</span>
++      </button>
++    </div>
++    <div class="p-space-md flex flex-col gap-4 overflow-y-auto">
++      <p class="font-body-md text-text-secondary">
++        This is a preview of the personalized email generated for the first selected recipient.
++        <span id="email-preview-count-container" class="hidden text-status-score-medium-text font-medium"><br>+ <span id="email-preview-count">0</span> additional personalized emails would be sent.</span>
++      </p>
++      <div class="border border-border-default/60 rounded-xl overflow-hidden">
++        <div class="bg-surface-canvas px-4 py-2 border-b border-border-default/50 font-label-md text-text-secondary">Subject: <span id="email-preview-subject" class="text-text-primary font-medium"></span></div>
++        <div id="email-preview-body" class="p-4 bg-surface-card font-body-md text-text-primary prose prose-sm max-w-none"></div>
++      </div>
++    </div>
++    <div class="p-space-md border-t border-border-default/50 flex justify-end bg-surface-canvas">
++      <button type="button" class="px-6 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all shadow-sm" onclick="document.getElementById('email-preview-modal').classList.add('hidden')">Got it</button>
++    </div>
++  </div>
++</div>
++
+ </body>
+ </html>
+\ No newline at end of file

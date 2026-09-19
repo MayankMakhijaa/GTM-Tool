@@ -94,6 +94,12 @@ def strip_markdown(text: str) -> str:
 
 def clean_fallback_name(raw: str) -> str:
     text = strip_markdown(raw)
+
+    # Strip "View [Name]'s hiring graphic/profile"
+    match = re.search(r"^View\s+(.*?)(?:['’]s?)\s+(?:hiring graphic|profile|image|open to work graphic)$", text, re.IGNORECASE)
+    if match:
+        text = match.group(1)
+
     text = re.sub(r"Author$", "", text, flags=re.IGNORECASE)
     text = re.sub(r"^Author\s+", "", text, flags=re.IGNORECASE)
     text = re.sub(r"•?\s*(?:1st|2nd|3rd\+?|Verified|Premium|svg)\s*•?", " ", text, flags=re.IGNORECASE)

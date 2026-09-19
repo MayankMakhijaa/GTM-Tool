@@ -67,6 +67,30 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users (user_id)
         );
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS leads (
+            lead_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            score INTEGER,
+            first_name TEXT,
+            last_name TEXT,
+            full_name TEXT,
+            company TEXT,
+            role TEXT,
+            intent TEXT,
+            business_need TEXT,
+            reason TEXT,
+            lead_type TEXT,
+            email TEXT,
+            phone_no TEXT,
+            linkedin_profile TEXT,
+            source TEXT,
+            source_reference TEXT,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (user_id)
+        );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_leads_user_id ON leads(user_id);")
     conn.commit()
     conn.close()
 

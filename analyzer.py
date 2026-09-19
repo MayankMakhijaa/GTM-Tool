@@ -6,13 +6,11 @@ from google.genai import types
 
 def analyze_comments(comments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Use Gemini to analyze a list of structured LinkedIn comments and extract qualified leads deterministically.
-    Uses temperature=0.0 and explicit qualification rules to guarantee consistent filtering across runs.
+    Use Gemini 3.5 Flash Lite with Google Search Grounding to verify and qualify LinkedIn leads.
     """
     if not comments:
         return []
 
-    # Separate candidates from obvious low-value items/post-author replies
     evaluated_results: List[Dict[str, Any]] = []
     candidates_to_analyze: List[Dict[str, Any]] = []
 
@@ -22,6 +20,8 @@ def analyze_comments(comments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         comment_text = str(item.get("comment", "") or "").strip()
         is_author_reply = bool(item.get("is_author_reply", False))
         is_candidate = bool(item.get("is_candidate", True))
+        entity_type = str(item.get("entity_type", "person"))
+        profile_url = item.get("profile_url")
 
         if is_author_reply:
             evaluated_results.append({
@@ -38,7 +38,7 @@ def analyze_comments(comments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "lead_type": None,
                 "email": None,
                 "phone": None,
-                "profile_url": None
+                "profile_url": profile_url
             })
         elif not is_candidate:
             evaluated_results.append({
@@ -55,13 +55,15 @@ def analyze_comments(comments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "lead_type": None,
                 "email": None,
                 "phone": None,
-                "profile_url": None
+                "profile_url": profile_url
             })
         else:
             candidates_to_analyze.append({
                 "name": name,
                 "headline": headline or None,
-                "comment": comment_text
+                "comment": comment_text,
+                "entity_type": entity_type,
+                "profile_url": profile_url
             })
 
     if not candidates_to_analyze:
@@ -82,15 +84,13 @@ def analyze_comments(comments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "reason": "GEMINI_API_KEY missing",
                 "lead_type": None,
                 "email": None,
-                "phone": None,
-                "profile_url": None
+                "phone": None
             })
         return evaluated_results
 
     try:
         client = genai.Client(api_key=api_key)
         
-        # Sort candidates deterministically before invoking Gemini
         sorted_candidates = sorted(
             candidates_to_analyze,
             key=lambda x: (str(x.get("name", "")).lower(), str(x.get("comment", "")).lower())
@@ -99,51 +99,62 @@ def analyze_comments(comments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         input_data = json.dumps(sorted_candidates)
         
         prompt = f"""
-You are a deterministic B2B lead qualification system.
-Analyze the following structured list of LinkedIn commenter records (containing name, headline, and comment).
+You are a deterministic B2B lead qualification and enrichment system.
+Analyze the following structured list of LinkedIn commenter candidates.
+
+You have access to Google Search. You MUST use it to enrich and verify publicly available information for these candidates based on their name, headline, and comment context.
+
+ENRICHMENT & VERIFICATION RULES:
+1. Verify the person/company identity matches the candidate. Do not treat a random same-name search result as the candidate.
+2. If `entity_type` is "company", do not create a normal person lead unless the comment explicitly indicates buying intent from that company.
+3. Fill missing company/role information only when strong public evidence exists.
+4. Find a publicly listed business email/phone ONLY when the public source clearly associates it with that person/business. NEVER guess or fabricate missing information. Return null if unavailable.
+5. Provide the supporting public source URL in `source_reference`.
 
 DETERMINISTIC QUALIFICATION MATRIX:
 1. QUALIFIED LEAD (`lead`: true):
    - Comment explicitly seeks solutions, software, vendor services, demos, pricing, or implementation details.
-   - Comment describes an active business challenge, workflow pain point, or implementation project.
-   - Commenter role/headline indicates a decision maker, evaluator, or buyer (Founder, CEO, CTO, VP, Director, Lead, Manager, Consultant) AND comment is non-generic.
-   - For QUALIFIED leads:
+   - Comment describes an active business challenge or implementation project.
+   - Commenter role/headline indicates a decision maker, evaluator, or buyer AND comment is non-generic.
+   - Outputs:
      * `lead_score`: 70 to 100
      * `intent`: "High" or "Medium"
      * `lead_type`: "Decision Maker", "Evaluator", or "Prospect"
-     * `business_need`: Concise description of stated or implied business problem
-     * `company`: Extract company name ONLY if explicitly identifiable in the headline/comment. Otherwise null.
-     * `role`: Extract job title/role ONLY if explicitly identifiable in the headline/comment. Otherwise null.
-     * `reason`: Concise justification based on comment/headline text
+     * `first_name` / `last_name`: Derived from verified full name.
+     * `name` (full_name): Verified candidate name.
+     * `company`: Verified company, otherwise null.
+     * `role`: Verified role/headline, otherwise null.
+     * `business_need`: Inferred only from comment + supporting evidence.
+     * `reason`: Concise explanation of why this is a qualified lead.
+     * `email` / `phone`: ONLY if publicly and confidently associated.
+     * `source`: "linkedin_post_web_enriched"
+     * `source_reference`: URL of the public source evidence.
 
 2. DISQUALIFIED COMMENT (`lead`: false):
-   - Generic praise or politeness (e.g. "Great post", "Agreed", "Thanks for sharing", "Awesome").
+   - Generic praise or politeness ("Great post", "Agreed").
    - Personal anecdotes without business software/service intent.
-   - For DISQUALIFIED comments:
+   - Outputs:
      * `lead_score`: 0 to 39
      * `intent`: "Low" or null
      * `lead_type`: null
      * `business_need`: null
-     * `company`: Extract ONLY if present in headline/comment, else null.
-     * `role`: Extract ONLY if present in headline/comment, else null.
      * `reason`: "Generic or non-buying comment"
+     * `source`: "linkedin_post"
 
-CRITICAL INSTRUCTIONS:
-- NEVER guess, invent, or construct an email address or phone number. Return null for email and phone.
-- Return null for profile_url.
-- Return a JSON array containing analyzed objects for ALL input items in the EXACT SAME ORDER as provided.
+CRITICAL: Return a JSON array containing the analyzed objects for ALL input items in the EXACT SAME ORDER as provided. Do not invent a profile_url, use the provided one or null.
 
 Input candidates:
 {input_data}
 """
 
         response = client.models.generate_content(
-            model='gemini-3.5-flash-lite',
+            model='gemini-3.7-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.0,
                 seed=42,
                 response_mime_type="application/json",
+                tools=[types.Tool(google_search=types.GoogleSearch())]
             ),
         )
         
@@ -156,30 +167,19 @@ Input candidates:
             for i, item in enumerate(analyzed_data):
                 if isinstance(item, dict):
                     cand = sorted_candidates[i] if i < len(sorted_candidates) else {}
-                    item["name"] = cand.get("name") or item.get("name") or "Unknown"
-                    item["headline"] = cand.get("headline") or item.get("headline")
+                    item["name"] = item.get("name") or cand.get("name") or "Unknown"
+                    item["first_name"] = item.get("first_name") or (item["name"].split(" ")[0] if item["name"] else None)
+                    item["last_name"] = item.get("last_name") or (" ".join(item["name"].split(" ")[1:]) if item["name"] and " " in item["name"] else None)
+                    item["headline"] = item.get("headline") or cand.get("headline")
                     item["email"] = item.get("email") or None
                     item["phone"] = item.get("phone") or None
-                    item["profile_url"] = None
+                    item["profile_url"] = cand.get("profile_url") or None
+                    item["source"] = item.get("source") or "linkedin_post_web_enriched"
+                    item["source_reference"] = item.get("source_reference") or None
                     evaluated_results.append(item)
 
         return evaluated_results
     except Exception as e:
         print(f"Gemini Analysis Error: {str(e)}")
-        for cand in candidates_to_analyze:
-            evaluated_results.append({
-                **cand,
-                "lead": False,
-                "lead_score": 0,
-                "company": None,
-                "role": None,
-                "business_need": None,
-                "intent": None,
-                "reason": "Analysis error",
-                "lead_type": None,
-                "email": None,
-                "phone": None,
-                "profile_url": None
-            })
-        return evaluated_results
+        raise e
 

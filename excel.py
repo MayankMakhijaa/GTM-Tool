@@ -52,3 +52,38 @@ def generate_excel(analyzed_comments: List[Dict[str, Any]]) -> str:
         df_meta.to_excel(writer, sheet_name="Run Metadata", index=False)
         
     return filename
+
+import io
+
+def generate_excel_in_memory(leads: List[Dict[str, Any]]) -> io.BytesIO:
+    """
+    Generate an Excel file in memory with the given leads.
+    """
+    now = datetime.now().astimezone()
+    
+    # Define exact 11 columns for Qualified Leads
+    leads_keys = [
+        "score", "full_name", "company", "role", "intent",
+        "business_need", "reason", "lead_type", "email", "phone_no", "linkedin_profile"
+    ]
+    cols = [
+        "Score", "Person's Name", "Company", "Role", "Intent",
+        "Business Need", "Reason", "Lead Type", "Email", "Phone No.", "LinkedIn Profile"
+    ]
+    
+    if leads:
+        df_leads = pd.DataFrame(leads)
+        for key in leads_keys:
+            if key not in df_leads.columns:
+                df_leads[key] = None
+        df_leads = df_leads[leads_keys]  # type: ignore
+        df_leads.columns = cols
+    else:
+        df_leads = pd.DataFrame({c: [] for c in cols})
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df_leads.to_excel(writer, sheet_name="Qualified Leads", index=False)
+        
+    output.seek(0)
+    return output

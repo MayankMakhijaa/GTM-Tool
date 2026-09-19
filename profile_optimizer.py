@@ -1,12 +1,12 @@
 import os
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 from google import genai
 from google.genai import types
 
 
-def optimize_linkedin_profile(extracted_profile: Dict[str, Any]) -> Dict[str, Any]:
+def optimize_linkedin_profile(extracted_profile: Dict[str, Any], gtm_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     Use Gemini to evaluate the extracted LinkedIn profile and generate structured lead-generation recommendations.
     Uses a single structured request for cost control and fast evaluation.
@@ -19,9 +19,15 @@ def optimize_linkedin_profile(extracted_profile: Dict[str, Any]) -> Dict[str, An
 
     profile_data = extracted_profile.get("profile", extracted_profile)
     profile_json = json.dumps(profile_data, indent=2)
+    gtm_context_json = json.dumps(gtm_context, indent=2) if gtm_context else "None provided."
 
     prompt = f"""
 You are an elite executive LinkedIn lead-generation strategist and professional positioning consultant.
+
+GTM STRATEGY CONTEXT:
+The user is targeting the following offer and audience:
+{gtm_context_json}
+Ensure the optimization strongly aligns with this Go-To-Market strategy.
 
 MASTER OPTIMIZATION OBJECTIVE:
 Your primary objective is to optimize the user's LinkedIn profile to generate more relevant LEADS, BUSINESS OPPORTUNITIES, HIGH-VALUE CONVERSATIONS, and PROFESSIONAL OPPORTUNITIES.
