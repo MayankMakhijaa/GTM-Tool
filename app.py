@@ -24,7 +24,8 @@ from gtm_engine import (
     get_all_opportunities,
     get_or_create_user,
     get_user_gtm_context,
-    save_user_gtm_context
+    save_user_gtm_context,
+    rewrite_gtm_context_field
 )
 
 load_dotenv()
@@ -327,6 +328,23 @@ def api_get_gtm_context():
             "additional_context": ctx.get("additional_context", ""),
         }
     })
+
+
+@app.route("/api/gtm-context/write-with-ai", methods=["POST"])
+def api_write_with_ai():
+    data = request.get_json() or {}
+    field = data.get("field")
+    current_value = data.get("current_value")
+    instruction = data.get("instruction")
+    
+    if not field or not instruction:
+        return jsonify({"success": False, "error": "Field and instruction are required."}), 400
+        
+    try:
+        enriched_text = rewrite_gtm_context_field(field, current_value or "", instruction)
+        return jsonify({"success": True, "generated_text": enriched_text})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route("/api/gtm-opportunities/find", methods=["POST"])

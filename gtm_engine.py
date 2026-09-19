@@ -810,3 +810,31 @@ def run_gtm_pipeline(
     print(f"[GTM ENGINE] Debug telemetry: {debug_path}")
 
     return saved
+
+
+def rewrite_gtm_context_field(field_name: str, current_value: str, instruction: str) -> str:
+    """
+    Uses Gemini to rewrite a specific GTM context field based on user instruction.
+    """
+    client = _get_gemini_client()
+    
+    prompt = f"""You are an expert B2B Go-To-Market Consultant.
+
+The user is defining their GTM Context and wants to improve a specific field.
+Field being improved: {field_name}
+Current Value: {current_value}
+
+User's Instruction for Improvement:
+{instruction}
+
+TASK:
+Rewrite or enrich the current value based ON THE USER'S INSTRUCTION.
+- If the field is "Offer", focus on improving the company's offer description.
+- If the field is "ICP", focus on improving the description of the ideal customer profile.
+- If the field is "Additional Context", focus on improving the supporting business/context information.
+- Preserve the user's actual meaning. Do not invent unrelated business information.
+- Return ONLY the newly rewritten text, with no conversational filler, markdown formatting, or quotes.
+"""
+    config = types.GenerateContentConfig(temperature=0.7)
+    text, model_used = _call_gemini(client, GTM_MODEL_PRIMARY, prompt, config)
+    return text.strip()
