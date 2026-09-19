@@ -33,6 +33,10 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "linkedin_lead_gen_secret_key_2026")
 CORS(app)
 
+@app.before_request
+def debug_request_logger():
+    print(f"[FLASK REQUEST DEBUG] {request.method} {request.path}", flush=True)
+
 OUTPUT_DIR = os.path.join(os.getcwd(), "output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 SESSION_TIMEOUT_SECONDS = 1800  # 30 minutes
@@ -332,6 +336,7 @@ def api_find_gtm_opportunities():
     The frontend sends an empty body {}.
     The backend resolves the authenticated user and loads offer/ICP/context from the database.
     """
+    print("[GTM API DEBUG] POST /api/gtm-opportunities/find RECEIVED", flush=True)
     import traceback
     print("\n[GTM DEBUG] Find Opportunities request received")
 
@@ -403,7 +408,9 @@ def api_find_gtm_opportunities():
 
     try:
         print("[GTM DEBUG] Starting GTM engine...")
+        print("[GTM API DEBUG] About to call GTM pipeline", flush=True)
         opportunities = run_gtm_pipeline(offer, target_icp, additional_context)
+        print("[GTM API DEBUG] GTM pipeline returned", flush=True)
         print("[GTM DEBUG] Sending response to frontend")
         print("[GTM DEBUG] Request completed successfully")
         return jsonify({
@@ -412,6 +419,7 @@ def api_find_gtm_opportunities():
             "opportunities": opportunities
         })
     except Exception as e:
+        print(f"[GTM API DEBUG] ROUTE ERROR: {e}", flush=True)
         err_str = str(e)
         print(f"[GTM ERROR] Stage: GTM pipeline execution")
         print(f"[GTM ERROR] Exception type: {type(e).__name__}")
@@ -450,4 +458,8 @@ def download_file(filename):
     return send_from_directory(OUTPUT_DIR, safe_path, as_attachment=True)
 
 if __name__ == "__main__":
+    print("[FLASK DEBUG] Running current app.py instance", flush=True)
+    print("[FLASK DEBUG] Registered routes:", flush=True)
+    for rule in app.url_map.iter_rules():
+        print(f"[FLASK DEBUG] {rule} -> {rule.methods}", flush=True)
     app.run(debug=True, port=5000)

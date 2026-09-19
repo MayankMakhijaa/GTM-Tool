@@ -12,8 +12,8 @@ DB_PATH = os.path.join(os.getcwd(), "gtm_opportunities.db")
 
 # Model selection: prefer flash, fall back to lite.
 # These IDs are confirmed available on this API key via models.list().
-GTM_MODEL_PRIMARY = "models/gemini-2.5-pro"
-GTM_MODEL_FALLBACK = "models/gemini-3.5-flash-lite"
+GTM_MODEL_PRIMARY = "models/gemini-3.1-pro"
+GTM_MODEL_FALLBACK = "models/gemini-3.1-flash-lite"
 
 
 # ====================================================================

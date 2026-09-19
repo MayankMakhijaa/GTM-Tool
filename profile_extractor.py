@@ -1,6 +1,7 @@
 import os
 import re
-from typing import Dict, Any, List, Optional
+import time
+from typing import Dict, Any, List, Optional, cast
 from playwright.sync_api import sync_playwright, Page
 
 BROWSER_PROFILE_DIR = os.path.join(os.getcwd(), "browser_profile")
@@ -1037,9 +1038,10 @@ def extract_linkedin_profile(profile_url: str) -> Dict[str, Any]:
     full_data = None
     for event in extract_linkedin_profile_generator(profile_url):
         if event.get("event") == "error":
-            raise RuntimeError(event.get("error"))
+            # raise RuntimeError using stringified error to be safe
+            raise RuntimeError(str(event.get("error")))
         elif event.get("event") == "complete":
-            full_data = event.get("full_profile")
+            full_data = cast(Dict[str, Any], event.get("full_profile"))
     if not full_data:
         raise RuntimeError("Profile extraction completed without producing output data.")
     return full_data

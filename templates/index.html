@@ -664,69 +664,50 @@ No leads generated yet. Paste a LinkedIn post URL above to get started.
 <p class="font-body-md text-body-md text-text-secondary">Find companies that are relevant to your offer, not just companies that match basic filters.</p>
 </div>
 
-<!-- ICP & Offer Input Workspace Card -->
-<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md border border-border-default/60">
-<div class="flex flex-col gap-space-md">
-
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-offer-input">
-<span class="material-symbols-outlined text-[18px] text-primary-container">sell</span>
-<span>What do you sell?</span>
-</label>
-<textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-offer-input" placeholder="e.g. AI automation services for B2B companies"></textarea>
-</div>
-
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-icp-input">
-<span class="material-symbols-outlined text-[18px] text-primary-container">target</span>
-<span>Who are you looking to work with?</span>
-</label>
-<textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-icp-input" placeholder="e.g. US-based B2B SaaS companies with 50–500 employees that are growing and may need automation"></textarea>
-</div>
-
-<div class="flex flex-col gap-1.5">
-<span class="font-label-sm text-label-sm text-text-secondary">AI GTM Agent</span>
-</div>
-</div>
-<p class="font-body-md text-body-md text-text-secondary">Find companies that match your ICP and understand why they may be worth approaching now.</p>
-</div>
-
-<!-- Saved Context Summary Card (read-only) -->
+<!-- Editable Saved Context Summary Card -->
 <div id="gtm-context-card" class="bg-surface-card rounded-xl shadow-sm border border-border-default/60 flex flex-col gap-0 overflow-hidden">
-  <div class="flex items-center justify-between px-space-md pt-space-md pb-2">
-    <span class="font-label-md text-label-md text-text-muted uppercase tracking-wider flex items-center gap-1.5">
-      <span class="material-symbols-outlined text-[16px] text-primary-container">tune</span>
-      Using Your Saved Context
-    </span>
+  <div class="flex items-center justify-between px-space-md pt-space-md pb-2 border-b border-border-default/50">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[20px] text-primary-container">tune</span>
+      <h2 class="font-headline-sm text-headline-sm text-text-primary">Your GTM Context</h2>
+    </div>
     <span id="gtm-context-status" class="font-label-sm text-label-sm text-text-muted italic"></span>
   </div>
-  <div class="px-space-md pb-space-md flex flex-col gap-2.5">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-      <div class="p-3 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1 min-h-[70px]">
-        <span class="font-label-sm text-[10px] text-text-muted uppercase tracking-wider flex items-center gap-1">
-          <span class="material-symbols-outlined text-[12px]">sell</span> Offer
-        </span>
-        <p id="gtm-ctx-offer" class="font-body-sm text-body-sm text-text-primary leading-snug"></p>
-      </div>
-      <div class="p-3 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1 min-h-[70px]">
-        <span class="font-label-sm text-[10px] text-text-muted uppercase tracking-wider flex items-center gap-1">
-          <span class="material-symbols-outlined text-[12px]">target</span> ICP
-        </span>
-        <p id="gtm-ctx-icp" class="font-body-sm text-body-sm text-text-primary leading-snug"></p>
-      </div>
-      <div class="p-3 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1 min-h-[70px]">
-        <span class="font-label-sm text-[10px] text-text-muted uppercase tracking-wider flex items-center gap-1">
-          <span class="material-symbols-outlined text-[12px]">info</span> Context
-        </span>
-        <p id="gtm-ctx-context" class="font-body-sm text-body-sm text-text-secondary leading-snug italic"></p>
-      </div>
+  <div class="p-space-md flex flex-col gap-space-md">
+    <div class="flex flex-col gap-1.5">
+      <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-ctx-offer">
+        <span class="material-symbols-outlined text-[16px]">sell</span>
+        <span>Offer</span>
+      </label>
+      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-ctx-offer"></textarea>
     </div>
-    <!-- Action Row -->
-    <div class="flex items-center justify-end pt-1">
-      <button class="h-11 px-8 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="gtm-find-btn" type="button">
-        <span class="material-symbols-outlined text-[18px]">search</span>
-        <span id="gtm-find-btn-text">Find Opportunities</span>
-      </button>
+    <div class="flex flex-col gap-1.5">
+      <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-ctx-icp">
+        <span class="material-symbols-outlined text-[16px]">target</span>
+        <span>ICP</span>
+      </label>
+      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-ctx-icp"></textarea>
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-ctx-context">
+        <span class="material-symbols-outlined text-[16px]">info</span>
+        <span>Additional Context</span>
+      </label>
+      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-ctx-context"></textarea>
+    </div>
+    
+    <div class="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-border-default/50 gap-4">
+      <span id="gtm-save-status" class="font-label-sm text-label-sm text-status-success-text opacity-0 transition-opacity whitespace-nowrap">Saved successfully!</span>
+      <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-end">
+        <button class="w-full sm:w-auto h-11 px-6 rounded-xl bg-surface-canvas hover:bg-surface-subtle text-text-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 border border-border-default/60 shrink-0 active:scale-[0.98]" id="gtm-save-btn" type="button">
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          <span>Save Changes</span>
+        </button>
+        <button class="w-full sm:w-auto h-11 px-8 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="gtm-find-btn" type="button">
+          <span class="material-symbols-outlined text-[18px]">search</span>
+          <span id="gtm-find-btn-text">Find Opportunities</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -2664,7 +2645,7 @@ C
 
     // ===== GTM OPPORTUNITIES MODULE =====
 
-    // Load read-only context summary from /api/gtm-context
+    // Load editable context summary from /api/gtm-context
     async function loadGtmContextSummary() {
       const offerEl = document.getElementById('gtm-ctx-offer');
       const icpEl = document.getElementById('gtm-ctx-icp');
@@ -2675,15 +2656,15 @@ C
         const res = await fetch('/api/gtm-context');
         const data = await res.json();
         if (res.ok && data.success && data.data) {
-          if (offerEl) offerEl.textContent = data.data.offer || '—';
-          if (icpEl) icpEl.textContent = data.data.target_icp || '—';
-          if (contextEl) contextEl.textContent = data.data.additional_context || 'No additional context provided.';
+          if (offerEl) offerEl.value = data.data.offer || '';
+          if (icpEl) icpEl.value = data.data.target_icp || '';
+          if (contextEl) contextEl.value = data.data.additional_context || '';
           if (statusEl) statusEl.textContent = 'Loaded from onboarding';
         } else {
           const msg = data.error || 'Context unavailable.';
-          if (offerEl) offerEl.textContent = 'Onboarding required.';
-          if (icpEl) icpEl.textContent = 'Please complete the onboarding flow first.';
-          if (contextEl) contextEl.textContent = '';
+          if (offerEl) offerEl.value = '';
+          if (icpEl) icpEl.value = '';
+          if (contextEl) contextEl.value = '';
           if (statusEl) statusEl.textContent = msg;
         }
       } catch (err) {
@@ -2960,6 +2941,7 @@ C
       try {
         console.log('[GTM DEBUG] Sending POST /api/gtm-opportunities/find');
         console.log('[GTM DEBUG] Request sent');
+        console.log("[GTM FRONTEND DEBUG] Fetching:", '/api/gtm-opportunities/find');
 
         const res = await fetch('/api/gtm-opportunities/find', {
           method: 'POST',
@@ -2967,6 +2949,7 @@ C
           body: JSON.stringify({})
         });
 
+        console.log("[GTM FRONTEND DEBUG] Response:", res.status, res.url);
         console.log('[GTM DEBUG] Response status:', res.status);
 
         let data;
@@ -3015,6 +2998,45 @@ C
       gtmFindBtn.addEventListener('click', (e) => {
         if (e && e.preventDefault) e.preventDefault();
         handleGtmFind();
+      });
+    }
+
+    const gtmSaveBtn = document.getElementById('gtm-save-btn');
+    if (gtmSaveBtn) {
+      gtmSaveBtn.addEventListener('click', async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const offer = document.getElementById('gtm-ctx-offer').value;
+        const icp = document.getElementById('gtm-ctx-icp').value;
+        const context = document.getElementById('gtm-ctx-context').value;
+        
+        const originalHTML = gtmSaveBtn.innerHTML;
+        gtmSaveBtn.disabled = true;
+        gtmSaveBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span><span>Saving...</span>';
+        
+        try {
+          const res = await fetch('/api/onboarding/save-gtm-context', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ offer: offer, target_icp: icp, additional_context: context })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+             const saveStatus = document.getElementById('gtm-save-status');
+             if (saveStatus) {
+               saveStatus.classList.remove('opacity-0');
+               setTimeout(() => {
+                 saveStatus.classList.add('opacity-0');
+               }, 3000);
+             }
+          } else {
+            alert(data.error || 'Failed to save context.');
+          }
+        } catch (err) {
+          alert('Network error while saving context.');
+        } finally {
+          gtmSaveBtn.disabled = false;
+          gtmSaveBtn.innerHTML = originalHTML;
+        }
       });
     }
 
