@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-DB_PATH = os.path.join(os.getcwd(), "gtm_opportunities.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "gtm_opportunities.db")
 
 def _get_connection():
     conn = sqlite3.connect(DB_PATH)

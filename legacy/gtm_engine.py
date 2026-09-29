@@ -8,7 +8,7 @@ from datetime import datetime
 from google import genai
 from google.genai import types
 
-DB_PATH = os.path.join(os.getcwd(), "gtm_opportunities.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "gtm_opportunities.db")
 
 # Model selection: prefer flash, fall back to lite.
 # These IDs are confirmed available on this API key via models.list().

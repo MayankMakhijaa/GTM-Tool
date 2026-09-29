@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 from parser import parse_pasted_comments
 from analyzer import analyze_comments
 from excel import generate_excel, generate_excel_in_memory
-from historical import get_historical_email_leads, get_all_historical_leads
-import leads_db
-from profile_extractor import (
+from legacy.historical import get_historical_email_leads, get_all_historical_leads
+import legacy.leads_db as leads_db
+from legacy.profile_extractor import (
     extract_linkedin_profile,
     extract_linkedin_profile_generator,
     check_linkedin_session,
@@ -19,7 +19,7 @@ from profile_extractor import (
     logout_linkedin_session
 )
 from profile_optimizer import optimize_linkedin_profile
-from gtm_engine import (
+from legacy.gtm_engine import (
     init_db as init_gtm_db,
     run_gtm_pipeline,
     get_all_opportunities,

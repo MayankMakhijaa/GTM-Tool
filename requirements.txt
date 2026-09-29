@@ -5,3 +5,6 @@ google-genai
 python-dotenv
 flask
 flask-cors
+SQLAlchemy
+alembic
+psycopg[binary]
