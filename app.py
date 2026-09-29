@@ -29,10 +29,29 @@ from legacy.gtm_engine import (
     rewrite_gtm_context_field
 )
 
+from config import Config
+from app.security.csrf import init_csrf
+from app.security.limiter import init_limiter
+from app.routes.auth import auth_bp
+from app.database import init_db, db_session
+
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "linkedin_lead_gen_secret_key_2026")
+app.config.from_object(Config)
+
+# Initialize extensions
+init_csrf(app)
+init_limiter(app)
+
+# Register Blueprints
+app.register_blueprint(auth_bp)
+
+# Close session at end of request
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
+
 CORS(app)
 
 @app.before_request

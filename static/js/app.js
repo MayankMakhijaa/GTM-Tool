@@ -99,8 +99,8 @@
       });
 
       // Module Data Fetching Triggers
-      if (actualTarget === 'profile-optimization' && typeof checkLinkedInSessionStatus === 'function') {
-        checkLinkedInSessionStatus({ skipNavigation: true });
+      if (actualTarget === 'profile-optimization' && typeof checkFamewebSessionStatus === 'function') {
+        checkFamewebSessionStatus({ skipNavigation: true });
           if (typeof loadGtmContextSummary === 'function') loadGtmContextSummary();
       } else if (actualTarget === 'gtm-opportunities') {
         if (typeof loadGtmContextSummary === 'function') loadGtmContextSummary();
@@ -118,17 +118,18 @@
     let currentUserContext = null;
     let savedGtmContext = null;
 
-    async function checkLinkedInSessionStatus(options = {}) {
+    async function checkFamewebSessionStatus(options = {}) {
       if (sessionStatusText) sessionStatusText.textContent = 'Checking...';
       try {
-        const res = await fetch('/api/linkedin-session-status');
+        const res = await fetch('/api/auth/me');
         const data = await res.json();
-        if (res.ok && data.success && data.data) {
-          const isAuth = data.data.authenticated;
-          const name = data.data.name || (data.data.user ? data.data.user.name : null) || 'LinkedIn Member';
-          const photo = data.data.profile_photo_url;
-          currentUserContext = data.data.user;
-          savedGtmContext = data.data.gtm_context;
+        const isAuth = data.authenticated;
+        if (isAuth && data.user) {
+          const user = data.user;
+          const name = user.name || 'Fameweb User';
+          const photo = null; // Fameweb auth doesn't have photo yet
+          currentUserContext = user;
+          savedGtmContext = null;
 
           const headerBadge = document.getElementById('header-user-badge');
           const headerName = document.getElementById('header-user-name');
@@ -185,10 +186,8 @@
               extractProfileBtn.disabled = false;
             }
 
-            // GTM context display is loaded separately via /api/gtm-context when the GTM view is opened
-
             // Onboarding Check & Navigation
-            const onboardingCompleted = data.data.onboarding_completed;
+            const onboardingCompleted = user.onboarding_step !== 'LINKEDIN';
             const modalGtm = document.getElementById('modal-onboarding-gtm');
             const modalOpt = document.getElementById('modal-onboarding-profile-opt');
             const modalGtmExp = document.getElementById('modal-onboarding-gtm-explore');
@@ -218,35 +217,36 @@
               console.log('[FLOW] Returning user -> Authenticated session active.');
             }
 
-          } else {
-            if (sessionStatusBadge) sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium border border-status-warning-border';
-            if (sessionStatusDot) sessionStatusDot.className = 'w-2 h-2 rounded-full bg-status-warning-text';
-            if (sessionStatusText) sessionStatusText.textContent = 'Not Connected';
-
-            if (connectedProfileInfo) connectedProfileInfo.classList.add('hidden');
-            if (connectedProfileName) connectedProfileName.textContent = '';
-            if (openSessionBtn) openSessionBtn.classList.remove('hidden');
-            if (logoutSessionBtn) logoutSessionBtn.classList.add('hidden');
-
-            if (headerBadge) headerBadge.classList.add('hidden');
-            if (headerLogoutBtn) headerLogoutBtn.classList.add('hidden');
-
-            if (profileUrlInput) {
-              profileUrlInput.value = '';
-              profileUrlInput.placeholder = 'Connect LinkedIn to load your profile';
-              profileUrlInput.readOnly = true;
-              profileUrlInput.disabled = true;
-            }
-            if (extractProfileBtn) {
-              extractProfileBtn.disabled = true;
-            }
-
-            if (!options.skipNavigation) switchTab('welcome-page');
-            console.log('[FLOW] Unauthenticated -> Displaying Welcome Page.');
           }
+        } else {
+          // Handle unauthenticated case (res.ok but authenticated=false)
+          if (sessionStatusBadge) sessionStatusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium border border-status-warning-border';
+          if (sessionStatusDot) sessionStatusDot.className = 'w-2 h-2 rounded-full bg-status-warning-text';
+          if (sessionStatusText) sessionStatusText.textContent = 'Not Connected';
+
+          if (connectedProfileInfo) connectedProfileInfo.classList.add('hidden');
+          if (connectedProfileName) connectedProfileName.textContent = '';
+          if (openSessionBtn) openSessionBtn.classList.remove('hidden');
+          if (logoutSessionBtn) logoutSessionBtn.classList.add('hidden');
+
+          if (headerBadge) headerBadge.classList.add('hidden');
+          if (headerLogoutBtn) headerLogoutBtn.classList.add('hidden');
+
+          if (profileUrlInput) {
+            profileUrlInput.value = '';
+            profileUrlInput.placeholder = 'Connect to load your profile';
+            profileUrlInput.readOnly = true;
+            profileUrlInput.disabled = true;
+          }
+          if (extractProfileBtn) {
+            extractProfileBtn.disabled = true;
+          }
+
+          if (!options.skipNavigation) switchTab('welcome-page');
+          console.log('[FLOW] Unauthenticated -> Displaying Welcome Page.');
         }
       } catch (err) {
-        console.error('Failed to check LinkedIn session status:', err);
+        console.error('Failed to check Fameweb session status:', err);
         if (sessionStatusText) sessionStatusText.textContent = 'Status Unknown';
         if (!options.skipNavigation) switchTab('welcome-page');
       }
@@ -254,28 +254,9 @@
 
     if (openSessionBtn) {
       openSessionBtn.addEventListener('click', async () => {
-        openSessionBtn.disabled = true;
-        openSessionBtn.classList.add('opacity-70', 'cursor-not-allowed');
-        try {
-          // 1. Pre-check if existing session is already authenticated
-          const statusRes = await fetch('/api/linkedin-session-status');
-          const statusData = await statusRes.json();
-
-          if (statusRes.ok && statusData.success && statusData.data && statusData.data.authenticated) {
-            console.log('[FLOW] Session pre-check: Existing authenticated LinkedIn session detected. Proceeding directly.');
-            await checkLinkedInSessionStatus({ isInitialBootstrap: true });
-            return;
-          }
-
-          // 2. If not authenticated, open Playwright Chromium session
-          await fetch('/api/open-linkedin-session', { method: 'POST' });
-          await checkLinkedInSessionStatus({ isInitialBootstrap: true });
-        } catch (err) {
-          console.error('Error opening session browser:', err);
-        } finally {
-          openSessionBtn.disabled = false;
-          openSessionBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-        }
+          // Do nothing, we removed LinkedIn Playwright login from Fameweb
+          // They should use the Fameweb login form instead
+          console.warn('LinkedIn Playwright auth is disabled for Fameweb auth.');
       });
     }
 
@@ -297,7 +278,7 @@
             }
             if (currentProfileContainer) currentProfileContainer.classList.add('hidden');
             if (optimizationResultContainer) optimizationResultContainer.classList.add('hidden');
-            checkLinkedInSessionStatus();
+            checkFamewebSessionStatus();
           }
         } catch (err) {
           console.error('Logout error:', err);
@@ -309,7 +290,7 @@
 
     if (checkSessionBtn) {
       checkSessionBtn.addEventListener('click', () => {
-        checkLinkedInSessionStatus();
+        checkFamewebSessionStatus();
       });
     }
 
@@ -370,13 +351,13 @@
 
           if (statusRes.ok && statusData.success && statusData.data && statusData.data.authenticated) {
             console.log('[FLOW] Session pre-check: Existing authenticated LinkedIn session detected. Proceeding directly.');
-            await checkLinkedInSessionStatus({ isInitialBootstrap: true });
+            await checkFamewebSessionStatus({ isInitialBootstrap: true });
             return;
           }
 
           // 2. If not authenticated, open Playwright Chromium session
           await fetch('/api/open-linkedin-session', { method: 'POST' });
-          await checkLinkedInSessionStatus({ isInitialBootstrap: true });
+          await checkFamewebSessionStatus({ isInitialBootstrap: true });
         } catch (err) {
           console.error('Error connecting LinkedIn session:', err);
         } finally {
@@ -474,7 +455,7 @@
 
     // Initial application bootstrap
     document.addEventListener('DOMContentLoaded', () => {
-        if (typeof checkLinkedInSessionStatus === 'function') {
-            checkLinkedInSessionStatus({ isInitialBootstrap: true });
+        if (typeof checkFamewebSessionStatus === 'function') {
+            checkFamewebSessionStatus({ isInitialBootstrap: true });
         }
     });

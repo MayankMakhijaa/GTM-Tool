@@ -8,3 +8,8 @@ flask-cors
 SQLAlchemy
 alembic
 psycopg[binary]
+argon2-cffi
+flask-limiter
+flask-wtf
+email-validator
+phonenumbers
