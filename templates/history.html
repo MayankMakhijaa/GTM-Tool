@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% block title %}Fameweb{% endblock %}
+{% block scripts %}
+<script src="/static/js/history.js"></script>
+{% endblock %}
+{% block content %}
+<div class="flex flex-col w-full px-space-xl py-space-lg gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-code-sm text-code-sm text-primary uppercase tracking-wider">Audit &amp; Archive</span>
+<span class="text-outline-variant font-body-sm text-body-sm">•</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Continuous Sync (v3.4.2)</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">History</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+        Review previously generated leads and GTM research activity. Inspect autonomous pipeline telemetry, enrichment logs, and conversion velocity across accounts.
+      </p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container-lowest text-on-surface hover:bg-surface-container shadow-sm rounded-lg font-label-md text-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-outline">tune</span>
+<span>View Presets</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm bg-primary text-on-primary hover:bg-secondary shadow-sm rounded-lg font-label-md text-label-md transition-all active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Export CSV / JSON</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Researched</span>
+<span class="p-1 rounded-full bg-surface-container text-primary">
+<span class="material-symbols-outlined text-[18px]">query_stats</span>
+</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">148</span>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center font-semibold">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> +14.2%
+        </span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 72%;"></div>
+</div>
+</div>
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Outreach Ready</span>
+<span class="p-1 rounded-full bg-surface-container text-tertiary">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">64</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">43.2% ratio</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
+<div class="bg-tertiary h-full rounded-full" style="width: 43%;"></div>
+</div>
+</div>
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Avg Lead Score</span>
+<span class="p-1 rounded-full bg-surface-container text-secondary">
+<span class="material-symbols-outlined text-[18px]">speed</span>
+</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">87.4%</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">Tier-1 Fit</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 87%;"></div>
+</div>
+</div>
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Meeting Conversion</span>
+<span class="p-1 rounded-full bg-surface-container text-primary">
+<span class="material-symbols-outlined text-[18px]">trending_up</span>
+</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">18.2%</span>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center font-semibold">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> 27 meetings
+        </span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 18.2%;"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm items-center">
+<div class="md:col-span-4 relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">search</span>
+<input class="w-full pl-9 pr-space-md py-space-sm bg-surface-container-low text-on-surface placeholder:text-outline text-body-md font-body-md rounded-lg focus:outline-none focus:bg-surface-container-lowest focus:shadow-[0_0_0_2px_rgba(37,99,235,0.2)] transition-all" placeholder="Search by lead name, company, or domain..." type="text"/>
+</div>
+<div class="md:col-span-8 flex flex-wrap items-center justify-start md:justify-end gap-space-xs">
+<div class="relative">
+<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
+<option>Last 30 Days ▼</option>
+<option>Today</option>
+<option>Last 7 Days</option>
+<option>Last 90 Days</option>
+<option>Year to Date</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
+</div>
+<div class="relative">
+<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
+<option>All Statuses (Qualified, Reached, Closed) ▼</option>
+<option>Outreach Ready</option>
+<option>Contacted</option>
+<option>Meeting Booked</option>
+<option>Qualified</option>
+<option>Disqualified</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
+</div>
+<div class="relative">
+<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
+<option>Score &gt; 80% ▼</option>
+<option>All Scores</option>
+<option>Score &gt; 90% (Elite)</option>
+<option>Score 70% - 80%</option>
+<option>Score &lt; 70%</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
+</div>
+<div class="relative">
+<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
+<option>All Companies ▼</option>
+<option>Nordix Cloud Systems</option>
+<option>Veloce Security AI</option>
+<option>Aethelgard Logistics</option>
+<option>Datastream IO</option>
+<option>Hyperion Data Labs</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
+</div>
+<button class="p-space-sm text-outline hover:text-on-surface hover:bg-surface-container rounded-lg transition-colors" title="Reset Filters" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_alt_off</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap pt-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant mr-1">Active Filters:</span>
+<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded-full text-on-surface font-code-sm text-code-sm">
+        Time: 30D
+        <button class="hover:text-error flex items-center"><span class="material-symbols-outlined text-[14px]">close</span></button>
+</span>
+<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded-full text-on-surface font-code-sm text-code-sm">
+        Score &gt;= 80%
+        <button class="hover:text-error flex items-center"><span class="material-symbols-outlined text-[14px]">close</span></button>
+</span>
+<button class="font-label-sm text-label-sm text-primary hover:underline ml-space-xs">Clear all</button>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider select-none">
+<th class="py-space-md pl-space-lg pr-space-sm font-semibold">Date Researched</th>
+<th class="py-space-md px-space-md font-semibold">Lead Name</th>
+<th class="py-space-md px-space-md font-semibold">Company</th>
+<th class="py-space-md px-space-md font-semibold">Role</th>
+<th class="py-space-md px-space-md font-semibold text-center">Lead Score</th>
+<th class="py-space-md px-space-md font-semibold">Intent Level</th>
+<th class="py-space-md px-space-md font-semibold">Status</th>
+<th class="py-space-md px-space-md font-semibold">Source</th>
+<th class="py-space-md pr-space-lg pl-space-md font-semibold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low font-body-md text-body-md" id="history-table-body">
+</tbody>
+</table>
+</div>
+<div class="px-space-lg py-space-md bg-surface-container-low flex flex-col md:flex-row items-center justify-between gap-space-md select-none">
+<div class="flex items-center gap-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Showing</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold" id="pagination-range">0 to 0</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="pagination-total">of 0 historical prospects</span>
+</div>
+<div class="inline-flex items-center gap-1" id="pagination-controls">
+</div>
+<div class="inline-flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-full shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Total Outreach Drafts:</span>
+<span class="font-code-sm text-code-sm text-primary font-bold">64</span>
+<span class="text-outline-variant font-label-sm text-label-sm">|</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Conversion:</span>
+<span class="font-code-sm text-code-sm text-tertiary font-bold">18.2%</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">schedule</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Autonomous Ingest Frequency</span>
+</div>
+<span class="font-code-sm text-code-sm text-tertiary">Realtime</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        The research scheduler crawls verified domains every 15 minutes. High Surge accounts trigger automated executive email drafting immediately upon ingest.
+      </p>
+<div class="mt-space-md flex items-center justify-between text-on-surface-variant font-code-sm text-code-sm">
+<span>Next Batch: <strong class="text-on-surface font-semibold">03m 42s</strong></span>
+<span>Queue: <strong class="text-on-surface font-semibold">12 targets</strong></span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">hub</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Intent Signal Distribution</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline">Historical Avg</span>
+</div>
+<div class="flex items-center gap-space-sm py-space-xs">
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span>High Surge</span>
+<span class="font-code-sm text-code-sm text-on-surface">42%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 42%;"></div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span>Funded</span>
+<span class="font-code-sm text-code-sm text-on-surface">31%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 31%;"></div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span>Hiring</span>
+<span class="font-code-sm text-code-sm text-on-surface">27%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full" style="width: 27%;"></div>
+</div>
+</div>
+</div>
+<div class="mt-space-sm font-body-sm text-body-sm text-on-surface-variant flex items-center justify-between">
+<span>Signal Quality Index</span>
+<span class="font-label-md text-label-md text-tertiary font-bold">98.4 / 100</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-tertiary text-[20px]">verified_user</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Compliance &amp; Privacy Log</span>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary bg-tertiary/10 px-2 py-0.5 rounded">GDPR / CCPA</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        All 148 crawled records maintain opt-out and provenance hashes. Autonomous email generations follow verified enterprise deliverability quotas.
+      </p>
+<div class="mt-space-md flex items-center justify-between">
+<a class="font-label-sm text-label-sm text-primary hover:underline flex items-center gap-0.5" href="javascript:void(0)">
+<span>Download Audit Trail</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+<span class="font-code-sm text-code-sm text-outline">SHA-256 Validated</span>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    const navLinks = document.querySelectorAll('aside nav a');
+    navLinks.forEach(link => {
+      const path = link.getAttribute('data-path');
+      if (path === 'history') {
+        link.className = 'flex items-center gap-space-md px-space-md py-space-sm rounded-lg bg-primary-container text-on-primary font-label-md text-label-md shadow-sm transition-colors';
+      } else {
+        link.className = 'flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors';
+      }
+    });
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,565 @@
+{% extends "base.html" %}
+{% block title %}Fameweb{% endblock %}
+{% block content %}
+<div class="flex flex-col w-full">
+<!-- Interactive View Script -->
+<script>
+    function selectProspect(data) {
+      document.getElementById('drawer-name').innerText = data.name;
+      document.getElementById('drawer-title-company').innerText = data.role + " @ " + data.company;
+      document.getElementById('drawer-score').innerText = data.score + "%";
+      document.getElementById('drawer-score-tier').innerText = data.tier;
+      document.getElementById('drawer-need').innerText = data.need;
+      document.getElementById('drawer-signals').innerText = data.signals;
+      document.getElementById('drawer-qualification').innerText = data.qualification;
+      document.getElementById('drawer-avatar').src = data.avatar;
+      document.getElementById('drawer-avatar').setAttribute('data-alt', data.avatarAlt);
+      
+      const rows = document.querySelectorAll('.prospect-row');
+      rows.forEach(r => r.classList.remove('bg-surface-container-high/60'));
+      const activeRow = document.getElementById('row-' + data.id);
+      if (activeRow) activeRow.classList.add('bg-surface-container-high/60');
+    }
+  </script>
+<!-- Page Header Sub-Bar -->
+<div class="w-full px-space-xl py-space-lg bg-surface-container-lowest shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">GTM Research</h1>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-code-sm text-code-sm">
+          SYNAPSE-V4.2
+        </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Find prospects that match your ICP with high-intent buying signals.</p>
+</div>
+<!-- Right Quick Actions -->
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<div class="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+        Data Provider: Clearbit + Crustdata Graph
+      </div>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+        Exclusions
+      </button>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+        Export CSV
+      </button>
+</div>
+</div>
+<!-- Primary Workspace Content -->
+<div class="w-full px-space-xl py-space-lg flex flex-col gap-space-lg">
+<!-- SECTION 1: Research Configuration Card -->
+<div class="w-full bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+<!-- ICP Context Pill Banner -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm bg-surface-container-low px-space-md py-space-sm rounded-lg">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">verified_user</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Active Model:</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Based on ICP: Mid-Market B2B SaaS &amp; DevTools ($2M-$25M ARR)</span>
+</div>
+<a class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:text-secondary font-medium transition-colors" href="javascript:void(0)">
+<span>View ICP Details</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Controls Form Row -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-md items-end">
+<!-- Target Leads -->
+<div class="md:col-span-2 flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Target Leads</label>
+<div class="relative flex items-center">
+<input class="w-full h-10 px-3 pr-8 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all font-code-sm" max="500" min="10" step="10" type="number" value="50"/>
+<span class="absolute right-3 font-code-sm text-code-sm text-outline pointer-events-none">qty</span>
+</div>
+</div>
+<!-- Research Mode Dropdown -->
+<div class="md:col-span-4 flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Research Mode</label>
+<div class="relative flex items-center">
+<select class="w-full h-10 pl-3 pr-9 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md outline-none appearance-none cursor-pointer focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all">
+<option selected="">Comprehensive (AI Enriched + Live Surge)</option>
+<option>Fast Scan (Firmographic Signals Only)</option>
+<option>Deep Intent (Technographic &amp; Leadership Hiring)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 text-on-surface-variant text-[20px] pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Filter Dropdown -->
+<div class="md:col-span-3 flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Persona Filter</label>
+<div class="relative flex items-center">
+<select class="w-full h-10 pl-3 pr-9 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md outline-none appearance-none cursor-pointer focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all">
+<option selected="">VPs of Sales &amp; RevOps</option>
+<option>Chief Revenue Officers (CRO)</option>
+<option>Heads of Growth &amp; Pipeline Ops</option>
+<option>Founders / CEOs (Seed to Series B)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 text-on-surface-variant text-[20px] pointer-events-none">filter_list</span>
+</div>
+</div>
+<!-- Primary Action CTA -->
+<div class="md:col-span-3">
+<button class="w-full h-10 px-4 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-secondary transition-all shadow-sm active:scale-[0.99]">
+<span class="material-symbols-outlined text-[20px]">travel_explore</span>
+<span id="btn-start-research">Start Research</span>
+</button>
+</div>
+</div>
+</div>
+<!-- SECTION 2: Active Research Progress Banner -->
+<div class="w-full bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-3 h-3 rounded-full bg-primary animate-ping"></div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Researching prospects across verified executive graphs...</span>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-auto">
+<span class="font-code-sm text-code-sm text-primary font-bold">72% COMPLETED</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">(ETA: 18s)</span>
+</div>
+</div>
+<!-- Animated Progress Bar Container -->
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden relative">
+<div class="h-full bg-primary-container rounded-full transition-all duration-700 ease-out relative" style="width: 72%;">
+<div class="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.25)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.25)_50%,rgba(255,255,255,0.25)_75%,transparent_75%,transparent)] bg-[length:16px_16px] animate-[pulse_2s_infinite]"></div>
+</div>
+</div>
+<!-- Asynchronous Telemetry Metrics Row -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-sm pt-space-xs">
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Candidates Found</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md text-on-surface font-bold">124</span>
+<span class="font-body-sm text-body-sm text-tertiary">↑ raw leads</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">ICP Qualified</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md text-tertiary font-bold">38</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-code-sm">fit &gt; 80%</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Enriched &amp; Analyzed</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md text-on-surface font-bold">71</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">profiles</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Rejection Rate</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md text-on-surface-variant font-bold">43%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">filtered out</span>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 3: Results Table & Split Lead Detail View -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT: Results Table Section (7 columns on large screens) -->
+<div class="xl:col-span-7 bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Table Toolbar -->
+<div class="p-space-md bg-surface-container-low flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Qualified Pipeline</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-code-sm text-code-sm">5 Leads Preview</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant hidden sm:inline">Sort:</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold cursor-pointer">Highest Fit ↓</span>
+</div>
+</div>
+<!-- Tabular List Container -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider shadow-[0_1px_0_0_#dae2fd]">
+<th class="py-3 px-space-md">Fit Score</th>
+<th class="py-3 px-space-md">Prospect</th>
+<th class="py-3 px-space-md">Company</th>
+<th class="py-3 px-space-md">Intent Surge</th>
+<th class="py-3 px-space-md">Status</th>
+<th class="py-3 px-space-md text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low">
+<!-- ROW 1 (Selected by Default) -->
+<tr class="prospect-row bg-surface-container-high/60 hover:bg-surface-container-high/80 transition-colors cursor-pointer group" id="row-1" onclick="selectProspect({
+                    id: 1,
+                    name: 'Marcus Vance',
+                    role: 'VP Revenue Ops',
+                    company: 'Nordix Cloud Systems',
+                    score: 96,
+                    tier: 'Tier 1 Priority Match',
+                    need: 'Scaling inbound lead triage &amp; CRM routing automation with AI workflows.',
+                    signals: 'Active postings for 4 SDRs, recent HubSpot-to-Salesforce migration announced on LinkedIn 5 days ago.',
+                    qualification: 'Matches company size (140 emp), revenue tier ($18M ARR), target role, and active SDR hiring triggers.',
+                    avatar: 'placeholder',
+                    avatarAlt: 'A clean corporate studio headshot portrait of an executive man in his late 30s with short dark hair wearing a navy tailored blazer over a crisp white shirt, neutral background, professional studio lighting.'
+                  })">
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-code-sm text-code-sm font-bold">
+<span class="material-symbols-outlined text-[14px]">stars</span>
+                    96%
+                  </div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A clean corporate studio headshot portrait of an executive man in his late 30s with short dark hair wearing a navy tailored blazer over a crisp white shirt, neutral background, professional studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_QQ5yYetn14oo36oeGIbi7TRfn5_RU59-5iAojDw5_AV8XfTXstCvRYspS2KF2u5fWaL4KAKHSIIr3-1ym17NjvQlkKvahCFrPZLHFJ5f_fKB9isQg1PcerjBWVaBWlv43o277Sjj2bRPKT9-GBq6hwPRsvfWZW0OHtbENc8_CeHinay76WoqK6y-byRgnu4upy3s5wqg1R_54tXWw-fO5tlJrdIhcBEmAJ1K6fQw6iOLw3Te9iTJ"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Marcus Vance</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">VP Revenue Ops</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface truncate">Nordix Cloud Systems</span>
+<span class="font-body-sm text-body-sm text-outline truncate">$18M ARR • 140 Emp</span>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+                    Hiring 4 SDRs
+                  </span>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary/10 text-tertiary font-label-sm text-label-sm font-medium">
+                    Qualified
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right whitespace-nowrap">
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-primary hover:bg-primary-container hover:text-on-primary font-label-sm text-label-sm transition-all shadow-sm">
+                    Open
+                  </button>
+</td>
+</tr>
+<!-- ROW 2 -->
+<tr class="prospect-row hover:bg-surface-container/60 transition-colors cursor-pointer group" id="row-2" onclick="selectProspect({
+                    id: 2,
+                    name: 'Elena Rostova',
+                    role: 'Head of Growth',
+                    company: 'Veloce Security AI',
+                    score: 94,
+                    tier: 'Tier 1 Priority Match',
+                    need: 'Transitioning from manual SDR cold calling to automated multi-channel intent outreach.',
+                    signals: 'Closed Series B ($24M) in Q1, tech stack includes Outreach and 6sense, expanding US sales footprint.',
+                    qualification: 'Matches hyper-growth stage ($24M Series B), ICP ARR band, and expanding outbound sales motion.',
+                    avatar: 'placeholder',
+                    avatarAlt: 'Close-up studio business portrait of a modern executive woman with shoulder-length brown hair, minimalist black sweater, focused professional expression, high-end corporate photoshoot.'
+                  })">
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-code-sm text-code-sm font-bold">
+<span class="material-symbols-outlined text-[14px]">stars</span>
+                    94%
+                  </div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="Close-up studio business portrait of a modern executive woman with shoulder-length brown hair, minimalist black sweater, focused professional expression, high-end corporate photoshoot." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqBHE4J455bwzOl48K7pfMYavHYmh8pdGcc-pswEuc1cXt9xB0k2WLZIcYZjOdgUfdZC05p87sBp6vb1JoaJ0us66NL14sydYZBZRL_rLpWHpneWQF3xdSpaVi7jjnzGWKdRH7ddVDJ4HTq2SHA-67i5jwXaxlbMB22WSzVkURcZnrQivncuw7e-ODF_zbQ5ZSB85USsoi29AX_xp9ZvZKo0o9yU1wF-iFozvdkA5jzNUn249FOs58"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Elena Rostova</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Head of Growth</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface truncate">Veloce Security AI</span>
+<span class="font-body-sm text-body-sm text-outline truncate">$12M ARR • 85 Emp</span>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm font-medium">
+                    Series B ($24M)
+                  </span>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary/10 text-tertiary font-label-sm text-label-sm font-medium">
+                    Qualified
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right whitespace-nowrap">
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:bg-primary-container hover:text-on-primary font-label-sm text-label-sm transition-all shadow-sm">
+                    Open
+                  </button>
+</td>
+</tr>
+<!-- ROW 3 -->
+<tr class="prospect-row hover:bg-surface-container/60 transition-colors cursor-pointer group" id="row-3" onclick="selectProspect({
+                    id: 3,
+                    name: 'Liam Chen',
+                    role: 'Chief Commercial Officer',
+                    company: 'Aethelgard Logistics',
+                    score: 89,
+                    tier: 'High Opportunity Fit',
+                    need: 'Consolidating fragmented sales tech stack and eliminating dual data entry for account reps.',
+                    signals: 'Recent LinkedIn update hiring 6 commercial SDRs across EMEA and APAC branches.',
+                    qualification: 'Meets target commercial authority role, $22M ARR, and actively revamping pipeline tech.',
+                    avatar: 'placeholder',
+                    avatarAlt: 'Headshot portrait of an Asian male executive in his 40s wearing rimless glasses and a charcoal tailored suit jacket, bright office interior background with glass walls and diffused lighting.'
+                  })">
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-code-sm text-code-sm font-semibold">
+                    89%
+                  </div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="Headshot portrait of an Asian male executive in his 40s wearing rimless glasses and a charcoal tailored suit jacket, bright office interior background with glass walls and diffused lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDs21HESa88m72i605lEumfHVb3nic9qmDVo8bD54p2C6vWBiBbTClCyuGpdOD4g8ruAliEvauw5ovOse4OJcPSEHbo_Y0sXKWxNXqc8YD15ex3IO8rAa9JGf6gRMr9yihGx9HmCXDz5joScDn6y7xRAJJ-cQydo3AsqnCrJl71PYcQDnZIfu2ByBwxg987_RAGYqb4NtRPz2nHGGzyyCqUreDcSjY5Tcd-0G2dfKjSdu4eDcUsmA2b"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Liam Chen</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Chief Commercial Off.</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface truncate">Aethelgard Logistics</span>
+<span class="font-body-sm text-body-sm text-outline truncate">$22M ARR • 210 Emp</span>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm font-medium">
+                    SDR Hiring Blitz
+                  </span>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary/10 text-tertiary font-label-sm text-label-sm font-medium">
+                    Qualified
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right whitespace-nowrap">
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:bg-primary-container hover:text-on-primary font-label-sm text-label-sm transition-all shadow-sm">
+                    Open
+                  </button>
+</td>
+</tr>
+<!-- ROW 4 -->
+<tr class="prospect-row hover:bg-surface-container/60 transition-colors cursor-pointer group" id="row-4" onclick="selectProspect({
+                    id: 4,
+                    name: 'Sarah Lindqvist',
+                    role: 'VP Enterprise Sales',
+                    company: 'Datastream IO',
+                    score: 86,
+                    tier: 'High Opportunity Fit',
+                    need: 'Shortening 60-day enterprise sales cycle through dynamic buyer intent signaling.',
+                    signals: 'Web inbound search traffic surge +35% over past 30 days, expanding into UK market.',
+                    qualification: 'High ARR ($15M), VP level buyer persona, direct urgency around sales velocity.',
+                    avatar: 'placeholder',
+                    avatarAlt: 'Professional executive portrait photo of a blonde Scandinavian woman with warm smile, wearing a slate grey silk shirt in a modern architectural boardroom with soft window light.'
+                  })">
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-code-sm text-code-sm font-semibold">
+                    86%
+                  </div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="Professional executive portrait photo of a blonde Scandinavian woman with warm smile, wearing a slate grey silk shirt in a modern architectural boardroom with soft window light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_Nux1kKCd4B6wrmgq489nPvvba1oK9CKKQY6axOgChGRYX-jdIZSDcZaTSoawARkH5WIWZOYoeeNKl1AVpAgiqGAHILim7bldJjp920_0lVJou_Fc1XDEugrZ72VTUY_47SEmKJHAIfHOKYpNlSYnSBRJ44Fx1IfPN9KaeWpaXrtIg7I6s-Kalt7Wvj86IzUnNUEIQ7WpN4nbvm4l0-cuGtcIuLQMpDDOIXU_9P0erHFKAnhR06sV"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Sarah Lindqvist</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">VP Enterprise Sales</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface truncate">Datastream IO</span>
+<span class="font-body-sm text-body-sm text-outline truncate">$15M ARR • 110 Emp</span>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm font-medium">
+                    Inbound Vol +35%
+                  </span>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary/10 text-tertiary font-label-sm text-label-sm font-medium">
+                    Qualified
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right whitespace-nowrap">
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:bg-primary-container hover:text-on-primary font-label-sm text-label-sm transition-all shadow-sm">
+                    Open
+                  </button>
+</td>
+</tr>
+<!-- ROW 5 -->
+<tr class="prospect-row hover:bg-surface-container/60 transition-colors cursor-pointer group" id="row-5" onclick="selectProspect({
+                    id: 5,
+                    name: 'Tariq Mansoor',
+                    role: 'VP Customer Acquisition',
+                    company: 'CloudPulse Software',
+                    score: 82,
+                    tier: 'Medium Match',
+                    need: 'Fixing speed-to-lead response delays causing drop-offs on inbound demo requests.',
+                    signals: 'Web traffic surge detected across pricing pages, currently testing automated chatbot widgets.',
+                    qualification: 'Under $10M ARR threshold ($7M ARR), but high velocity buyer with clear operational pain.',
+                    avatar: 'placeholder',
+                    avatarAlt: 'Portrait of a Middle Eastern male tech director in late 30s with groomed beard and casual navy blazer over dark crewneck, crisp tech campus background, natural ambient lighting.'
+                  })">
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-code-sm text-code-sm font-semibold">
+                    82%
+                  </div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="Portrait of a Middle Eastern male tech director in late 30s with groomed beard and casual navy blazer over dark crewneck, crisp tech campus background, natural ambient lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYKb3f4mFY1uhYYtY-Xp1wGma9MJw07x3PXuCKs4eA5PShOvZZvYlvmg6PCZhjQSGS2svKqKbudEGyX7Pbt_HZ2VUp2MmOax4Ofeo4RVbNGrJWP14GtByfz6gM2xZStnty4gpmBDqNw0rZpCWUojVDxXH-h7srbyBW0dsX6Fql-RRhP019_JNKJJ7hloziZ_3S9c6mEks0_vZW6dKRc8Z4h7fPgCtlA4lpvQkqR8AvSx-EAzQmEKhr"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Tariq Mansoor</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">VP Customer Acq.</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface truncate">CloudPulse Software</span>
+<span class="font-body-sm text-body-sm text-outline truncate">$7M ARR • 65 Emp</span>
+</div>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm font-medium">
+                    Traffic Surge
+                  </span>
+</td>
+<td class="py-3 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm font-medium">
+                    In Review
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right whitespace-nowrap">
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:bg-primary-container hover:text-on-primary font-label-sm text-label-sm transition-all shadow-sm">
+                    Open
+                  </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer Pagination -->
+<div class="p-space-md bg-surface-container-lowest flex items-center justify-between shadow-[0_-1px_0_0_#dae2fd]">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Showing 5 of 38 qualified prospects</span>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded text-outline hover:text-on-surface disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<span class="font-code-sm text-code-sm text-on-surface px-2">Page 1 of 8</span>
+<button class="p-1 rounded text-on-surface hover:text-primary">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- RIGHT: Lead Detail Slide-Over / Split View Drawer (5 columns) -->
+<div class="xl:col-span-5 bg-surface-container-lowest rounded-xl shadow-md p-space-lg flex flex-col gap-space-lg sticky top-20">
+<!-- Drawer Header with Prospect Identity -->
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<img class="w-14 h-14 rounded-full object-cover shadow-sm" data-alt="A clean corporate studio headshot portrait of an executive man in his late 30s with short dark hair wearing a navy tailored blazer over a crisp white shirt, neutral background, professional studio lighting." id="drawer-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPPYG4N6XuMorbph7MyEU-VDtjl_NhK95X-dQDryQey7kSiMx8UTvwetM1ANFSqnC6DV8ktHkSMk1jHchoFjYeAIAnN9CCDYase-HaAhagBnVJNqKkXuUrtZJMrHRb9EZB_p574hUvW0CQaPgNMk2KzBCL_AqWGKLmTAvLNtl2QFj807U7oSbkSRLNw_Nhm2To9wDhoUnW7cRuSWd25zmWLggQW-WE5rDnMhpsMJ-h86-xtamxS28I"/>
+<div class="flex flex-col min-w-0">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold leading-tight truncate" id="drawer-name">Marcus Vance</h3>
+<span class="font-body-md text-body-md text-on-surface-variant truncate" id="drawer-title-company">VP Revenue Ops @ Nordix Cloud Systems</span>
+<a class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline mt-1 font-semibold" href="javascript:void(0)">
+<span>View External Profile</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<div class="font-headline-xl text-headline-xl text-tertiary font-bold tracking-tight" id="drawer-score">96%</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-right" id="drawer-score-tier">Tier 1 Priority Match</span>
+</div>
+</div>
+<!-- Inline Data Visualizer: Match Radar Breakdown -->
+<div class="p-space-md rounded-lg bg-surface-container-low flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Algorithmic Fit Vector</span>
+<div class="space-y-2">
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface">
+<span>Firmographic Fit (ARR &amp; Headcount)</span>
+<span class="font-code-sm text-code-sm text-primary font-semibold">98%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 98%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface">
+<span>Persona &amp; Decision Authority</span>
+<span class="font-code-sm text-code-sm text-primary font-semibold">95%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 95%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface">
+<span>Intent Surge &amp; Buying Urgency</span>
+<span class="font-code-sm text-code-sm text-tertiary font-semibold">92%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary rounded-full" style="width: 92%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Analytical Dossier Cards -->
+<div class="flex flex-col gap-space-md">
+<!-- Business Need -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px] text-primary">target</span>
+<span>Identified Business Need</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface bg-surface-container-lowest p-space-sm rounded-lg" id="drawer-need">
+              Scaling inbound lead triage &amp; CRM routing automation with AI workflows.
+            </p>
+</div>
+<!-- Intent Signals -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px] text-primary">bolt</span>
+<span>Surge &amp; Intent Signals</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface bg-surface-container-lowest p-space-sm rounded-lg" id="drawer-signals">
+              Active postings for 4 SDRs, recent HubSpot-to-Salesforce migration announced on LinkedIn 5 days ago.
+            </p>
+</div>
+<!-- Qualification Reason -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span>
+<span>AI Qualification Reason</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant bg-surface-container-low p-space-sm rounded-lg" id="drawer-qualification">
+              Matches company size (140 emp), revenue tier ($18M ARR), target role, and active SDR hiring triggers.
+            </p>
+</div>
+</div>
+<!-- Drawer Action Buttons -->
+<div class="pt-space-md flex flex-col sm:flex-row items-center gap-space-sm">
+<button class="w-full sm:w-1/3 h-11 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">bookmark_border</span>
+<span id="btn-save-lead">Save Lead</span>
+</button>
+<button class="w-full sm:w-2/3 h-11 rounded-lg bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md font-semibold transition-all shadow-md flex items-center justify-center gap-2">
+<span id="btn-draft-outreach">Draft Personalized Outreach</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/gtm.js"></script>
+{% endblock %}

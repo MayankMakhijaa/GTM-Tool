@@ -23,6 +23,7 @@ def login_required(f):
                 "message": "User inactive or not found."
             }), 401
             
+        request.user_id = user_id
         return f(*args, **kwargs)
     return decorated_function
 

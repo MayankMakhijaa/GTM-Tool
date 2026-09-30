@@ -13,37 +13,37 @@
 </div>
 <nav class="flex flex-col gap-space-xs" id="main-nav">
 <!-- Dashboard Nav Link -->
-<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl transition-colors bg-status-score-high-bg text-primary-container font-label-md" data-path="dashboard" id="nav-dashboard" href="#">
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl transition-colors bg-status-score-high-bg text-primary-container font-label-md" data-path="dashboard" id="nav-dashboard" href="javascript:void(0)">
 <span class="material-symbols-outlined text-[20px]">grid_view</span>
 <span>Dashboard</span>
 </a>
 
 <!-- Profile Optimization Nav Link -->
-<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="profile-optimization" id="nav-profile-optimization" href="#">
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="profile-optimization" id="nav-profile-optimization" href="javascript:void(0)">
 <span class="material-symbols-outlined text-[20px]">auto_awesome</span>
 <span>Profile Optimization</span>
 </a>
 
 <!-- GTM Opportunities Nav Link -->
-<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="gtm-opportunities" id="nav-gtm-opportunities" href="#">
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="gtm-opportunities" id="nav-gtm-opportunities" href="javascript:void(0)">
 <span class="material-symbols-outlined text-[20px]">explore</span>
 <span>GTM Opportunities</span>
 </a>
 
 <!-- Lead Gen via Post Nav Link -->
-<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="lead-gen-post" id="nav-lead-gen-post" href="#">
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="lead-gen-post" id="nav-lead-gen-post" href="javascript:void(0)">
 <span class="material-symbols-outlined text-[20px]">post_add</span>
 <span>Lead Gen via Post</span>
 </a>
 
 <!-- Email Nav Link -->
-<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="email" id="nav-email" href="#">
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="email" id="nav-email" href="javascript:void(0)">
 <span class="material-symbols-outlined text-[20px]">mail</span>
 <span>Email</span>
 </a>
 
 <!-- History Nav Link -->
-<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="history" id="nav-history" href="#">
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="history" id="nav-history" href="javascript:void(0)">
 <span class="material-symbols-outlined text-[20px]">history</span>
 <span>History</span>
 </a>
@@ -1029,7 +1029,7 @@ C
 <div class="flex flex-col min-w-0">
 <div class="flex items-center gap-2">
 <h3 class="font-headline-sm text-headline-sm text-text-primary truncate" id="gtm-modal-company-name">Company Name</h3>
-<a href="#" target="_blank" rel="noopener noreferrer" id="gtm-modal-website-link" class="text-primary-container hover:underline font-label-sm text-label-sm flex items-center gap-0.5 hidden">
+<a href="javascript:void(0)" target="_blank" rel="noopener noreferrer" id="gtm-modal-website-link" class="text-primary-container hover:underline font-label-sm text-label-sm flex items-center gap-0.5 hidden">
 <span>Visit Website</span>
 <span class="material-symbols-outlined text-[14px]">open_in_new</span>
 </a>
@@ -1445,6 +1445,150 @@ C
     <script src="{{ url_for('static', filename='js/leads.js') }}"></script>
     <script src="{{ url_for('static', filename='js/email-outreach.js') }}"></script>
     <script src="{{ url_for('static', filename='js/gtm.js') }}"></script>
+
+
+<!-- ================= ONBOARDING MODAL: COMPANY SETUP ================= -->
+<div id="modal-onboarding-company" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-space-md hidden">
+  <div class="bg-surface-card rounded-2xl shadow-xl border border-border-default/80 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-space-xl flex flex-col gap-space-lg animate-in fade-in zoom-in duration-200">
+    <div class="flex items-center gap-3 border-b border-border-default/60 pb-4">
+      <div class="w-10 h-10 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center font-bold">
+        <span class="material-symbols-outlined text-[22px]">domain</span>
+      </div>
+      <div class="flex flex-col">
+        <h3 class="font-headline-sm text-headline-sm text-text-primary">Company Setup</h3>
+        <p class="font-body-sm text-body-sm text-text-secondary">Tell us about your company so we can personalize your experience.</p>
+      </div>
+    </div>
+
+    <form id="form-onboarding-company" class="flex flex-col gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Company Name</label>
+            <input type="text" id="ob-company-name" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Website URL *</label>
+            <input type="url" id="ob-company-website" required class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="https://example.com">
+          </div>
+      </div>
+      
+      <div class="flex flex-col gap-1.5">
+        <label class="font-label-md text-label-md text-text-primary font-semibold">Description</label>
+        <textarea id="ob-company-desc" rows="2" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">What Company Sells</label>
+            <input type="text" id="ob-company-sells" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Products/Services</label>
+            <input type="text" id="ob-company-products" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Industry</label>
+            <input type="text" id="ob-company-industry" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Company Size</label>
+            <input type="text" id="ob-company-size" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="e.g. 10-50">
+          </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Revenue</label>
+            <input type="text" id="ob-company-revenue" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Location</label>
+            <input type="text" id="ob-company-location" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+      </div>
+
+      <div id="ob-company-error" class="hidden text-status-error-text text-sm font-medium"></div>
+
+      <div class="flex justify-end pt-2">
+        <button type="submit" id="ob-company-save-btn" class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center gap-2 shadow-sm">
+          <span>Save & Continue</span>
+          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= ONBOARDING MODAL: ICP SETUP ================= -->
+<div id="modal-onboarding-icp" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-space-md hidden">
+  <div class="bg-surface-card rounded-2xl shadow-xl border border-border-default/80 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-space-xl flex flex-col gap-space-lg animate-in fade-in zoom-in duration-200">
+    <div class="flex items-center gap-3 border-b border-border-default/60 pb-4">
+      <div class="w-10 h-10 rounded-xl bg-status-score-medium-bg text-status-score-medium-text flex items-center justify-center font-bold">
+        <span class="material-symbols-outlined text-[22px]">group</span>
+      </div>
+      <div class="flex flex-col">
+        <h3 class="font-headline-sm text-headline-sm text-text-primary">Ideal Customer Profile (ICP)</h3>
+        <p class="font-body-sm text-body-sm text-text-secondary">Define who you are targeting to generate the best leads.</p>
+      </div>
+    </div>
+
+    <form id="form-onboarding-icp" class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="font-label-md text-label-md text-text-primary font-semibold">Target Customer</label>
+        <textarea id="ob-icp-target" rows="2" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="e.g. VPs of Sales at B2B SaaS startups..."></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Company Size</label>
+            <input type="text" id="ob-icp-size" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Revenue Range</label>
+            <input type="text" id="ob-icp-revenue" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Target Roles (comma-separated)</label>
+            <input type="text" id="ob-icp-roles" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Industry</label>
+            <input type="text" id="ob-icp-industry" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Location</label>
+            <input type="text" id="ob-icp-location" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-md text-label-md text-text-primary font-semibold">Tone</label>
+            <select id="ob-icp-tone" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+                <option value="FORMAL">Formal</option>
+                <option value="SEMI_FORMAL">Semi-Formal</option>
+                <option value="CASUAL">Casual</option>
+            </select>
+          </div>
+      </div>
+
+      <div id="ob-icp-error" class="hidden text-status-error-text text-sm font-medium"></div>
+
+      <div class="flex justify-end pt-2">
+        <button type="submit" id="ob-icp-save-btn" class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center gap-2 shadow-sm">
+          <span>Complete Setup</span>
+          <span class="material-symbols-outlined text-[18px]">check_circle</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 </body>
 </html>

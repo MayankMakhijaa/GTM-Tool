@@ -1,12 +1,5 @@
 import pytest
-import sys
-import importlib.util
-
-spec = importlib.util.spec_from_file_location("app_module", "app.py")
-app_module = importlib.util.module_from_spec(spec)
-sys.modules["app_module"] = app_module
-spec.loader.exec_module(app_module)
-app = app_module.app
+from app_module import app
 from app.database import db_session, Base, engine
 from app.models.all_models import UserTable
 from app.security.password import hash_password, verify_password
@@ -22,7 +15,9 @@ def protected_test():
 def client():
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
-    app.config['RATELIMIT_ENABLED'] = False  # Disable rate limiting in tests
+    app.config['RATELIMIT_ENABLED'] = False
+    from app.security.limiter import limiter
+    limiter.enabled = False  # Disable rate limiting in tests
     
     # We must reset DB to ensure tests are isolated
     Base.metadata.drop_all(bind=engine)

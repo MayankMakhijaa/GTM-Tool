@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+{% block title %}Fameweb{% endblock %}
+{% block content %}
+<div class="flex flex-col w-full">
+<!-- Main Canvas Container -->
+<div class="p-space-xl flex flex-col gap-space-xl">
+<!-- Top Greeting & Real-Time Operational Bar -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs font-code-sm text-code-sm text-primary uppercase tracking-wider mb-1">
+<span>COHORT-4 // REVENUE INTELLIGENCE</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Good morning, {{ user.name.split(" ")[0] if user else 'Sarah' }}</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Your GTM workspace at a glance. 16 high-surge buying accounts require execution today.</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center bg-surface-container-low px-space-md py-space-sm rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-tertiary mr-1.5" style="font-variation-settings: 'FILL' 1;">sync</span>
+<span class="font-label-sm text-label-sm text-on-surface">Data Synced: Just now</span>
+</div>
+<button class="inline-flex items-center gap-space-xs bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded-lg shadow-sm hover:bg-surface-container transition-colors font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px] text-outline">tune</span>
+<span>Filters</span>
+</button>
+<button class="inline-flex items-center gap-space-xs bg-primary text-on-primary px-space-md py-space-sm rounded-lg shadow-sm hover:bg-secondary transition-colors font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Quick Run</span>
+</button>
+</div>
+</div>
+<!-- Row 1: KPI Metric Scorecards (4 Bento Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-lg">
+<!-- Card 1: Qualified Leads -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Qualified Leads</span>
+<div class="flex items-baseline gap-space-sm mt-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface">--</span>
+<span class="inline-flex items-center font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-tertiary-fixed/30 text-tertiary font-semibold">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                +18%
+              </span>
+</div>
+</div>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs">
+<!-- Sparkline Mini Chart -->
+<div class="flex items-end justify-between h-8 gap-1">
+<div class="flex-1 bg-surface-container-high rounded-sm h-[40%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[55%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[45%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[70%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[60%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[85%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-primary rounded-sm h-[100%]"></div>
+</div>
+<div class="flex justify-between items-center mt-space-xs font-body-sm text-body-sm text-outline">
+<span>vs. 35 last week</span>
+<span class="font-label-sm text-label-sm text-tertiary">Top 4% Velocity</span>
+</div>
+</div>
+</div>
+<!-- Card 2: High Intent -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">High Intent</span>
+<div class="flex items-baseline gap-space-sm mt-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface">--</span>
+<span class="inline-flex items-center font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-primary-fixed text-primary font-semibold">
+                Critical
+              </span>
+</div>
+</div>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs">
+<!-- Sparkline Mini Chart -->
+<div class="flex items-end justify-between h-8 gap-1">
+<div class="flex-1 bg-surface-container-high rounded-sm h-[65%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[50%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[60%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[75%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[90%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[80%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-primary-container rounded-sm h-[100%]"></div>
+</div>
+<div class="flex justify-between items-center mt-space-xs font-body-sm text-body-sm text-outline">
+<span>Active buying triggers</span>
+<span class="font-label-sm text-label-sm text-primary">8 Signals</span>
+</div>
+</div>
+</div>
+<!-- Card 3: New Prospects -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">New Prospects</span>
+<div class="flex items-baseline gap-space-sm mt-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface">--</span>
+<span class="inline-flex items-center font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-surface-container text-on-surface-variant">
+                Last 48h
+              </span>
+</div>
+</div>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[20px]">group_add</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs">
+<!-- Sparkline Mini Chart -->
+<div class="flex items-end justify-between h-8 gap-1">
+<div class="flex-1 bg-surface-container-high rounded-sm h-[30%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[40%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[65%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[50%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[75%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[85%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-secondary rounded-sm h-[95%]"></div>
+</div>
+<div class="flex justify-between items-center mt-space-xs font-body-sm text-body-sm text-outline">
+<span>Enriched systematically</span>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">98.4% Clean</span>
+</div>
+</div>
+</div>
+<!-- Card 4: Outreach Activity -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Outreach Activity</span>
+<div class="flex items-baseline gap-space-sm mt-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface">--</span>
+<span class="inline-flex items-center font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-tertiary-fixed/30 text-tertiary font-semibold">
+                12 Replied
+              </span>
+</div>
+</div>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">outgoing_mail</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs">
+<!-- Sparkline Mini Chart -->
+<div class="flex items-end justify-between h-8 gap-1">
+<div class="flex-1 bg-surface-container-high rounded-sm h-[40%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[60%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[50%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[70%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[80%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-surface-container-high rounded-sm h-[75%] group-hover:bg-primary-fixed transition-colors"></div>
+<div class="flex-1 bg-primary rounded-sm h-[90%]"></div>
+</div>
+<div class="flex justify-between items-center mt-space-xs font-body-sm text-body-sm text-outline">
+<span>Personalized drafts</span>
+<span class="font-label-sm text-label-sm text-tertiary">14.3% Reply Rate</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 2: Dual Column Layout (60% Table / 40% Control Hub) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+<!-- Left Column: Lead Overview Table (7 cols out of 12 = ~58-60%) -->
+<div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Table Header / Toolbar -->
+<div class="p-space-lg flex flex-col sm:flex-row sm:items-center justify-between gap-space-md bg-surface-container-lowest">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Target Lead Feed</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Qualified accounts ranked by intent scoring &amp; market proximity</p>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="relative">
+<input class="pl-8 pr-space-md py-1.5 rounded-lg bg-surface-container-low text-on-surface text-body-sm font-body-sm focus:outline-none focus:ring-1 focus:ring-primary w-48 transition-all" placeholder="Search target leads..." type="text"/>
+<span class="material-symbols-outlined text-[16px] text-outline absolute left-2.5 top-2.5">search</span>
+</div>
+<button class="p-1.5 rounded-lg bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-space-md px-space-lg">Lead &amp; Organization</th>
+<th class="py-space-md px-space-md">Title</th>
+<th class="py-space-md px-space-md text-center">Fit Score</th>
+<th class="py-space-md px-space-md">Intent Surge</th>
+<th class="py-space-md px-space-md">Pipeline State</th>
+<th class="py-space-md px-space-lg text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low text-body-md font-body-md">
+<!-- Row 1: Marcus Vance -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group">
+<td class="py-space-md px-space-lg">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-label-md text-primary font-semibold shrink-0">
+                        MV
+                      </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate group-hover:text-primary transition-colors">Marcus Vance</span>
+<div class="flex items-center gap-1 font-body-sm text-body-sm text-outline truncate">
+<span class="material-symbols-outlined text-[13px]">corporate_fare</span>
+<span>Nordix Cloud Systems</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm text-on-surface">VP Revenue Ops</span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full font-code-sm text-code-sm font-semibold bg-tertiary-fixed/30 text-tertiary">
+                      96%
+                    </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-error-container text-on-error-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+                      High Surge
+                    </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm text-tertiary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+                      Ready for Outreach
+                    </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="inline-flex items-center gap-1 px-space-md py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm hover:bg-secondary transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[14px]">edit_note</span>
+<span>Draft Email</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Elena Rostova -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group">
+<td class="py-space-md px-space-lg">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-label-md text-primary font-semibold shrink-0">
+                        ER
+                      </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate group-hover:text-primary transition-colors">Elena Rostova</span>
+<div class="flex items-center gap-1 font-body-sm text-body-sm text-outline truncate">
+<span class="material-symbols-outlined text-[13px]">corporate_fare</span>
+<span>Veloce Security AI</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm text-on-surface">Head of Growth</span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full font-code-sm text-code-sm font-semibold bg-tertiary-fixed/30 text-tertiary">
+                      92%
+                    </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-surface-container-high text-primary font-medium">
+                      Series B Funded
+                    </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm text-tertiary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+                      Ready for Outreach
+                    </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="inline-flex items-center gap-1 px-space-md py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm hover:bg-secondary transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[14px]">edit_note</span>
+<span>Draft Email</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Liam Chen -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group">
+<td class="py-space-md px-space-lg">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-label-md text-primary font-semibold shrink-0">
+                        LC
+                      </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate group-hover:text-primary transition-colors">Liam Chen</span>
+<div class="flex items-center gap-1 font-body-sm text-body-sm text-outline truncate">
+<span class="material-symbols-outlined text-[13px]">corporate_fare</span>
+<span>Aethelgard Logistics</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm text-on-surface">Chief Commercial Officer</span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full font-code-sm text-code-sm font-semibold bg-primary-fixed text-primary">
+                      88%
+                    </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">
+                      SDR Hiring Blitz
+                    </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">hourglass_top</span>
+                      Reviewing
+                    </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="inline-flex items-center gap-1 px-space-md py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm hover:bg-surface-container-highest transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+<span>View Lead</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Priya Patel -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group">
+<td class="py-space-md px-space-lg">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-label-md text-primary font-semibold shrink-0">
+                        PP
+                      </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate group-hover:text-primary transition-colors">Priya Patel</span>
+<div class="flex items-center gap-1 font-body-sm text-body-sm text-outline truncate">
+<span class="material-symbols-outlined text-[13px]">corporate_fare</span>
+<span>Datastream IO</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm text-on-surface">VP Sales</span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full font-code-sm text-code-sm font-semibold bg-primary-fixed text-primary">
+                      85%
+                    </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-surface-variant text-on-surface-variant font-medium">
+                      Tech Stack Migration
+                    </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm text-tertiary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+                      Ready for Outreach
+                    </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="inline-flex items-center gap-1 px-space-md py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm hover:bg-secondary transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[14px]">edit_note</span>
+<span>Draft Email</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer Pagination/Status -->
+<div class="px-space-lg py-space-md bg-surface-container-low flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline">Displaying 4 of 42 high-confidence targets</span>
+<div class="flex items-center gap-space-xs">
+<a class="font-label-sm text-label-sm text-primary hover:underline inline-flex items-center gap-1" href="javascript:void(0)">
+<span>View all leads</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Inline Visual Context / Strategic Insight Bar -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[24px]">insights</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold">AI Pattern Detected</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Accounts undergoing 'Sales Ops Tool Consolidation' have converted 3.2x faster this week. 8 accounts fit this profile.</p>
+</div>
+<button class="shrink-0 px-space-md py-1 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors" type="button">
+            Analyze Cluster
+          </button>
+</div>
+</div>
+<!-- Right Column: Control & Velocity Cards (5 cols out of 12 = ~40-42%) -->
+<div class="lg:col-span-5 xl:col-span-4 flex flex-col gap-space-lg">
+<!-- Card 1: Active ICP Snapshot -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between pb-space-sm border-b border-surface-container-low">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">target</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Active ICP Snapshot</h3>
+</div>
+<span class="font-code-sm text-code-sm px-2 py-0.5 rounded bg-tertiary-fixed/30 text-tertiary font-semibold">V2.4 Active</span>
+</div>
+<div class="mt-space-md flex flex-col gap-space-md">
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block mb-1">Target Segment</span>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Mid-Market B2B SaaS &amp; DevTools</p>
+<span class="font-code-sm text-code-sm text-on-surface-variant">$2M – $25M ARR Range</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block mb-1">Target Roles</span>
+<div class="flex flex-wrap gap-1 mt-1">
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container-high text-on-surface">VP Sales</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container-high text-on-surface">Head of RevOps</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container-high text-on-surface">Chief Revenue Officer</span>
+</div>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block mb-1">Geography Focus</span>
+<div class="flex items-center gap-2 text-on-surface font-body-sm text-body-sm mt-0.5">
+<span class="material-symbols-outlined text-[16px] text-outline">public</span>
+<span>North America, Western Europe (Tier 1)</span>
+</div>
+</div>
+</div>
+<div class="mt-space-lg pt-space-md border-t border-surface-container-low flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline">Last refined 3d ago</span>
+<a class="font-label-md text-label-md text-primary hover:text-secondary inline-flex items-center gap-1 font-semibold group transition-colors" href="javascript:void(0)">
+<span>View / Edit ICP</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Card 2: GTM Pipeline Velocity / Activity -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between pb-space-sm border-b border-surface-container-low">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">speed</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Pipeline Velocity</h3>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Weekly Target</span>
+</div>
+<div class="mt-space-md flex flex-col gap-space-md">
+<!-- Metric 1: Researched Prospects -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-baseline">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Researched Prospects</span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">128 <span class="text-outline font-normal">/ 150</span></span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-500" style="width: 85%;"></div>
+</div>
+</div>
+<!-- Metric 2: Leads Qualified -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-baseline">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Leads Qualified</span>
+<span class="font-code-sm text-code-sm text-tertiary font-semibold">42 <span class="text-outline font-normal">(32.8% rate)</span></span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full rounded-full transition-all duration-500" style="width: 68%;"></div>
+</div>
+</div>
+<!-- Metric 3: Outreach Drafted -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-baseline">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Outreach Drafted</span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">28 accounts</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary-container h-full rounded-full transition-all duration-500" style="width: 52%;"></div>
+</div>
+</div>
+<!-- Metric 4: Active Responses -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-baseline">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Active Responses</span>
+<span class="font-code-sm text-code-sm text-tertiary font-semibold">6 positive replies</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-fixed-dim h-full rounded-full transition-all duration-500" style="width: 44%;"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Action CTA -->
+<div class="mt-space-lg pt-space-md">
+<button class="w-full py-space-sm px-space-md rounded-lg bg-primary-container text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-space-xs hover:bg-secondary transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+<span>Launch New GTM Research</span>
+</button>
+</div>
+</div>
+<!-- Bonus Tactical Agent Visual Widget -->
+<div class="bg-surface-container-high/60 p-space-md rounded-xl flex items-center gap-space-md">
+<img class="w-12 h-12 rounded-lg object-cover shadow-sm shrink-0" data-alt="A clean corporate analytical data rendering showing network clusters and sales pipeline velocity nodes, muted blue and cool slate tones, minimalistic SaaS styling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBP98clRRzUEItNv7wmL1fSzg8V2Uw2o8ZAg1fJUpYi4eFtLe_WUXlnklCm0yLI57LAcQuZT8uTherw3v6ZNZFI8lIv3JESgi-ohWdE143NpnCrgVAXxAUFFUHwWAdo3wKB3PjIgxFQ3cvX7w2kVYSZNLH96eVfeE-H7yjC8kCJ3T2PR0Blm8IxRSbkc8UcZw-18eoJW0XT8-tuFFnDSA_iU5TmT9E9uDjpDsYjKEE_3c_aQPTy_DJq"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wide">Next Autonomous Batch</span>
+<span class="font-body-sm text-body-sm text-on-surface truncate">Triggering enrichment for 18 Series B targets at 14:00 EST</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/leads.js"></script>
+{% endblock %}

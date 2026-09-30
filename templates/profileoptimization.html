@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+{% block title %}Fameweb{% endblock %}
+{% block content %}
+<div class="flex flex-col w-full">
+<div class="px-space-xl py-space-lg flex flex-col gap-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-space-md">
+<div class="flex flex-col">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Profile Optimization</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Improve your professional profile for your GTM goals.</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-high text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-tertiary">verified</span>
+<span class="font-label-sm text-label-sm">Profile Sync: 18m ago</span>
+</div>
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 bg-surface-container text-on-surface rounded-lg hover:bg-surface-container-highest transition-colors font-label-md text-label-md" id="export-summary-btn">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Executive Brief</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<div class="lg:col-span-4 flex flex-col gap-space-lg">
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="relative shrink-0">
+<img alt="Sarah Jenkins" class="w-20 h-20 rounded-full object-cover shadow-sm ring-4 ring-surface-container-low" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqaMPD789AAkt9VatCyAaFw5ZZQH6kJZ3QNZv3Jf91eN2Ms8weqJubSrY6izoGpke7BQJjc1V0-m3vDuC8TbhPNcrfbFqV4Ogc6-vhf_AfXEkvGYYb3s2rByz2aH3bVX7u86B4ZaNZhMK3tE_jwjb6PYC_cTWL6Ao6CxLeaOdJo62uPiMEBmWld55eOaTpJ9JUFXKUtBrJJ11n-AmF1dlfIuVGz-au5Di7augGkbfQ-9zv4HXn58mD"/>
+<span class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-tertiary flex items-center justify-center text-on-tertiary shadow-sm">
+<span class="material-symbols-outlined text-[12px]">check</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-md text-headline-md text-on-surface truncate">Sarah Jenkins</h2>
+</div>
+<span class="font-label-md text-label-md text-primary font-semibold truncate">Head of Growth &amp; GTM Strategy</span>
+<div class="flex items-center gap-1 text-on-surface-variant mt-1">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="font-body-sm text-body-sm">San Francisco Bay Area</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Current Headline</span>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+              Head of Growth at Fameweb | Scaling B2B Pipeline &amp; Intelligent Outbound Automation
+            </p>
+</div>
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Target Audience (ICP)</span>
+<div class="flex flex-wrap gap-1.5 mt-1">
+<span class="px-space-sm py-1 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-lg">VPs of Sales</span>
+<span class="px-space-sm py-1 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-lg">RevOps Leaders</span>
+<span class="px-space-sm py-1 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-lg">B2B Founders</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">GTM Profile Score</span>
+<span class="font-headline-md text-headline-md text-on-surface">Optimization Gauge</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">Tier 1 Target</span>
+</div>
+<div class="flex items-center justify-center py-space-xs">
+<div class="relative w-44 h-44 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 160 160">
+<circle class="text-surface-container" cx="80" cy="80" fill="transparent" r="68" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary-container" cx="80" cy="80" fill="transparent" id="radial-progress-circle" r="68" stroke="currentColor" stroke-dasharray="427.25" stroke-dashoffset="94" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<div class="flex items-baseline">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight">78</span>
+<span class="font-body-md text-body-md text-outline">/100</span>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center gap-0.5 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> Strong Impact
+                </span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-space-md pt-space-xs">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface-variant">Headline Impact</span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">70%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-amber-500 rounded-full transition-all duration-700" style="width: 70%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface-variant">Outcome Evidence</span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">65%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-amber-500 rounded-full transition-all duration-700" style="width: 65%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface-variant">Keyword Alignment</span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">92%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full transition-all duration-700" style="width: 92%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface-variant">Social Proof</span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">85%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary-container rounded-full transition-all duration-700" style="width: 85%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-sm">
+<button class="w-full flex items-center justify-center gap-space-sm px-space-md py-3 bg-primary-container text-on-primary rounded-lg font-label-md text-label-md hover:bg-secondary transition-all shadow-sm active:scale-[0.98]" id="generate-suggestions-btn">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+<span>Generate Suggestions</span>
+</button>
+<button class="w-full flex items-center justify-center gap-space-sm px-space-md py-2.5 bg-surface-container-low text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container transition-colors" id="refresh-data-btn">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+<span>Refresh Profile Data</span>
+</button>
+</div>
+<div class="flex items-start gap-space-sm p-space-sm bg-surface-container-low rounded-lg">
+<span class="material-symbols-outlined text-[18px] text-outline shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-snug">
+              Fameweb analyzes your copy against high-converting executive profiles in your ICP. No automated changes are pushed to LinkedIn.
+            </p>
+</div>
+</div>
+</div>
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<h2 class="font-headline-md text-headline-md text-on-surface">Actionable Suggestions</h2>
+<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-label-sm text-label-sm">4 Priorities</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-3 py-1 bg-surface-container-high text-on-surface font-label-sm text-label-sm rounded-lg">All (4)</button>
+<button class="px-3 py-1 bg-surface-container-lowest text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded-lg">High Impact</button>
+<button class="px-3 py-1 bg-surface-container-lowest text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded-lg">Draft Stage</button>
+</div>
+</div>
+<div class="flex flex-col gap-space-lg">
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">title</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Headline Optimization</h3>
+<span class="font-body-sm text-body-sm text-outline">Primary profile hook &amp; direct search ranker</span>
+</div>
+</div>
+<span class="px-space-sm py-0.5 rounded-full bg-amber-100 text-amber-900 font-label-sm text-label-sm font-semibold shrink-0">High Priority</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start gap-space-sm bg-surface-container-low p-space-md rounded-lg">
+<span class="material-symbols-outlined text-[18px] text-amber-700 shrink-0 mt-0.5">report_problem</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase">Identified Weakness</span>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Current headline lists generic responsibilities rather than quantified enterprise outcomes.</p>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs p-space-md bg-surface-container-lowest rounded-lg">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Recommended Copy</span>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +34% Predicted Connection Acceptance
+                  </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface font-medium italic mt-1 bg-surface-container-low p-space-sm rounded-lg" id="rec-headline-text">
+                  "Helping B2B SaaS teams convert 3x more pipeline with autonomous speed-to-lead qualification."
+                </p>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-sm pt-space-xs">
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 bg-surface-container text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-highest transition-colors" onclick="copyToClipboard('rec-headline-text', this)">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span>Copy Suggestion</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 bg-primary-container text-on-primary rounded-lg font-label-md text-label-md hover:bg-secondary transition-colors" onclick="applyToDraft(this, 'Headline updated in draft')">
+<span class="material-symbols-outlined text-[16px]">assignment_turned_in</span>
+<span>Apply to Draft</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">subject</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">About / Summary Section</h3>
+<span class="font-body-sm text-body-sm text-outline">Executive summary &amp; conversion copy</span>
+</div>
+</div>
+<span class="px-space-sm py-0.5 rounded-full bg-amber-100 text-amber-900 font-label-sm text-label-sm font-semibold shrink-0">High Priority</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start gap-space-sm bg-surface-container-low p-space-md rounded-lg">
+<span class="material-symbols-outlined text-[18px] text-amber-700 shrink-0 mt-0.5">report_problem</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase">Identified Weakness</span>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">The opening paragraph focuses on personal history rather than your prospect's pain point.</p>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs p-space-md bg-surface-container-lowest rounded-lg">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Recommended Hook</span>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">flash_on</span> Retains ICP Decision-Maker Attention
+                  </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface font-medium italic mt-1 bg-surface-container-low p-space-sm rounded-lg" id="rec-about-text">
+                  "Most RevOps leaders lose 40% of inbound meetings due to slow response times. Over the past 7 years, I've designed and executed predictable revenue flywheels that bridge SDR response latency down to zero."
+                </p>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-sm pt-space-xs">
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 bg-surface-container text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-highest transition-colors" onclick="copyToClipboard('rec-about-text', this)">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span>Copy Suggestion</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 bg-primary-container text-on-primary rounded-lg font-label-md text-label-md hover:bg-secondary transition-colors" onclick="applyToDraft(this, 'Summary hook applied to draft')">
+<span class="material-symbols-outlined text-[16px]">assignment_turned_in</span>
+<span>Apply to Draft</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">work_history</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Experience Section</h3>
+<span class="font-body-sm text-body-sm text-outline">Historical execution proof &amp; validation</span>
+</div>
+</div>
+<span class="px-space-sm py-0.5 rounded-full bg-blue-100 text-blue-900 font-label-sm text-label-sm font-semibold shrink-0">Medium Priority</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start gap-space-sm bg-surface-container-low p-space-md rounded-lg">
+<span class="material-symbols-outlined text-[18px] text-blue-700 shrink-0 mt-0.5">info</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase">Identified Weakness</span>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Prior role at DataPulse lacks hard metrics and conversion proof.</p>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs p-space-md bg-surface-container-lowest rounded-lg">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Recommended Bullet Insertion</span>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">query_stats</span> Verified Credibility Boost
+                  </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface font-medium italic mt-1 bg-surface-container-low p-space-sm rounded-lg" id="rec-exp-text">
+                  "Scaled outbound qualified pipeline from $1.2M to $8.4M ARR in 14 months by instrumenting automated buyer-intent signals and persona routing."
+                </p>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-sm pt-space-xs">
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 bg-surface-container text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-highest transition-colors" onclick="copyToClipboard('rec-exp-text', this)">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span>Copy Suggestion</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">award_star</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Skills &amp; Industry Endorsements</h3>
+<span class="font-body-sm text-body-sm text-outline">Search query alignment &amp; discovery rank</span>
+</div>
+</div>
+<span class="px-space-sm py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold shrink-0">Low Priority</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start gap-space-sm bg-surface-container-low p-space-md rounded-lg">
+<span class="material-symbols-outlined text-[18px] text-outline shrink-0 mt-0.5">tune</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase">Identified Weakness</span>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Top 3 pinned skills do not mirror your ICP's priority search queries.</p>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs p-space-md bg-surface-container-lowest rounded-lg">
+<span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Priority Alignment Order</span>
+<div class="flex flex-wrap gap-space-xs mt-1">
+<div class="flex items-center gap-1.5 px-space-md py-1.5 bg-surface-container rounded-lg">
+<span class="w-4 h-4 rounded-full bg-primary text-on-primary font-code-sm text-[10px] flex items-center justify-center">1</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">Pipeline Velocity</span>
+</div>
+<div class="flex items-center gap-1.5 px-space-md py-1.5 bg-surface-container rounded-lg">
+<span class="w-4 h-4 rounded-full bg-primary text-on-primary font-code-sm text-[10px] flex items-center justify-center">2</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">RevOps Architecture</span>
+</div>
+<div class="flex items-center gap-1.5 px-space-md py-1.5 bg-surface-container rounded-lg">
+<span class="w-4 h-4 rounded-full bg-primary text-on-primary font-code-sm text-[10px] flex items-center justify-center">3</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">Outbound Intelligence</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-sm pt-space-xs">
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 bg-surface-container text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-highest transition-colors" id="reorder-skills-btn">
+<span class="material-symbols-outlined text-[16px]">low_priority</span>
+<span>Reorder Skills</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-6 right-6 flex items-center gap-space-sm px-space-lg py-space-md bg-inverse-surface text-inverse-on-surface rounded-xl shadow-xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50" id="toast-notification">
+<span class="material-symbols-outlined text-tertiary-fixed text-[20px]">check_circle</span>
+<span class="font-label-md text-label-md" id="toast-message">Action successful</span>
+</div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/profile-optimization.js"></script>
+{% endblock %}

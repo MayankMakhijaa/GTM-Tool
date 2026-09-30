@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "status-score-high-text": "#1D4ED8", "background": "#f8f9ff", "on-error-container": "#93000a", "on-background": "#0b1c30", "error-container": "#ffdad6", "on-surface-variant": "#414752", "surface-bright": "#f8f9ff", "secondary-fixed-dim": "#bec6e0", "tertiary-fixed": "#6ffbbe", "on-tertiary-fixed": "#002113", "inverse-on-surface": "#eaf1ff", "surface-subtle": "#F1F5F9", "primary-fixed-dim": "#a8c8ff", "on-tertiary": "#ffffff", "text-secondary": "#475569", "tertiary-fixed-dim": "#4edea3", "on-tertiary-fixed-variant": "#005236", "primary-fixed": "#d6e3ff", "tertiary": "#005b3d", "primary-container": "#0a66c2", "status-success-border": "#A7F3D0", "on-secondary-fixed": "#131b2e", "status-score-high-bg": "#EFF6FF", "surface-tint": "#005eb5", "on-primary-container": "#dbe6ff", "surface-dim": "#cbdbf5", "inverse-surface": "#213145", "on-secondary": "#ffffff", "on-surface": "#0b1c30", "status-success-text": "#047857", "outline": "#727783", "surface-variant": "#d3e4fe", "error": "#ba1a1a", "surface-container-high": "#dce9ff", "secondary-fixed": "#dae2fd", "on-tertiary-container": "#76ffc2", "border-default": "#E2E8F0", "border-focus": "#0A66C2", "surface": "#f8f9ff", "border-hover": "#CBD5E1", "text-primary": "#0F172A", "inverse-primary": "#a8c8ff", "on-primary-fixed": "#001b3d", "secondary": "#565e74", "status-success-bg": "#ECFDF5", "surface-canvas": "#F8FAFC", "on-primary": "#ffffff", "surface-container-lowest": "#ffffff", "on-primary-fixed-variant": "#00468a", "on-error": "#ffffff", "primary": "#004e99", "outline-variant": "#c1c6d4", "text-muted": "#94A3B8", "on-secondary-fixed-variant": "#3f465c", "on-secondary-container": "#5c647a", "surface-card": "#FFFFFF", "surface-container-low": "#eff4ff", "surface-container": "#e5eeff", "secondary-container": "#dae2fd", "surface-container-highest": "#d3e4fe", "tertiary-container": "#007650" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-lg": "1.5rem", "space-sm": "0.5rem", "gutter": "1.5rem", "space-md": "1rem", "space-xs": "0.25rem", "margin": "2rem", "space-xl": "2rem" }, "fontFamily": { "headline-sm": ["Geist"], "headline-lg": ["Geist"], "body-sm": ["Geist"], "headline-lg-mobile": ["Geist"], "body-md": ["Geist"], "label-sm": ["Geist"], "stat-value": ["Geist"], "body-lg": ["Geist"], "table-header": ["Geist"], "table-cell": ["Geist"], "headline-md": ["Geist"], "label-md": ["Geist"] }, "fontSize": { "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "stat-value": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "table-header": ["12px", { "lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600" }], "table-cell": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+<aside id="app-sidebar" class="fixed left-0 top-0 h-full w-60 bg-surface-card z-50 flex flex-col justify-between py-space-lg px-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] hidden">
+<div class="flex flex-col gap-space-lg">
+<div class="flex items-center gap-space-sm px-space-xs cursor-pointer" onclick="switchTab('dashboard')">
+<div class="w-8 h-8 rounded-xl bg-primary-container flex items-center justify-center text-on-primary font-headline-sm text-headline-sm">L</div>
+<span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">LinkedIn Growth</span>
+</div>
+<nav class="flex flex-col gap-space-xs" id="main-nav">
+<!-- Dashboard Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl transition-colors bg-status-score-high-bg text-primary-container font-label-md" data-path="dashboard" id="nav-dashboard" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span>Dashboard</span>
+</a>
+
+<!-- Profile Optimization Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="profile-optimization" id="nav-profile-optimization" href="#">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+<span>Profile Optimization</span>
+</a>
+
+<!-- GTM Opportunities Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="gtm-opportunities" id="nav-gtm-opportunities" href="#">
+<span class="material-symbols-outlined text-[20px]">explore</span>
+<span>GTM Opportunities</span>
+</a>
+
+<!-- Lead Gen via Post Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="lead-gen-post" id="nav-lead-gen-post" href="#">
+<span class="material-symbols-outlined text-[20px]">post_add</span>
+<span>Lead Gen via Post</span>
+</a>
+
+<!-- Email Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="email" id="nav-email" href="#">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+<span>Email</span>
+</a>
+
+<!-- History Nav Link -->
+<a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-text-secondary hover:bg-surface-subtle hover:text-on-surface transition-colors font-body-md text-body-md" data-path="history" id="nav-history" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span>History</span>
+</a>
+</nav>
+</div>
+<div class="px-space-xs pt-space-md border-t border-border-default/60 flex flex-col gap-2">
+<div class="p-space-sm rounded-xl bg-surface-canvas flex items-center gap-space-sm">
+<div id="sidebar-user-avatar" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 overflow-hidden text-on-primary font-bold">
+<span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span id="sidebar-user-name" class="font-label-md text-label-md text-text-primary truncate">LinkedIn Member</span>
+<span id="sidebar-user-status" class="font-label-sm text-label-sm text-status-success-text truncate font-medium">Connected</span>
+</div>
+</div>
+<button id="sidebar-app-logout-btn" type="button" class="w-full py-1.5 px-3 rounded-xl bg-surface-subtle hover:bg-error-container/40 text-text-secondary hover:text-error transition-colors font-label-md text-label-md flex items-center justify-center gap-1.5 border border-border-default/60">
+<span class="material-symbols-outlined text-[16px]">logout</span>
+<span>Log Out</span>
+</button>
+</div>
+</aside>
+
+<div id="main-content-wrapper" class="pl-0 min-h-screen flex flex-col transition-all duration-200">
+<header id="app-header" class="fixed top-0 left-0 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 flex items-center justify-between px-margin gap-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] transition-all duration-200">
+<div class="flex items-center gap-2">
+<span id="header-brand-title" class="font-headline-sm text-headline-sm text-text-primary">LinkedIn Lead Generator</span>
+</div>
+<div class="flex items-center gap-3">
+<div id="header-user-badge" class="hidden items-center gap-2 bg-surface-card px-3 py-1.5 rounded-full border border-border-default shadow-sm">
+<div id="header-user-avatar" class="w-6 h-6 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-[11px] font-bold overflow-hidden">
+<span class="material-symbols-outlined text-[14px]">person</span>
+</div>
+<span id="header-user-name" class="font-label-md text-label-md text-text-primary font-semibold truncate max-w-[160px]">LinkedIn Member</span>
+</div>
+<button id="header-app-logout-btn" type="button" class="hidden items-center gap-1 px-3 py-1.5 rounded-full bg-surface-canvas hover:bg-surface-subtle text-text-secondary hover:text-error font-label-sm text-label-sm border border-border-default transition-all">
+<span class="material-symbols-outlined text-[16px]">logout</span>
+<span>Log Out</span>
+</button>
+</div>
+</header>
+
+<main class="w-full pt-16 flex-1 bg-surface">
+<div class="max-w-[1200px] mx-auto px-margin py-space-xl flex flex-col gap-space-xl">
+<div class="flex flex-col w-full">
+
+<!-- 1. Logged-Out Landing / Welcome Page Container -->
+<div id="view-welcome-page" class="flex flex-col gap-space-xl w-full max-w-4xl mx-auto py-12">
+<div class="bg-surface-card rounded-2xl p-8 sm:p-12 shadow-md border border-border-default/80 flex flex-col items-center text-center gap-6">
+<div class="w-16 h-16 rounded-2xl bg-primary-container text-on-primary flex items-center justify-center text-3xl font-bold shadow-sm">
+L
+</div>
+<div class="flex flex-col gap-2 max-w-2xl">
+<h1 class="font-headline-lg text-3xl sm:text-4xl text-text-primary tracking-tight font-bold">
+Welcome Page
+</h1>
+<p class="font-body-md text-lg text-text-secondary">
+Automate B2B lead generation, optimize profile positioning for your ICP, and discover high-intent GTM opportunities using AI.
+</p>
+</div>
+
+<div class="pt-4 flex flex-col w-full max-w-md mx-auto gap-4" id="auth-forms-container">
+    <div id="login-form-wrapper" class="flex flex-col gap-4">
+        <h3 class="font-headline-sm text-text-primary text-center">Log In to Fameweb</h3>
+        <input type="text" id="login-identifier" placeholder="Email or Phone" class="h-10 px-3 rounded-lg border border-border-default focus:border-border-focus outline-none" />
+        <input type="password" id="login-password" placeholder="Password" class="h-10 px-3 rounded-lg border border-border-default focus:border-border-focus outline-none" />
+        <button id="auth-login-btn" type="button" class="w-full h-10 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-headline-sm transition-all shadow-md">Log In</button>
+        <div id="login-error" class="text-error text-center hidden"></div>
+        <button type="button" id="show-signup-btn" class="text-primary-container text-sm hover:underline text-center">Don't have an account? Sign up</button>
+    </div>
+    
+    <div id="signup-form-wrapper" class="flex flex-col gap-4 hidden">
+        <h3 class="font-headline-sm text-text-primary text-center">Create Fameweb Account</h3>
+        <input type="text" id="signup-name" placeholder="Full Name" class="h-10 px-3 rounded-lg border border-border-default focus:border-border-focus outline-none" />
+        <input type="email" id="signup-email" placeholder="Email Address" class="h-10 px-3 rounded-lg border border-border-default focus:border-border-focus outline-none" />
+        <input type="tel" id="signup-phone" placeholder="Phone Number (e.g. +1234567890)" class="h-10 px-3 rounded-lg border border-border-default focus:border-border-focus outline-none" />
+        <input type="password" id="signup-password" placeholder="Password (min 8 chars)" class="h-10 px-3 rounded-lg border border-border-default focus:border-border-focus outline-none" />
+        <button id="auth-signup-btn" type="button" class="w-full h-10 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-headline-sm transition-all shadow-md">Sign Up</button>
+        <div id="signup-error" class="text-error text-center hidden"></div>
+        <button type="button" id="show-login-btn" class="text-primary-container text-sm hover:underline text-center">Already have an account? Log in</button>
+    </div>
+</div>
+
+<div class="pt-6 border-t border-border-default/60 w-full grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+<div class="p-4 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]">auto_awesome</span>
+<span class="font-headline-sm text-label-md text-text-primary">Profile Optimization</span>
+<span class="font-body-sm text-body-sm text-text-muted">Align your profile headline & about section to attract your target ICP.</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]">explore</span>
+<span class="font-headline-sm text-label-md text-text-primary">GTM Opportunities</span>
+<span class="font-body-sm text-body-sm text-text-muted">Discover buying intent and timing triggers across target companies.</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-canvas border border-border-default/50 flex flex-col gap-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]">post_add</span>
+<span class="font-headline-sm text-label-md text-text-primary">Lead Gen via Post</span>
+<span class="font-body-sm text-body-sm text-text-muted">Qualify comments from LinkedIn posts and export clean Excel files.</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 2. Main Dashboard Tile / Card View Container -->
+<div id="view-main-dashboard" class="hidden flex-col gap-space-xl w-full">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 id="main-dashboard-welcome-heading" class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Main Dashboard</h1>
+<span class="px-3 py-1 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm font-semibold border border-status-success-border">Active Session</span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Select an application module to begin your outreach workflow.</p>
+</div>
+
+<!-- Card Tile Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
+<!-- Card 1: Profile Optimization -->
+<div onclick="switchTab('profile-optimization')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">auto_awesome</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">Profile Optimization</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Position your LinkedIn profile to attract your target ICP based on your offer and value proposition.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>Open Module</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+
+<!-- Card 2: GTM Opportunities -->
+<div onclick="switchTab('gtm-opportunities')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">explore</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">GTM Opportunities</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Discover target companies with active timing triggers, intent signals, and strategic alignment.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>Explore Opportunities</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+
+<!-- Card 3: Lead Gen via Post -->
+<div onclick="switchTab('lead-gen-post')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">post_add</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">Lead Gen via Post</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Extract, clean, and score raw post comments using AI qualification and export to Excel.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>Launch Generator</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+
+<!-- Card 4: Email -->
+<div onclick="switchTab('email')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">mail</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">Email Leads</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">View consolidated deduplicated leads with public email addresses ready for email outreach.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>View Email Leads</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+
+<!-- Card 5: History -->
+<div onclick="switchTab('history')" class="bg-surface-card rounded-2xl p-space-lg shadow-sm border border-border-default hover:border-primary-container/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-6 group">
+<div class="flex flex-col gap-3">
+<div class="w-12 h-12 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">history</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-text-primary group-hover:text-primary-container transition-colors">Lead History</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Access complete deduplicated historical database of leads extracted across all past runs.</p>
+</div>
+</div>
+<div class="flex items-center text-primary-container font-label-md text-label-md font-semibold gap-1 pt-2">
+<span>Browse History</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 3. Lead Gen via Post Module Container (formerly Dashboard) -->
+<div id="view-lead-gen-post" class="hidden flex-col gap-space-lg w-full">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Lead Gen via Post</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-success-text"></span>
+<span class="font-label-sm text-label-sm text-text-secondary">Engine Ready</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Generate qualified leads from LinkedIn post comments.</p>
+</div>
+
+<!-- LinkedIn Comments Input Terminal Section -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-text-primary flex items-center gap-1.5" for="linkedin-comments">
+<span class="material-symbols-outlined text-[18px] text-primary-container">content_paste</span>
+<span>Paste LinkedIn Comments</span>
+</label>
+<span class="font-label-sm text-label-sm text-text-muted">Raw copy-paste from LinkedIn</span>
+</div>
+<div class="flex flex-col items-stretch gap-space-sm pt-1">
+<div class="relative w-full">
+<textarea class="w-full min-h-[140px] p-3.5 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container resize-y" id="linkedin-comments" placeholder="Paste messy/raw LinkedIn comments here... e.g. Amogh Misra • 1st Co-Founder & CEO at ScaleUp AI... Interested in testing..."></textarea>
+</div>
+<div class="flex justify-end pt-1">
+<button class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="generate-leads-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+<span>Generate Leads</span>
+</button>
+</div>
+</div>
+</div>
+
+<!-- Execution Pipeline Visualizer -->
+<div class="pt-2">
+<div class="bg-surface-canvas rounded-xl p-space-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2">
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-score-high-bg text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">content_paste</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">1. Raw Paste</span>
+<span class="font-label-sm text-[10px] text-text-muted truncate">Unstructured text</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-text-muted hidden sm:block">arrow_forward</span>
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-score-high-bg text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">cleaning_services</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">2. Local Parser</span>
+<span class="font-label-sm text-[10px] text-text-muted truncate">Clean & structure</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-text-muted hidden sm:block">arrow_forward</span>
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-score-high-bg text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">filter_alt</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">3. Local Pre-Filter</span>
+<span class="font-label-sm text-[10px] text-text-muted truncate">Headline & noise</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-text-muted hidden sm:block">arrow_forward</span>
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-score-high-bg text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">neurology</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">4. Gemini AI Scoring</span>
+<span class="font-label-sm text-[10px] text-text-muted truncate">Qualification & intent</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-text-muted hidden sm:block">arrow_forward</span>
+<div class="flex items-center gap-2 flex-1 min-w-0">
+<div class="w-6 h-6 rounded-full bg-status-success-bg text-status-success-text flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">table_view</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-text-primary">5. Excel Export</span>
+<span class="font-label-sm text-[10px] text-status-success-text truncate">Ready (.xlsx)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Telemetry Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Metric 1: Comments Analyzed -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Comments Analyzed</span>
+<span class="font-stat-value text-stat-value text-text-primary tracking-tight">-</span>
+<span class="font-label-sm text-label-sm text-text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-status-success-text">check_circle</span>
+            100% thread extracted
+          </span>
+</div>
+<div class="w-11 h-11 rounded-xl bg-surface-subtle flex items-center justify-center text-text-secondary shrink-0">
+<span class="material-symbols-outlined text-[22px]">mode_comment</span>
+</div>
+</div>
+<!-- Metric 2: Qualified Leads -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Qualified Leads</span>
+<span class="font-stat-value text-stat-value text-text-primary tracking-tight">-</span>
+<span class="font-label-sm text-label-sm text-status-success-text flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+            B2B conversion yield
+          </span>
+</div>
+<div class="w-11 h-11 rounded-xl bg-status-score-high-bg flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-[22px]">group</span>
+</div>
+</div>
+<!-- Metric 3: Avg Intent Score -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Avg Lead Intent</span>
+<span class="font-stat-value text-stat-value text-text-primary tracking-tight">-<span class="font-body-sm text-body-sm text-text-muted font-normal">/100</span></span>
+<span class="font-label-sm text-label-sm text-text-secondary">High decision-maker density</span>
+</div>
+<div class="w-11 h-11 rounded-xl bg-surface-subtle flex items-center justify-center text-text-secondary shrink-0">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</div>
+</div>
+<!-- Metric 4: Processing Time -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">AI Run Duration</span>
+<span class="font-stat-value text-stat-value text-text-primary tracking-tight">-</span>
+<span class="font-label-sm text-label-sm text-text-secondary">Real-time processing</span>
+</div>
+<div class="w-11 h-11 rounded-xl bg-surface-subtle flex items-center justify-center text-text-secondary shrink-0">
+<span class="material-symbols-outlined text-[22px]">timer</span>
+</div>
+</div>
+</div>
+
+<!-- Main Table Container: Qualified Leads Results -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Section Header -->
+<div class="p-space-md bg-surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Lead Results</h2>
+<span class="px-2 py-0.5 rounded-full bg-status-score-high-bg text-status-score-high-text font-label-sm text-label-sm">Current Run</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Preview of generated Excel data (showing top qualified leads for current post)</p>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-text-muted">Sort:</span>
+<div class="px-2.5 py-1 rounded-lg bg-surface-canvas font-label-sm text-label-sm text-text-primary flex items-center gap-1 cursor-default">
+<span>Score (Highest first)</span>
+<span class="material-symbols-outlined text-[14px] text-text-muted">expand_more</span>
+</div>
+</div>
+</div>
+
+<!-- Tabular Data -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-canvas text-text-secondary font-table-header text-table-header uppercase">
+<th class="py-3 px-4 w-[40px]" scope="col"></th>
+<th class="py-3 px-4 w-[110px]" scope="col">Lead Score</th>
+<th class="py-3 px-4 w-[180px]" scope="col">Name</th>
+<th class="py-3 px-4 w-[170px]" scope="col">Company</th>
+<th class="py-3 px-4 w-[210px]" scope="col">Role</th>
+<th class="py-3 px-4 min-w-[280px]" scope="col">Business Need</th>
+<th class="py-3 px-4 w-[110px]" scope="col">Intent</th>
+<th class="py-3 px-4 w-[140px] text-right" scope="col">LinkedIn Profile</th>
+</tr>
+</thead>
+<tbody id="dashboard-table-body" class="divide-y-0 font-table-cell text-table-cell text-text-primary">
+<tr>
+<td colspan="7" class="py-8 text-center text-text-muted">
+No leads generated yet. Paste a LinkedIn post URL above to get started.
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- Action Footer / Export Bar -->
+<div class="p-space-md bg-surface-canvas/60 flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-2 text-text-secondary">
+<span class="material-symbols-outlined text-[18px] text-text-muted">info</span>
+<span class="font-body-sm text-body-sm text-text-secondary">
+            The complete dataset of qualified leads and extracted comments is included in the export.
+          </span>
+</div>
+<button class="w-full sm:w-auto h-10 px-5 rounded-xl bg-surface-card hover:bg-surface-subtle text-text-primary font-label-md text-label-md transition-colors flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] shrink-0" id="download-excel-btn" type="button">
+<svg class="w-4 h-4 text-status-success-text" fill="currentColor" viewbox="0 0 24 24">
+<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V9h12v2zm0-4H6V5h12v2z"></path>
+</svg>
+<span>Download Excel (.xlsx)</span>
+<span class="material-symbols-outlined text-[16px] text-text-muted">download</span>
+</button>
+</div>
+</div>
+</div>
+
+<!-- Profile Optimization View Container -->
+<div id="view-profile-optimization" class="flex flex-col gap-space-lg w-full hidden">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Profile Optimization</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-sm text-label-sm text-text-secondary">AI Career Brand Engine</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Analyze your LinkedIn profile and improve your positioning, content, and discoverability.</p>
+</div>
+
+<!-- LinkedIn Session Control Bar -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm border border-border-default/60">
+<div class="flex flex-col gap-2">
+  <div class="flex items-center gap-2">
+    <span class="font-label-md text-label-md text-text-primary font-semibold">LinkedIn Session:</span>
+    <div id="session-status-badge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-warning-bg text-status-warning-text font-label-sm text-label-sm font-medium border border-status-warning-border">
+      <span class="w-2 h-2 rounded-full bg-status-warning-text animate-pulse" id="session-status-dot"></span>
+      <span id="session-status-text">Checking Status...</span>
+    </div>
+  </div>
+  <!-- Connected User Profile Info Container -->
+  <div id="connected-profile-info" class="hidden flex items-center gap-3 pt-1">
+    <div id="connected-profile-avatar" class="w-9 h-9 rounded-full bg-primary-container text-on-primary font-bold flex items-center justify-center text-label-md overflow-hidden shrink-0 shadow-sm">
+      <span id="connected-profile-initials">U</span>
+    </div>
+    <div class="flex flex-col leading-tight">
+      <span id="connected-profile-name" class="font-label-md text-label-md text-text-primary font-semibold">User Name</span>
+      <span class="font-label-sm text-[11px] text-text-muted">Connected LinkedIn profile</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Editable Saved Context Summary Card -->
+<div id="po-gtm-context-card" class="bg-surface-card rounded-xl shadow-sm border border-border-default/60 flex flex-col gap-0 overflow-hidden">
+  <div class="flex items-center justify-between px-space-md pt-space-md pb-2 border-b border-border-default/50">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[20px] text-primary-container">tune</span>
+      <h2 class="font-headline-sm text-headline-sm text-text-primary">Your GTM Context</h2>
+    </div>
+    <span id="po-gtm-context-status" class="font-label-sm text-label-sm text-text-muted italic"></span>
+  </div>
+  <div class="p-space-md flex flex-col gap-space-md">
+    <div class="flex flex-col gap-1.5 gtm-field-group transition-opacity duration-200" id="po-gtm-field-group-offer">
+      <div class="flex items-center justify-between">
+        <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="po-gtm-ctx-offer">
+          <span class="material-symbols-outlined text-[16px]">sell</span>
+          <span>Offer</span>
+        </label>
+        <button class="ai-write-btn text-primary-container hover:text-primary font-label-sm text-[12px] flex items-center gap-1 transition-colors" type="button" data-field="Offer" data-target="po-gtm-ctx-offer" data-group="po-gtm-field-group-offer">
+          <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Write with AI
+        </button>
+      </div>
+      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="po-gtm-ctx-offer"></textarea>
+      
+      <div class="ai-panel hidden flex-col gap-3 mt-1 p-4 bg-surface-card border border-primary-container/40 rounded-xl shadow-md z-10 relative">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-[16px] text-primary-container">auto_awesome</span>
+          <span class="font-label-md text-text-primary font-semibold">Write with AI</span>
+        </div>
+        <textarea class="ai-instruction w-full min-h-[60px] p-2.5 rounded-lg bg-surface-canvas font-body-sm text-text-primary placeholder:text-text-muted border border-border-default focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none resize-y text-sm" placeholder="Describe what you want to say... (e.g. Make this sound more professional)"></textarea>
+        
+        <div class="ai-preview-container hidden p-3 bg-primary-fixed/20 rounded-lg border border-primary-container/20 mt-1">
+           <span class="font-label-sm text-text-secondary text-[11px] uppercase tracking-wider mb-1 block">Preview</span>
+           <p class="ai-preview-text font-body-sm text-text-primary whitespace-pre-wrap text-sm"></p>
+        </div>
+
+        <div class="flex items-center justify-between mt-1">
+           <button class="ai-cancel-btn text-text-secondary hover:text-text-primary font-label-sm text-sm transition-colors" type="button">Cancel</button>
+           <div class="flex items-center gap-2">
+             <button class="ai-rewrite-btn px-4 py-1.5 rounded-lg bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-sm transition-colors flex items-center gap-1.5" type="button">
+               <span class="material-symbols-outlined text-[16px]">refresh</span> <span class="btn-text">Rewrite</span>
+             </button>
+             <button class="ai-use-btn px-4 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-sm text-sm transition-colors font-medium flex items-center gap-1.5 shadow-sm hidden" type="button">
+               <span class="material-symbols-outlined text-[16px]">check</span> Use Answer
+             </button>
+           </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1.5 gtm-field-group transition-opacity duration-200" id="po-gtm-field-group-icp">
+      <div class="flex items-center justify-between">
+        <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="po-gtm-ctx-icp">
+          <span class="material-symbols-outlined text-[16px]">target</span>
+          <span>ICP</span>
+        </label>
+        <button class="ai-write-btn text-primary-container hover:text-primary font-label-sm text-[12px] flex items-center gap-1 transition-colors" type="button" data-field="ICP" data-target="po-gtm-ctx-icp" data-group="po-gtm-field-group-icp">
+          <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Write with AI
+        </button>
+      </div>
+      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="po-gtm-ctx-icp"></textarea>
+      
+      <div class="ai-panel hidden flex-col gap-3 mt-1 p-4 bg-surface-card border border-primary-container/40 rounded-xl shadow-md z-10 relative">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-[16px] text-primary-container">auto_awesome</span>
+          <span class="font-label-md text-text-primary font-semibold">Write with AI</span>
+        </div>
+        <textarea class="ai-instruction w-full min-h-[60px] p-2.5 rounded-lg bg-surface-canvas font-body-sm text-text-primary placeholder:text-text-muted border border-border-default focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none resize-y text-sm" placeholder="Describe what you want to say... (e.g. Make this sound more specific)"></textarea>
+        
+        <div class="ai-preview-container hidden p-3 bg-primary-fixed/20 rounded-lg border border-primary-container/20 mt-1">
+           <span class="font-label-sm text-text-secondary text-[11px] uppercase tracking-wider mb-1 block">Preview</span>
+           <p class="ai-preview-text font-body-sm text-text-primary whitespace-pre-wrap text-sm"></p>
+        </div>
+
+        <div class="flex items-center justify-between mt-1">
+           <button class="ai-cancel-btn text-text-secondary hover:text-text-primary font-label-sm text-sm transition-colors" type="button">Cancel</button>
+           <div class="flex items-center gap-2">
+             <button class="ai-rewrite-btn px-4 py-1.5 rounded-lg bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-sm transition-colors flex items-center gap-1.5" type="button">
+               <span class="material-symbols-outlined text-[16px]">refresh</span> <span class="btn-text">Rewrite</span>
+             </button>
+             <button class="ai-use-btn px-4 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-sm text-sm transition-colors font-medium flex items-center gap-1.5 shadow-sm hidden" type="button">
+               <span class="material-symbols-outlined text-[16px]">check</span> Use Answer
+             </button>
+           </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1.5 gtm-field-group transition-opacity duration-200" id="po-gtm-field-group-context">
+      <div class="flex items-center justify-between">
+        <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="po-gtm-ctx-context">
+          <span class="material-symbols-outlined text-[16px]">info</span>
+          <span>Additional Context</span>
+        </label>
+        <button class="ai-write-btn text-primary-container hover:text-primary font-label-sm text-[12px] flex items-center gap-1 transition-colors" type="button" data-field="Additional Context" data-target="po-gtm-ctx-context" data-group="po-gtm-field-group-context">
+          <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Write with AI
+        </button>
+      </div>
+      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="po-gtm-ctx-context"></textarea>
+      
+      <div class="ai-panel hidden flex-col gap-3 mt-1 p-4 bg-surface-card border border-primary-container/40 rounded-xl shadow-md z-10 relative">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-[16px] text-primary-container">auto_awesome</span>
+          <span class="font-label-md text-text-primary font-semibold">Write with AI</span>
+        </div>
+        <textarea class="ai-instruction w-full min-h-[60px] p-2.5 rounded-lg bg-surface-canvas font-body-sm text-text-primary placeholder:text-text-muted border border-border-default focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none resize-y text-sm" placeholder="Describe what you want to say..."></textarea>
+        
+        <div class="ai-preview-container hidden p-3 bg-primary-fixed/20 rounded-lg border border-primary-container/20 mt-1">
+           <span class="font-label-sm text-text-secondary text-[11px] uppercase tracking-wider mb-1 block">Preview</span>
+           <p class="ai-preview-text font-body-sm text-text-primary whitespace-pre-wrap text-sm"></p>
+        </div>
+
+        <div class="flex items-center justify-between mt-1">
+           <button class="ai-cancel-btn text-text-secondary hover:text-text-primary font-label-sm text-sm transition-colors" type="button">Cancel</button>
+           <div class="flex items-center gap-2">
+             <button class="ai-rewrite-btn px-4 py-1.5 rounded-lg bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-sm transition-colors flex items-center gap-1.5" type="button">
+               <span class="material-symbols-outlined text-[16px]">refresh</span> <span class="btn-text">Rewrite</span>
+             </button>
+             <button class="ai-use-btn px-4 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-sm text-sm transition-colors font-medium flex items-center gap-1.5 shadow-sm hidden" type="button">
+               <span class="material-symbols-outlined text-[16px]">check</span> Use Answer
+             </button>
+           </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-border-default/50 gap-4">
+      <span id="po-gtm-save-status" class="font-label-sm text-label-sm text-status-success-text opacity-0 transition-opacity whitespace-nowrap">Saved successfully!</span>
+      <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-end">
+        <button class="w-full sm:w-auto h-11 px-6 rounded-xl bg-surface-canvas hover:bg-surface-subtle text-text-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 border border-border-default/60 shrink-0 active:scale-[0.98]" id="po-gtm-save-btn" type="button">
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          <span>Save Changes</span>
+        </button>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Extraction Input Terminal Card -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-text-primary flex items-center gap-1.5" for="profile-url-input">
+<span class="material-symbols-outlined text-[18px] text-primary-container">link</span>
+<span>LinkedIn Profile</span>
+</label>
+<span class="font-label-sm text-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">lock</span> Authenticated Profile</span>
+</div>
+<div class="flex flex-col sm:flex-row items-stretch gap-space-sm pt-1">
+<div class="relative flex-1">
+  <input class="w-full h-11 pl-3.5 pr-10 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors border border-border-default/60 cursor-not-allowed opacity-90 font-mono text-sm" id="profile-url-input" placeholder="Connect LinkedIn to load your profile" type="text" readonly disabled/>
+  <span class="material-symbols-outlined text-[18px] text-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" title="Read-only: populated from authenticated LinkedIn session">lock</span>
+</div>
+<button class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-container" id="extract-profile-btn" type="button" disabled>
+<span class="material-symbols-outlined text-[18px]">person_search</span>
+<span id="extract-profile-btn-text">Extract Profile</span>
+</button>
+</div>
+</div>
+
+<!-- Extraction Type Selection Section -->
+<div class="flex flex-col gap-space-xs pt-3 border-t border-border-default/50">
+  <div class="flex items-center justify-between">
+    <label class="font-label-md text-label-md text-text-primary flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[18px] text-primary-container">tune</span>
+      <span>Extraction Type</span>
+    </label>
+    <span class="font-label-sm text-label-sm text-text-muted">Choose profile scope</span>
+  </div>
+  
+  <div class="flex items-center gap-6 pt-1">
+    <label class="flex items-center gap-2 cursor-pointer font-label-md text-label-md text-text-primary select-none">
+      <input type="radio" name="extraction-type" value="complete" id="ext-type-complete" checked class="w-4 h-4 text-primary-container accent-primary-container focus:ring-primary-container cursor-pointer"/>
+      <span>Complete Extraction</span>
+    </label>
+    <label class="flex items-center gap-2 cursor-pointer font-label-md text-label-md text-text-primary select-none">
+      <input type="radio" name="extraction-type" value="selected" id="ext-type-selected" class="w-4 h-4 text-primary-container accent-primary-container focus:ring-primary-container cursor-pointer"/>
+      <span>Selected Extraction</span>
+    </label>
+  </div>
+
+  <!-- Selected Extraction Checkboxes Container -->
+  <div id="selected-sections-container" class="hidden flex-col gap-2 pt-3">
+    <span class="font-label-sm text-label-sm text-text-secondary font-medium">Select sections to extract and optimize:</span>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="name" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Name</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="headline" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Headline</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="about" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>About</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="experience" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Experience</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="education" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Education</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="skills" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Skills</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="certifications" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Certifications</span>
+      </label>
+      <label class="flex items-center gap-2 p-2 px-3 rounded-lg bg-surface-canvas border border-border-default/60 hover:bg-surface-subtle transition-colors cursor-pointer select-none font-body-sm text-body-sm text-text-primary">
+        <input type="checkbox" name="selected-section" value="projects" class="w-4 h-4 accent-primary-container rounded cursor-pointer section-checkbox" checked />
+        <span>Projects</span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- Progressive Extraction Visualizer -->
+<div id="extraction-progress-container" class="hidden pt-2">
+  <div class="p-space-md bg-surface-canvas rounded-xl border border-border-default/60 flex flex-col gap-3">
+    <div class="flex items-center justify-between border-b border-border-default/50 pb-2">
+      <span class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px] text-primary-container animate-spin" id="extraction-spinner">sync</span>
+        <span id="extraction-current-status-title">Extracting Profile...</span>
+      </span>
+      <span class="font-label-sm text-[11px] text-text-muted" id="extraction-progress-counter">0 / 8 Sections</span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="extraction-section-checklist">
+      <!-- Progressive checklist items -->
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- CURRENT PROFILE Extracted Verification View -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col gap-space-lg hidden" id="current-profile-container">
+<div class="flex items-center justify-between border-b border-border-default pb-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[24px] text-primary-container">assignment_ind</span>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">CURRENT PROFILE</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-status-score-high-bg text-status-score-high-text font-label-sm text-label-sm">Extracted Information</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Verify before optimization</span>
+</div>
+
+<!-- Extracted Profile Content Sections -->
+<div class="flex flex-col gap-space-md" id="extracted-profile-content">
+<!-- Dynamic Profile Content Rendered Here -->
+</div>
+
+<div class="flex justify-end pt-space-sm border-t border-border-default">
+<button class="h-12 px-8 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-body-md font-semibold transition-all flex items-center justify-center gap-2.5 shadow-md shrink-0 active:scale-[0.98]" id="optimize-profile-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span>Analyze &amp; Optimize Profile</span>
+</button>
+</div>
+</div>
+
+<!-- OPTIMIZATION RESULT COMPARISON VIEW -->
+<div class="flex flex-col gap-space-lg hidden" id="optimization-result-container">
+<!-- Overall Profile Score Card -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-lg flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-lg border-l-4 border-primary-container">
+<div class="flex items-center gap-space-md">
+<div class="w-16 h-16 rounded-2xl bg-status-score-high-bg text-primary-container flex flex-col items-center justify-center shrink-0 border border-primary-container/20">
+<span class="font-stat-value text-[24px] font-bold leading-tight" id="opt-overall-score">78</span>
+<span class="font-label-sm text-[10px] text-text-muted">/ 100</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Profile Optimization Score</h3>
+<p class="font-body-sm text-body-sm text-text-secondary" id="opt-summary-text">Comprehensive brand impact and recruiter discoverability analysis.</p>
+</div>
+</div>
+
+<!-- Category Scores Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 w-full lg:w-auto shrink-0" id="opt-category-scores">
+<!-- Category score pills rendered dynamically -->
+</div>
+</div>
+
+<!-- CURRENT VS SUGGESTED COMPARISON SECTION -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-space-md bg-surface-card border-b border-border-default flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary-container">compare</span>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">CURRENT vs SUGGESTED Comparison</h2>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Review and select preferred recommendations</span>
+</div>
+
+<!-- Comparison Column Headers -->
+<div class="grid grid-cols-1 lg:grid-cols-2 bg-surface-canvas border-b border-border-default font-table-header text-table-header uppercase text-text-secondary">
+<div class="p-3.5 px-6 flex items-center gap-2 border-r border-border-default/50">
+<span class="w-2 h-2 rounded-full bg-text-muted"></span>
+<span>CURRENT (Extracted LinkedIn Info)</span>
+</div>
+<div class="p-3.5 px-6 flex items-center gap-2 text-primary-container font-semibold">
+<span class="w-2 h-2 rounded-full bg-status-success-text"></span>
+<span>SUGGESTED (AI Recommendation)</span>
+</div>
+</div>
+
+<!-- Comparison Rows List -->
+<div class="divide-y divide-border-default" id="comparison-rows-container">
+<!-- Comparison Cards Rendered Dynamically -->
+</div>
+</div>
+</div>
+</div>
+
+<!-- GTM Opportunities View Container -->
+<div id="view-gtm-opportunities" class="flex flex-col gap-space-lg w-full hidden">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">GTM Opportunities</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-text-secondary">AI GTM Agent V1</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Find companies that are relevant to your offer, not just companies that match basic filters.</p>
+</div>
+
+<!-- Editable Saved Context Summary Card -->
+<div id="gtm-context-card" class="bg-surface-card rounded-xl shadow-sm border border-border-default/60 flex flex-col gap-0 overflow-hidden">
+  <div class="flex items-center justify-between px-space-md pt-space-md pb-2 border-b border-border-default/50">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[20px] text-primary-container">tune</span>
+      <h2 class="font-headline-sm text-headline-sm text-text-primary">Your GTM Context</h2>
+    </div>
+    <span id="gtm-context-status" class="font-label-sm text-label-sm text-text-muted italic"></span>
+  </div>
+  <div class="p-space-md flex flex-col gap-space-md">
+    <div class="flex flex-col gap-1.5 gtm-field-group transition-opacity duration-200" id="gtm-field-group-offer">
+      <div class="flex items-center justify-between">
+        <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-ctx-offer">
+          <span class="material-symbols-outlined text-[16px]">sell</span>
+          <span>Offer</span>
+        </label>
+        <button class="ai-write-btn text-primary-container hover:text-primary font-label-sm text-[12px] flex items-center gap-1 transition-colors" type="button" data-field="Offer" data-target="gtm-ctx-offer" data-group="gtm-field-group-offer">
+          <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Write with AI
+        </button>
+      </div>
+      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-ctx-offer"></textarea>
+      
+      <div class="ai-panel hidden flex-col gap-3 mt-1 p-4 bg-surface-card border border-primary-container/40 rounded-xl shadow-md z-10 relative">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-[16px] text-primary-container">auto_awesome</span>
+          <span class="font-label-md text-text-primary font-semibold">Write with AI</span>
+        </div>
+        <textarea class="ai-instruction w-full min-h-[60px] p-2.5 rounded-lg bg-surface-canvas font-body-sm text-text-primary placeholder:text-text-muted border border-border-default focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none resize-y text-sm" placeholder="Describe what you want to say... (e.g. Make this sound more professional)"></textarea>
+        
+        <div class="ai-preview-container hidden p-3 bg-primary-fixed/20 rounded-lg border border-primary-container/20 mt-1">
+           <span class="font-label-sm text-text-secondary text-[11px] uppercase tracking-wider mb-1 block">Preview</span>
+           <p class="ai-preview-text font-body-sm text-text-primary whitespace-pre-wrap text-sm"></p>
+        </div>
+
+        <div class="flex items-center justify-between mt-1">
+           <button class="ai-cancel-btn text-text-secondary hover:text-text-primary font-label-sm text-sm transition-colors" type="button">Cancel</button>
+           <div class="flex items-center gap-2">
+             <button class="ai-rewrite-btn px-4 py-1.5 rounded-lg bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-sm transition-colors flex items-center gap-1.5" type="button">
+               <span class="material-symbols-outlined text-[16px]">refresh</span> <span class="btn-text">Rewrite</span>
+             </button>
+             <button class="ai-use-btn px-4 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-sm text-sm transition-colors font-medium flex items-center gap-1.5 shadow-sm hidden" type="button">
+               <span class="material-symbols-outlined text-[16px]">check</span> Use Answer
+             </button>
+           </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1.5 gtm-field-group transition-opacity duration-200" id="gtm-field-group-icp">
+      <div class="flex items-center justify-between">
+        <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-ctx-icp">
+          <span class="material-symbols-outlined text-[16px]">target</span>
+          <span>ICP</span>
+        </label>
+        <button class="ai-write-btn text-primary-container hover:text-primary font-label-sm text-[12px] flex items-center gap-1 transition-colors" type="button" data-field="ICP" data-target="gtm-ctx-icp" data-group="gtm-field-group-icp">
+          <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Write with AI
+        </button>
+      </div>
+      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-ctx-icp"></textarea>
+      
+      <div class="ai-panel hidden flex-col gap-3 mt-1 p-4 bg-surface-card border border-primary-container/40 rounded-xl shadow-md z-10 relative">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-[16px] text-primary-container">auto_awesome</span>
+          <span class="font-label-md text-text-primary font-semibold">Write with AI</span>
+        </div>
+        <textarea class="ai-instruction w-full min-h-[60px] p-2.5 rounded-lg bg-surface-canvas font-body-sm text-text-primary placeholder:text-text-muted border border-border-default focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none resize-y text-sm" placeholder="Describe what you want to say... (e.g. Make this sound more specific)"></textarea>
+        
+        <div class="ai-preview-container hidden p-3 bg-primary-fixed/20 rounded-lg border border-primary-container/20 mt-1">
+           <span class="font-label-sm text-text-secondary text-[11px] uppercase tracking-wider mb-1 block">Preview</span>
+           <p class="ai-preview-text font-body-sm text-text-primary whitespace-pre-wrap text-sm"></p>
+        </div>
+
+        <div class="flex items-center justify-between mt-1">
+           <button class="ai-cancel-btn text-text-secondary hover:text-text-primary font-label-sm text-sm transition-colors" type="button">Cancel</button>
+           <div class="flex items-center gap-2">
+             <button class="ai-rewrite-btn px-4 py-1.5 rounded-lg bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-sm transition-colors flex items-center gap-1.5" type="button">
+               <span class="material-symbols-outlined text-[16px]">refresh</span> <span class="btn-text">Rewrite</span>
+             </button>
+             <button class="ai-use-btn px-4 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-sm text-sm transition-colors font-medium flex items-center gap-1.5 shadow-sm hidden" type="button">
+               <span class="material-symbols-outlined text-[16px]">check</span> Use Answer
+             </button>
+           </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1.5 gtm-field-group transition-opacity duration-200" id="gtm-field-group-context">
+      <div class="flex items-center justify-between">
+        <label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5" for="gtm-ctx-context">
+          <span class="material-symbols-outlined text-[16px]">info</span>
+          <span>Additional Context</span>
+        </label>
+        <button class="ai-write-btn text-primary-container hover:text-primary font-label-sm text-[12px] flex items-center gap-1 transition-colors" type="button" data-field="Additional Context" data-target="gtm-ctx-context" data-group="gtm-field-group-context">
+          <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Write with AI
+        </button>
+      </div>
+      <textarea class="w-full min-h-[70px] p-3 rounded-xl bg-surface-canvas font-body-md text-body-md text-text-primary placeholder:text-text-muted transition-colors focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-primary-container border border-border-default/60 resize-y" id="gtm-ctx-context"></textarea>
+      
+      <div class="ai-panel hidden flex-col gap-3 mt-1 p-4 bg-surface-card border border-primary-container/40 rounded-xl shadow-md z-10 relative">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-[16px] text-primary-container">auto_awesome</span>
+          <span class="font-label-md text-text-primary font-semibold">Write with AI</span>
+        </div>
+        <textarea class="ai-instruction w-full min-h-[60px] p-2.5 rounded-lg bg-surface-canvas font-body-sm text-text-primary placeholder:text-text-muted border border-border-default focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none resize-y text-sm" placeholder="Describe what you want to say..."></textarea>
+        
+        <div class="ai-preview-container hidden p-3 bg-primary-fixed/20 rounded-lg border border-primary-container/20 mt-1">
+           <span class="font-label-sm text-text-secondary text-[11px] uppercase tracking-wider mb-1 block">Preview</span>
+           <p class="ai-preview-text font-body-sm text-text-primary whitespace-pre-wrap text-sm"></p>
+        </div>
+
+        <div class="flex items-center justify-between mt-1">
+           <button class="ai-cancel-btn text-text-secondary hover:text-text-primary font-label-sm text-sm transition-colors" type="button">Cancel</button>
+           <div class="flex items-center gap-2">
+             <button class="ai-rewrite-btn px-4 py-1.5 rounded-lg bg-surface-canvas hover:bg-surface-subtle border border-border-default text-text-primary font-label-sm text-sm transition-colors flex items-center gap-1.5" type="button">
+               <span class="material-symbols-outlined text-[16px]">refresh</span> <span class="btn-text">Rewrite</span>
+             </button>
+             <button class="ai-use-btn px-4 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-sm text-sm transition-colors font-medium flex items-center gap-1.5 shadow-sm hidden" type="button">
+               <span class="material-symbols-outlined text-[16px]">check</span> Use Answer
+             </button>
+           </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-border-default/50 gap-4">
+      <span id="gtm-save-status" class="font-label-sm text-label-sm text-status-success-text opacity-0 transition-opacity whitespace-nowrap">Saved successfully!</span>
+      <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-end">
+        <button class="w-full sm:w-auto h-11 px-6 rounded-xl bg-surface-canvas hover:bg-surface-subtle text-text-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 border border-border-default/60 shrink-0 active:scale-[0.98]" id="gtm-save-btn" type="button">
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          <span>Save Changes</span>
+        </button>
+        <button class="w-full sm:w-auto h-11 px-8 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]" id="gtm-find-btn" type="button">
+          <span class="material-symbols-outlined text-[18px]">search</span>
+          <span id="gtm-find-btn-text">Find Opportunities</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Progress Visualizer Card -->
+<div id="gtm-progress-container" class="hidden p-space-md bg-surface-card rounded-xl border border-primary-container/30 shadow-sm flex flex-col gap-3">
+<div class="flex items-center justify-between border-b border-border-default/50 pb-2">
+<span class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary-container animate-spin" id="gtm-progress-spinner">sync</span>
+<span id="gtm-progress-status">Discovering Opportunities...</span>
+</span>
+<span class="font-label-sm text-[11px] text-text-muted" id="gtm-progress-step">Processing Pipeline</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-body-sm">
+<div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-surface-canvas border-border-default/50" id="gtm-step1">
+<span class="material-symbols-outlined text-[16px] text-text-muted">radio_button_unchecked</span>
+<span class="text-text-muted truncate">1. Searching Public Web...</span>
+</div>
+<div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-surface-canvas border-border-default/50" id="gtm-step2">
+<span class="material-symbols-outlined text-[16px] text-text-muted">radio_button_unchecked</span>
+<span class="text-text-muted truncate">2. Collecting Evidence...</span>
+</div>
+<div class="p-2 px-3 rounded-lg border flex items-center gap-2 bg-surface-canvas border-border-default/50" id="gtm-step3">
+<span class="material-symbols-outlined text-[16px] text-text-muted">radio_button_unchecked</span>
+<span class="text-text-muted truncate">3. Scoring Opportunities...</span>
+</div>
+</div>
+</div>
+
+<!-- Inline Error State -->
+<div id="gtm-error-container" class="hidden bg-surface-card rounded-xl border border-status-error-border/60 p-space-md flex flex-col gap-3">
+  <div class="flex items-start gap-3">
+    <span class="material-symbols-outlined text-[22px] text-status-error-text shrink-0 mt-0.5">error</span>
+    <div class="flex flex-col gap-1">
+      <span class="font-label-md text-label-md text-text-primary font-semibold">Discovery Failed</span>
+      <p id="gtm-error-msg" class="font-body-sm text-body-sm text-text-secondary"></p>
+    </div>
+  </div>
+  <div class="flex justify-end">
+    <button id="gtm-retry-btn" type="button" class="px-5 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center gap-2 shadow-sm active:scale-[0.98]">
+      <span class="material-symbols-outlined text-[16px]">refresh</span>
+      <span>Retry</span>
+    </button>
+  </div>
+</div>
+
+<!-- Opportunities Feed Header -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Discovered Opportunities</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-status-score-high-bg text-status-score-high-text font-label-sm text-label-sm font-semibold" id="gtm-count-badge">0 opportunities found</span>
+</div>
+</div>
+
+<!-- Opportunities Feed Cards List -->
+<div class="flex flex-col gap-space-md" id="gtm-feed-container">
+<!-- Opportunity Feed Cards Rendered Here -->
+<div class="bg-surface-card rounded-xl p-12 text-center text-text-muted flex flex-col items-center justify-center gap-3 border border-border-default/60">
+<span class="material-symbols-outlined text-[42px] text-text-muted">explore</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">No GTM opportunities discovered yet.</span>
+<span class="font-body-sm text-body-sm text-text-secondary max-w-[480px]">Click Find Opportunities above to run the AI discovery pipeline using your saved ICP and offer.</span>
+</div>
+</div>
+
+</div>
+
+<!-- Opportunity Detail Modal Drawer -->
+<div id="gtm-detail-modal" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-50 flex items-center justify-center p-space-md hidden">
+<div class="bg-surface-card rounded-2xl shadow-2xl max-w-[800px] w-full max-h-[90vh] flex flex-col overflow-hidden border border-border-default">
+<!-- Modal Header -->
+<div class="p-space-md bg-surface-canvas border-b border-border-default flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary font-bold flex items-center justify-center text-headline-sm shrink-0" id="gtm-modal-avatar">
+C
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-headline-sm text-text-primary truncate" id="gtm-modal-company-name">Company Name</h3>
+<a href="#" target="_blank" rel="noopener noreferrer" id="gtm-modal-website-link" class="text-primary-container hover:underline font-label-sm text-label-sm flex items-center gap-0.5 hidden">
+<span>Visit Website</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</div>
+<span class="font-label-sm text-label-sm text-text-secondary" id="gtm-modal-subtext">B2B SaaS • Location • Size</span>
+</div>
+</div>
+<button id="gtm-modal-close-btn" type="button" class="w-8 h-8 rounded-full hover:bg-surface-subtle flex items-center justify-center text-text-muted hover:text-text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+
+<!-- Modal Body -->
+<div class="p-space-lg overflow-y-auto flex flex-col gap-space-lg">
+
+<!-- Score Breakdown Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+<div class="p-3 rounded-xl bg-status-score-high-bg border border-primary-container/20 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">Overall</span>
+<span class="font-stat-value text-stat-value text-primary-container" id="gtm-modal-overall-score">0</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">ICP Fit</span>
+<span class="font-label-md text-label-md font-bold text-text-primary" id="gtm-modal-icp-score">0/100</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">Intent</span>
+<span class="font-label-md text-label-md font-bold text-text-primary" id="gtm-modal-intent-score">0/100</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">Timing</span>
+<span class="font-label-md text-label-md font-bold text-text-primary" id="gtm-modal-timing-score">0/100</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col items-center justify-center">
+<span class="font-label-sm text-[10px] text-text-muted uppercase">Confidence</span>
+<span class="font-label-md text-label-md font-bold text-text-primary capitalize" id="gtm-modal-confidence">medium</span>
+</div>
+</div>
+
+<!-- Why Now Box -->
+<div class="p-space-md rounded-xl bg-status-success-bg/40 border border-status-success-border/60 flex flex-col gap-1.5">
+<h4 class="font-label-md text-label-md text-status-success-text font-bold uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>WHY NOW?</span>
+</h4>
+<p class="font-body-md text-body-md text-text-primary whitespace-pre-line" id="gtm-modal-why-now">Reasoning...</p>
+</div>
+
+<!-- Recommended Action -->
+<div class="p-space-md rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col gap-1.5">
+<h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-container">lightbulb</span>
+<span>Recommended Action</span>
+</h4>
+<p class="font-body-md text-body-md text-text-primary font-medium" id="gtm-modal-action">Suggested next step...</p>
+</div>
+
+<!-- Reason / Summary -->
+<div class="p-space-md rounded-xl bg-surface-canvas border border-border-default/60 flex flex-col gap-1.5" id="gtm-modal-reason-block">
+<h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-container">analytics</span>
+<span>Evaluation Summary</span>
+</h4>
+<p class="font-body-md text-body-md text-text-secondary" id="gtm-modal-reason"></p>
+</div>
+
+<!-- Signals & Evidence List -->
+<div class="flex flex-col gap-2">
+<h4 class="font-label-md text-label-md text-text-muted uppercase tracking-wider">Signals &amp; Public Web Evidence</h4>
+<div class="flex flex-col gap-2.5" id="gtm-modal-evidence-list">
+<!-- Dynamic Evidence Items -->
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- Email Leads View Container -->
+<div id="view-email-leads" class="flex flex-col gap-space-lg w-full hidden">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Email Outreach</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-success-text"></span>
+<span class="font-label-sm text-label-sm text-text-secondary" id="email-leads-count-badge">0 Email Qualified</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Persistent historical email contacts consolidated across all Excel files in output/.</p>
+</div>
+
+<!-- Email Composer -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-default/60">
+  <div class="flex items-center justify-between px-space-md pt-space-md pb-2 border-b border-border-default/50">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[20px] text-primary-container">mail</span>
+      <h2 class="font-headline-sm text-headline-sm text-text-primary">New Email</h2>
+    </div>
+  </div>
+  <div class="flex flex-col">
+    <div class="flex items-center border-b border-border-default/50 px-space-md py-3 gap-4">
+      <span class="font-label-md text-text-secondary w-12 shrink-0">From</span>
+      <span class="font-body-md text-text-primary">Not configured</span>
+    </div>
+    <div class="flex items-center border-b border-border-default/50 px-space-md py-3 gap-4">
+      <span class="font-label-md text-text-secondary w-12 shrink-0">To</span>
+      <span class="font-body-md text-text-primary" id="composer-to-text">Select leads from Email Contacts below</span>
+    </div>
+    <div class="flex items-center border-b border-border-default/50 px-space-md py-2.5 gap-4">
+      <span class="font-label-md text-text-secondary w-12 shrink-0">Subject</span>
+      <input type="text" id="composer-subject" class="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 font-body-md text-text-primary placeholder:text-text-muted" placeholder="Email subject..." value="Quick idea for {{company_name}}">
+    </div>
+    
+    <!-- Banner for Template Mode (N recipients) -->
+    <div id="composer-template-banner" class="hidden bg-surface-canvas/50 border-b border-border-default/50 px-space-md py-2 text-text-secondary text-[13px]">
+      <span class="font-semibold text-primary">Template mode</span> &mdash; <span id="composer-template-banner-count">0 recipients selected</span>. Personalized values will be applied separately for each recipient.
+    </div>
+
+    <!-- Toolbar -->
+    <div id="composer-toolbar" class="flex items-center gap-1.5 px-space-md py-2 bg-surface-canvas border-b border-border-default/50 flex-wrap">
+      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('bold', false, null)" title="Bold">
+        <span class="material-symbols-outlined text-[18px]">format_bold</span>
+      </button>
+      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('italic', false, null)" title="Italic">
+        <span class="material-symbols-outlined text-[18px]">format_italic</span>
+      </button>
+      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('underline', false, null)" title="Underline">
+        <span class="material-symbols-outlined text-[18px]">format_underlined</span>
+      </button>
+      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('strikeThrough', false, null)" title="Strikethrough">
+        <span class="material-symbols-outlined text-[18px]">format_strikethrough</span>
+      </button>
+      <div class="w-px h-5 bg-border-default mx-1"></div>
+      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('insertUnorderedList', false, null)" title="Bullet List">
+        <span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+      </button>
+      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('insertOrderedList', false, null)" title="Numbered List">
+        <span class="material-symbols-outlined text-[18px]">format_list_numbered</span>
+      </button>
+      <div class="w-px h-5 bg-border-default mx-1"></div>
+      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('justifyLeft', false, null)" title="Align Left">
+        <span class="material-symbols-outlined text-[18px]">format_align_left</span>
+      </button>
+      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="document.execCommand('justifyCenter', false, null)" title="Align Center">
+        <span class="material-symbols-outlined text-[18px]">format_align_center</span>
+      </button>
+      <div class="w-px h-5 bg-border-default mx-1"></div>
+      <button class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors" type="button" onclick="const url=prompt('Enter link URL:'); if(url) document.execCommand('createLink', false, url)" title="Insert Link">
+        <span class="material-symbols-outlined text-[18px]">link</span>
+      </button>
+      <label class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors cursor-pointer" title="Insert Image">
+        <span class="material-symbols-outlined text-[18px]">image</span>
+        <input type="file" id="composer-image-input" accept="image/*" class="hidden">
+      </label>
+      <label class="p-1.5 rounded hover:bg-surface-subtle text-text-secondary transition-colors cursor-pointer" title="Add Attachment">
+        <span class="material-symbols-outlined text-[18px]">attach_file</span>
+        <input type="file" id="composer-attachment-input" class="hidden">
+      </label>
+    </div>
+    
+    <!-- Rich Text Body -->
+    <div id="composer-body" class="p-space-md min-h-[250px] font-body-md text-text-primary focus:outline-none overflow-y-auto" contenteditable="true">
+      <p>Hi <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="first_name" contenteditable="false">[First Name]</span>,</p>
+      <br>
+      <p>Noticed <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="company_name" contenteditable="false">[Company Name]</span> has been scaling <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="business_need" contenteditable="false">[Business Need]</span> lately &mdash; congrats on the growth.</p>
+      <br>
+      <p>Usually at that stage, teams start missing leads simply because there aren't enough hours to follow up with everyone fast enough, and speed-to-lead can make a major difference in conversions.</p>
+      <br>
+      <p>We build AI agents that handle this automatically &mdash; responding to inbound leads in seconds, qualifying them, and booking calls straight into your calendar, 24/7.</p>
+      <br>
+      <p>One client added <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="result_metric" contenteditable="false">[Result Metric]</span> more booked calls in their first month without hiring anyone new.</p>
+      <br>
+      <p>Worth a quick look at how this could work for <span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="company_name" contenteditable="false">[Company Name]</span>?</p>
+      <br>
+      <p><span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="sender_name" contenteditable="false">[Your Name]</span></p>
+      <p><span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="sender_role" contenteditable="false">[Your Role]</span></p>
+      <p><span class="email-placeholder bg-surface-subtle border border-border-default px-1.5 py-0.5 rounded text-text-secondary font-mono text-[12px] cursor-default" data-placeholder="sender_link" contenteditable="false">[Your Link]</span></p>
+    </div>
+
+    <!-- Preview Body (Read-only) -->
+    <div id="composer-preview" class="hidden flex-col">
+      <div class="flex items-center justify-between px-space-md py-2 bg-surface-canvas border-b border-border-default/50">
+        <span class="text-[13px] text-text-secondary">Previewing personalized email for <strong id="composer-preview-lead-name" class="text-text-primary"></strong></span>
+        <button type="button" id="btn-edit-template" class="text-[12px] font-semibold text-primary hover:text-primary-container transition-colors border border-primary/30 rounded px-2 py-1 bg-surface-card shadow-sm">
+          Edit Template
+        </button>
+      </div>
+      <div id="composer-preview-body" class="p-space-md min-h-[250px] font-body-md text-text-primary overflow-y-auto prose prose-sm max-w-none bg-surface-canvas/30"></div>
+    </div>
+    
+    <!-- Attachment display -->
+    <div id="composer-attachments-container" class="px-space-md pb-2 flex gap-2 flex-wrap empty:hidden"></div>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-between px-space-md py-3 border-t border-border-default/50 bg-surface-canvas">
+      <div class="text-[11px] font-mono text-text-muted">
+        Variables: <span class="bg-surface-card px-1 py-0.5 rounded border border-border-default">{{first_name}}</span> 
+        <span class="bg-surface-card px-1 py-0.5 rounded border border-border-default">{{company_name}}</span> 
+        <span class="bg-surface-card px-1 py-0.5 rounded border border-border-default">{{business_need}}</span>
+        <span class="bg-surface-card px-1 py-0.5 rounded border border-border-default">{{role}}</span>
+      </div>
+      <button id="btn-simulate-send" type="button" class="px-6 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-[18px]">send</span>
+        <span>Send Email</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Email Leads Table Section -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-space-md bg-surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Email Contacts</h2>
+<span class="px-2 py-0.5 rounded-full bg-status-success-bg text-status-success-text font-label-sm text-label-sm">Historical Email Store</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Consolidated deduplicated leads with public emails from all saved Excel files.</p>
+</div>
+<div class="flex items-center gap-2">
+<input type="checkbox" id="email-select-all" class="w-4 h-4 rounded border-border-default text-primary focus:ring-primary bg-surface-canvas cursor-pointer">
+<label for="email-select-all" class="font-label-md text-text-primary cursor-pointer" id="email-select-all-label">Select All (0 leads)</label>
+</div>
+</div>
+
+<!-- Tabular Data -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-canvas text-text-secondary font-table-header text-table-header uppercase">
+<th class="py-3 px-4 w-[40px]" scope="col"></th>
+<th class="py-3 px-4 w-[110px]" scope="col">Lead Score</th>
+<th class="py-3 px-4 w-[180px]" scope="col">Name</th>
+<th class="py-3 px-4 w-[170px]" scope="col">Company</th>
+<th class="py-3 px-4 min-w-[260px]" scope="col">Need</th>
+<th class="py-3 px-4 min-w-[240px]" scope="col">Reason</th>
+<th class="py-3 px-4 w-[140px] text-right" scope="col">Send Mail</th>
+</tr>
+</thead>
+<tbody id="email-table-body" class="divide-y-0 font-table-cell text-table-cell text-text-primary">
+<tr>
+<td colspan="7" class="py-12 text-center text-text-muted">
+<div class="flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[36px] text-text-muted">mail_lock</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">No leads with email addresses yet.</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Generate leads from a LinkedIn post to discover public email contacts.</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- History View Container -->
+<div id="view-history" class="flex flex-col gap-space-lg w-full hidden">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Lead History Vault</h1>
+<div class="flex items-center gap-space-xs bg-surface-card px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-success-text"></span>
+<span class="font-label-sm text-label-sm text-text-secondary" id="history-leads-count-badge">0 Total Leads</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">Consolidated record of ALL qualified leads across all historical Excel exports.</p>
+</div>
+
+<!-- History Leads Table Section -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-space-md bg-surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">All Historical Leads</h2>
+<span class="px-2 py-0.5 rounded-full bg-status-score-high-bg text-status-score-high-text font-label-sm text-label-sm">All Runs</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Comprehensive deduplicated lead database read directly from output/*.xlsx files.</p>
+</div>
+</div>
+
+<!-- Tabular Data -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-canvas text-text-secondary font-table-header text-table-header uppercase">
+<th class="py-3 px-4 w-[40px]" scope="col"></th>
+<th class="py-3 px-4 w-[110px]" scope="col">Lead Score</th>
+<th class="py-3 px-4 w-[180px]" scope="col">Name</th>
+<th class="py-3 px-4 w-[170px]" scope="col">Company</th>
+<th class="py-3 px-4 w-[210px]" scope="col">Role</th>
+<th class="py-3 px-4 min-w-[280px]" scope="col">Business Need</th>
+<th class="py-3 px-4 w-[110px]" scope="col">Intent</th>
+<th class="py-3 px-4 w-[140px] text-right" scope="col">LinkedIn Profile</th>
+</tr>
+</thead>
+<tbody id="history-table-body" class="divide-y-0 font-table-cell text-table-cell text-text-primary">
+<tr>
+<td colspan="7" class="py-12 text-center text-text-muted">
+<div class="flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[36px] text-text-muted">history_toggle_off</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">No historical leads recorded yet.</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Run lead generation on a LinkedIn post to save data to output/*.xlsx.</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- ================= ONBOARDING MODAL 1: 3 QUESTIONS ================= -->
+<div id="modal-onboarding-gtm" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-space-md hidden">
+  <div class="bg-surface-card rounded-2xl shadow-xl border border-border-default/80 max-w-xl w-full p-space-xl flex flex-col gap-space-lg animate-in fade-in zoom-in duration-200">
+    <div class="flex items-center gap-3 border-b border-border-default/60 pb-4">
+      <div class="w-10 h-10 rounded-xl bg-status-score-high-bg text-primary-container flex items-center justify-center font-bold">
+        <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+      </div>
+      <div class="flex flex-col">
+        <h3 class="font-headline-sm text-headline-sm text-text-primary">Welcome to LinkedIn Growth Engine</h3>
+        <p class="font-body-sm text-body-sm text-text-secondary">Please tell us about your offer and ICP to personalize your workspace.</p>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label for="onboarding-offer-input" class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5">
+          <span>1. What are you offering?</span>
+        </label>
+        <textarea id="onboarding-offer-input" rows="2" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md text-body-md text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="e.g. AI-powered B2B lead generation & outreach automation platform for sales teams..."></textarea>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="onboarding-icp-input" class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5">
+          <span>2. Who is your ideal customer (ICP)?</span>
+        </label>
+        <textarea id="onboarding-icp-input" rows="2" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md text-body-md text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="e.g. Founders, VPs of Sales, Growth Leads at B2B SaaS companies (10-200 employees)..."></textarea>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="onboarding-context-input" class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1.5">
+          <span>3. Any additional context?</span>
+        </label>
+        <textarea id="onboarding-context-input" rows="2" class="p-3 rounded-xl bg-surface-canvas border border-border-default/80 font-body-md text-body-md text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="e.g. Focus on US/EU markets, average contract value $10k-$50k/year..."></textarea>
+      </div>
+    </div>
+
+    <div class="flex justify-end pt-2">
+      <button id="onboarding-gtm-save-btn" type="button" class="h-11 px-6 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center gap-2 shadow-sm active:scale-[0.98]">
+        <span>Save & Continue</span>
+        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ONBOARDING MODAL 2: PROFILE OPTIMIZATION CHOICE ================= -->
+<div id="modal-onboarding-profile-opt" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-space-md hidden">
+  <div class="bg-surface-card rounded-2xl shadow-xl border border-border-default/80 max-w-md w-full p-space-xl flex flex-col gap-space-lg text-center items-center animate-in fade-in zoom-in duration-200">
+    <div class="w-14 h-14 rounded-2xl bg-status-score-high-bg text-primary-container flex items-center justify-center font-bold">
+      <span class="material-symbols-outlined text-[28px]">auto_awesome</span>
+    </div>
+    <div class="flex flex-col gap-2">
+      <h3 class="font-headline-sm text-xl text-text-primary font-semibold">Optimize Your Profile?</h3>
+      <p class="font-body-sm text-body-sm text-text-secondary">Would you like to generate AI profile optimization suggestions targeted to your saved offer and target ICP?</p>
+    </div>
+    <div class="flex flex-col sm:flex-row items-center gap-3 w-full pt-2">
+      <button id="onboarding-opt-yes-btn" type="button" class="w-full h-11 px-5 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]">
+        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+        <span>Yes, Optimize Profile</span>
+      </button>
+      <button id="onboarding-opt-skip-btn" type="button" class="w-full h-11 px-5 rounded-xl bg-surface-canvas hover:bg-surface-subtle text-text-secondary font-label-md text-label-md transition-all border border-border-default">
+        <span>Skip for now</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ONBOARDING MODAL 3: GTM EXPLORATION CHOICE ================= -->
+<div id="modal-onboarding-gtm-explore" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-space-md hidden">
+  <div class="bg-surface-card rounded-2xl shadow-xl border border-border-default/80 max-w-md w-full p-space-xl flex flex-col gap-space-lg text-center items-center animate-in fade-in zoom-in duration-200">
+    <div class="w-14 h-14 rounded-2xl bg-status-success-bg text-status-success-text flex items-center justify-center font-bold">
+      <span class="material-symbols-outlined text-[28px]">rocket_launch</span>
+    </div>
+    <div class="flex flex-col gap-2">
+      <h3 class="font-headline-sm text-xl text-text-primary font-semibold">You're All Set!</h3>
+      <p class="font-body-sm text-body-sm text-text-secondary">Would you like to explore potential GTM opportunities for your target ICP right now?</p>
+    </div>
+    <div class="flex flex-col sm:flex-row items-center gap-3 w-full pt-2">
+      <button id="onboarding-gtm-explore-btn" type="button" class="w-full h-11 px-5 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]">
+        <span class="material-symbols-outlined text-[18px]">explore</span>
+        <span>Explore GTM</span>
+      </button>
+      <button id="onboarding-dashboard-btn" type="button" class="w-full h-11 px-5 rounded-xl bg-surface-canvas hover:bg-surface-subtle text-text-secondary font-label-md text-label-md transition-all border border-border-default">
+        <span>Go to Dashboard</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+</main>
+</div>
+
+<!-- App Scripts -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/onboarding.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/profile-optimization.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/leads.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/email-outreach.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gtm.js') }}"></script>
+
+</body>
+</html>

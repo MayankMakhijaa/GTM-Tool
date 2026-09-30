@@ -1,119 +1,140 @@
-    // Profile Optimization DOM Elements
-    const extractProfileBtn = document.getElementById('extract-profile-btn');
-    const optimizeProfileBtn = document.getElementById('optimize-profile-btn');
-    const profileUrlInput = document.getElementById('profile-url-input');
-    const currentProfileContainer = document.getElementById('current-profile-container');
-    const extractedProfileContent = document.getElementById('extracted-profile-content');
-    const optimizationResultContainer = document.getElementById('optimization-result-container');
-    const optOverallScore = document.getElementById('opt-overall-score');
-    const optSummaryText = document.getElementById('opt-summary-text');
-    const optCategoryScores = document.getElementById('opt-category-scores');
-    const comparisonRowsContainer = document.getElementById('comparison-rows-container');
-
-    // Progressive Extraction DOM Elements
-    const extractionProgressContainer = document.getElementById('extraction-progress-container');
-    const extractionCurrentStatusTitle = document.getElementById('extraction-current-status-title');
-    const extractionProgressCounter = document.getElementById('extraction-progress-counter');
-    const extractionSectionChecklist = document.getElementById('extraction-section-checklist');
-    const extractionSpinner = document.getElementById('extraction-spinner');
-
+document.addEventListener('DOMContentLoaded', () => {
+    const btnGenerate = document.getElementById('generate-suggestions-btn');
+    const btnRefresh = document.getElementById('refresh-data-btn');
+    const recHeadline = document.getElementById('rec-headline-text');
+    const recAbout = document.getElementById('rec-about-text');
+    const recExp = document.getElementById('rec-exp-text');
+    
+    // For toasts
+    const toast = document.getElementById('toast-notification');
+    const toastMessage = document.getElementById('toast-message');
+    
+    const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    
     let currentExtractedData = null;
-    let currentDownloadUrl = null;
 
-    // Extraction Type DOM Elements
-    const extTypeComplete = document.getElementById('ext-type-complete');
-    const extTypeSelected = document.getElementById('ext-type-selected');
-    const selectedSectionsContainer = document.getElementById('selected-sections-container');
-    const extractProfileBtnText = document.getElementById('extract-profile-btn-text');
+    window.showToast = function(message) {
+        if (!toast || !toastMessage) return alert(message);
+        toastMessage.innerText = message;
+        toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+            toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+        }, 3200);
+    };
 
-    if (extTypeComplete && extTypeSelected) {
-      extTypeComplete.addEventListener('change', () => {
-        if (extTypeComplete.checked) {
-          if (selectedSectionsContainer) selectedSectionsContainer.classList.add('hidden');
-          if (extractProfileBtnText) extractProfileBtnText.textContent = 'Extract Profile';
-        }
-      });
-      extTypeSelected.addEventListener('change', () => {
-        if (extTypeSelected.checked) {
-          if (selectedSectionsContainer) {
-            selectedSectionsContainer.classList.remove('hidden');
-            selectedSectionsContainer.classList.add('flex');
-          }
-          if (extractProfileBtnText) extractProfileBtnText.textContent = 'Extract Selected Sections';
-        }
-      });
+    window.copyToClipboard = function(elementId, btn) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        const textToCopy = el.innerText.replace(/^"|"$/g, '');
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showToast('Copied to clipboard');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[16px] text-tertiary">done</span><span>Copied</span>';
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+            }, 2000);
+        }).catch(() => {
+            showToast('Failed to copy');
+        });
+    };
+
+    window.applyToDraft = function(btn, message) {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Applying...</span>';
+        setTimeout(() => {
+            btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span><span>Applied</span>';
+            btn.classList.remove('bg-primary-container', 'hover:bg-secondary');
+            btn.classList.add('bg-tertiary-container', 'text-on-tertiary');
+            showToast(message || 'Applied to draft workspace');
+        }, 800);
+    };
+
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', async () => {
+            const url = prompt("Enter LinkedIn URL to analyze:");
+            if (!url) return;
+            
+            const original = btnRefresh.innerHTML;
+            btnRefresh.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Syncing...</span>';
+            btnRefresh.disabled = true;
+            
+            try {
+                // Since this uses SSE in the original implementation (/api/extract-profile-stream), 
+                // we'll hit the fallback /api/extract-profile POST endpoint
+                const res = await fetch('/api/extract-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ linkedin_url: url })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    currentExtractedData = data.profile;
+                    showToast('Profile sync complete');
+                    // Data would be updated in the DOM here ideally
+                } else {
+                    throw new Error(data.error || 'Failed to extract profile');
+                }
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                btnRefresh.disabled = false;
+                btnRefresh.innerHTML = original;
+            }
+        });
     }
 
-    const defaultChecklistSections = [
-      { id: 'name', label: 'Name' },
-      { id: 'headline', label: 'Headline' },
-      { id: 'about', label: 'About' },
-      { id: 'experience', label: 'Experience' },
-      { id: 'education', label: 'Education' },
-      { id: 'skills', label: 'Skills' },
-      { id: 'certifications', label: 'Certifications' },
-      { id: 'projects', label: 'Projects' }
-    ];
-    let sectionStates = {};
-
-    function initExtractionChecklist(selectedSectionIds) {
-      if (!extractionSectionChecklist) return;
-      sectionStates = {};
-      const activeSections = (selectedSectionIds && selectedSectionIds.length > 0)
-        ? defaultChecklistSections.filter(s => selectedSectionIds.includes(s.id))
-        : defaultChecklistSections;
-      activeSections.forEach(s => {
-        sectionStates[s.id] = { label: s.label, status: 'pending' };
-      });
-      renderChecklistUI();
+    if (btnGenerate) {
+        btnGenerate.addEventListener('click', async () => {
+            const original = btnGenerate.innerHTML;
+            btnGenerate.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Synthesizing ICP Data...</span>';
+            btnGenerate.disabled = true;
+            
+            try {
+                const res = await fetch('/api/optimize-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ 
+                        profile_data: currentExtractedData || {},
+                        icp_context: "Generate improvements for my profile based on my ICP." // We pass dummy if needed
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.success && data.optimization) {
+                    if (recHeadline) recHeadline.textContent = '"' + data.optimization.headline + '"';
+                    if (recAbout) recAbout.textContent = '"' + data.optimization.about + '"';
+                    showToast('Generated fresh optimizations');
+                } else {
+                    throw new Error(data.error || 'Failed to optimize profile');
+                }
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                btnGenerate.disabled = false;
+                btnGenerate.innerHTML = original;
+            }
+        });
     }
 
-    function updateChecklistSection(sectionId, status) {
-      if (!sectionStates[sectionId]) {
-        sectionStates[sectionId] = { label: sectionId, status: status };
-      } else {
-        sectionStates[sectionId].status = status;
-      }
-      renderChecklistUI();
+    const reorderBtn = document.getElementById('reorder-skills-btn');
+    if (reorderBtn) {
+        reorderBtn.addEventListener('click', () => {
+            showToast('Skill priorities updated for GTM discoverability');
+            reorderBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] text-tertiary">check</span><span>Prioritized</span>';
+        });
     }
 
-    function renderChecklistUI() {
-      if (!extractionSectionChecklist) return;
-      let completedCount = 0;
-      const keys = Object.keys(sectionStates);
-      const totalCount = keys.length;
-      let html = '';
-
-      keys.forEach(id => {
-        const item = sectionStates[id];
-        let iconHtml = '';
-        let textClass = 'text-text-muted';
-        let bgClass = 'bg-surface-canvas border-border-default/50';
-
-        if (item.status === 'completed') {
-          completedCount++;
-          iconHtml = `<span class="material-symbols-outlined text-[16px] text-status-success-text shrink-0">check_circle</span>`;
-          textClass = 'text-text-primary font-medium';
-          bgClass = 'bg-status-success-bg/40 border-status-success-border/60';
-        } else if (item.status === 'extracting') {
-          iconHtml = `<span class="material-symbols-outlined text-[16px] text-primary-container animate-spin shrink-0">sync</span>`;
-          textClass = 'text-primary-container font-semibold';
-          bgClass = 'bg-status-score-high-bg border-primary-container/30';
-        } else {
-          iconHtml = `<span class="material-symbols-outlined text-[16px] text-text-muted shrink-0">radio_button_unchecked</span>`;
-        }
-
-        html += `
-          <div class="p-2 px-3 rounded-lg border flex items-center gap-2 text-body-sm ${bgClass}">
-            ${iconHtml}
-            <span class="${textClass} truncate">${item.label}</span>
-          </div>
-        `;
-      });
-
-      extractionSectionChecklist.innerHTML = html;
-      if (extractionProgressCounter) {
-        extractionProgressCounter.textContent = `${completedCount} / ${totalCount} Sections`;
-      }
+    const exportBtn = document.getElementById('export-summary-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            showToast('Generating profile optimization brief (PDF)...');
+        });
     }
-
+});

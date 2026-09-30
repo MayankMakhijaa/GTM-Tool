@@ -187,14 +187,7 @@
             }
 
             // Onboarding Check & Navigation
-            const onboardingCompleted = user.onboarding_step !== 'LINKEDIN';
-            const modalGtm = document.getElementById('modal-onboarding-gtm');
-            const modalOpt = document.getElementById('modal-onboarding-profile-opt');
-            const modalGtmExp = document.getElementById('modal-onboarding-gtm-explore');
-
             if (typeof resetInactivityTimer === 'function') resetInactivityTimer();
-
-            console.log(`[FLOW] LinkedIn authentication successful. onboarding_completed = ${onboardingCompleted}`);
 
             if (options.isInitialBootstrap) {
               if (typeof fetchHistoricalEmailLeads === 'function') fetchHistoricalEmailLeads();
@@ -203,14 +196,34 @@
               if (typeof fetchGtmOpportunities === 'function') fetchGtmOpportunities();
             }
 
-            if (!onboardingCompleted) {
-              if (modalOpt) modalOpt.classList.add('hidden');
-              if (modalGtmExp) modalGtmExp.classList.add('hidden');
-              if (modalGtm) modalGtm.classList.remove('hidden');
+            // Fetch true onboarding status
+            const obRes = await fetch('/api/onboarding/status');
+            const obData = await obRes.json();
+            
+            const modalCompany = document.getElementById('modal-onboarding-company');
+            const modalIcp = document.getElementById('modal-onboarding-icp');
+            const modalOpt = document.getElementById('modal-onboarding-profile-opt');
+            const modalGtmExp = document.getElementById('modal-onboarding-gtm-explore');
+            const modalGtm = document.getElementById('modal-onboarding-gtm'); // Legacy
+            if (modalGtm) modalGtm.classList.add('hidden');
+
+            const isCompanyDone = obData.company_completed;
+            const isIcpDone = obData.icp_completed;
+
+            if (!isCompanyDone || !isIcpDone) {
               if (!options.skipNavigation) switchTab('welcome-page');
-              console.log('[FLOW] First-time user -> Showing 3-question onboarding modal over Welcome Page.');
+              if (!isCompanyDone) {
+                if (modalCompany) modalCompany.classList.remove('hidden');
+                if (modalIcp) modalIcp.classList.add('hidden');
+                console.log('[FLOW] User needs to complete Company Setup.');
+              } else if (!isIcpDone) {
+                if (modalCompany) modalCompany.classList.add('hidden');
+                if (modalIcp) modalIcp.classList.remove('hidden');
+                console.log('[FLOW] User needs to complete ICP Setup.');
+              }
             } else {
-              if (modalGtm) modalGtm.classList.add('hidden');
+              if (modalCompany) modalCompany.classList.add('hidden');
+              if (modalIcp) modalIcp.classList.add('hidden');
               if (modalOpt) modalOpt.classList.add('hidden');
               if (modalGtmExp) modalGtmExp.classList.add('hidden');
               if (!options.skipNavigation) switchTab('main-dashboard');

@@ -33,6 +33,8 @@ from config import Config
 from app.security.csrf import init_csrf
 from app.security.limiter import init_limiter
 from app.routes.auth import auth_bp
+from app.routes.onboarding import onboarding_bp
+from app.routes.pages import pages_bp
 from app.database import init_db, db_session
 
 load_dotenv()
@@ -46,6 +48,8 @@ init_limiter(app)
 
 # Register Blueprints
 app.register_blueprint(auth_bp)
+app.register_blueprint(onboarding_bp)
+app.register_blueprint(pages_bp)
 
 # Close session at end of request
 @app.teardown_appcontext
@@ -73,9 +77,7 @@ def check_session_inactivity():
         else:
             session["last_activity"] = now
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+
 
 @app.route("/api/linkedin-session-status", methods=["GET"])
 def api_linkedin_session_status():

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"primary":"#004ac6","on-primary-container":"#eeefff","surface-variant":"#dae2fd","on-background":"#131b2e","secondary-fixed-dim":"#b7c4ff","error-container":"#ffdad6","on-error":"#ffffff","surface-container-highest":"#dae2fd","tertiary":"#006242","surface-tint":"#0053db","on-secondary-fixed":"#001551","on-primary":"#ffffff","primary-container":"#2563eb","on-secondary-container":"#fffbff","primary-fixed":"#dbe1ff","secondary":"#1d4ed8","on-secondary-fixed-variant":"#0039b5","error":"#ba1a1a","secondary-container":"#4069f2","on-surface":"#131b2e","outline":"#737686","inverse-on-surface":"#eef0ff","surface-bright":"#faf8ff","tertiary-fixed":"#6ffbbe","surface-container-high":"#e2e7ff","on-tertiary-fixed-variant":"#005236","on-tertiary-container":"#bdffdb","surface-container-lowest":"#ffffff","inverse-surface":"#283044","inverse-primary":"#b4c5ff","on-error-container":"#93000a","primary-fixed-dim":"#b4c5ff","on-surface-variant":"#434655","on-tertiary-fixed":"#002113","background":"#faf8ff","tertiary-container":"#007d55","secondary-fixed":"#dce1ff","on-tertiary":"#ffffff","on-secondary":"#ffffff","outline-variant":"#c3c6d7","on-primary-fixed":"#00174b","tertiary-fixed-dim":"#4edea3","surface-container":"#eaedff","surface-dim":"#d2d9f4","surface":"#faf8ff","surface-container-low":"#f2f3ff","on-primary-fixed-variant":"#003ea8"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-xs":"0.25rem","space-lg":"1.25rem","space-md":"0.75rem","gutter":"1.5rem","space-sm":"0.5rem","margin":"2rem","space-xl":"2rem","margin-mobile":"1rem","gutter-mobile":"0.75rem"},"fontFamily":{"label-sm":["Inter"],"code-sm":["JetBrains Mono"],"headline-lg-mobile":["Plus Jakarta Sans"],"body-sm":["Inter"],"headline-lg":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"headline-xl-mobile":["Plus Jakarta Sans"],"body-md":["Inter"],"headline-md":["Plus Jakarta Sans"],"label-md":["Inter"],"body-lg":["Inter"]},"fontSize":{"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"600"}],"code-sm":["12px",{"lineHeight":"16px","letterSpacing":"0","fontWeight":"500"}],"headline-lg-mobile":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"400"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.025em","fontWeight":"700"}],"headline-xl-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","letterSpacing":"0","fontWeight":"400"}],"headline-md":["18px",{"lineHeight":"26px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"500"}],"body-lg":["16px",{"lineHeight":"24px","letterSpacing":"0","fontWeight":"400"}]}}}}</script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+</head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-md"><img alt="Fameweb Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VZtbkcRVrLGtpSv5Ok_0JuX0Eyt04IrbKPiRofwFPTJmvJcbCgerPrirTkTzd8_fCXLgXAwm35syFrTK0FgQ2i4tCfDuweIVAmTtW3i2eUDa8hpNmtqrcSdx_QlW583uGqF_VaNsfHj6N43q2zJvcDkZ3dq7SBq_gnULmB1KMkdAex4HPUU3__4SyLBIfKNGPC2kP9w0SJOT3-YVP5WCrUbL3zgrb0Gv2swDRK-xluwRay_A4XEMxCU0o"/><span class="font-headline-md text-headline-md text-primary tracking-tight">Fameweb</span></div><nav class="hidden md:flex items-center gap-space-xl" data-active-classes="text-primary font-label-md text-label-md"><a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="product" href="javascript:void(0)">Product</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="features" href="javascript:void(0)">Features</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="how-it-works" href="javascript:void(0)">How it works</a></nav><div class="flex items-center gap-space-md"><a class="font-label-md text-label-md px-space-md py-space-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="login" href="/login">Sign In</a><a class="font-label-md text-label-md px-space-md py-space-sm bg-primary-container text-on-primary rounded-lg hover:bg-secondary transition-colors" data-path="signup" href="/signup">Sign Up</a><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqaMPD789AAkt9VatCyAaFw5ZZQH6kJZ3QNZv3Jf91eN2Ms8weqJubSrY6izoGpke7BQJjc1V0-m3vDuC8TbhPNcrfbFqV4Ogc6-vhf_AfXEkvGYYb3s2rByz2aH3bVX7u86B4ZaNZhMK3tE_jwjb6PYC_cTWL6Ao6CxLeaOdJo62uPiMEBmWld55eOaTpJ9JUFXKUtBrJJ11n-AmF1dlfIuVGz-au5Di7augGkbfQ-9zv4HXn58mD"/></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<!-- SECTION 1: HERO & INTERACTIVE PREVIEW WORKSPACE -->
+<section class="relative w-full max-w-7xl mx-auto px-space-lg pt-12 pb-24 flex flex-col items-center">
+<!-- Ambient subtle background depth element (contained) -->
+<div class="absolute -top-12 w-[600px] h-[340px] bg-gradient-to-b from-primary/10 via-surface-variant/40 to-transparent blur-3xl pointer-events-none rounded-full"></div>
+<!-- Status Badge -->
+<div class="inline-flex items-center gap-space-xs bg-surface-container-high px-3 py-1 rounded-full text-on-surface-variant font-label-sm text-label-sm mb-space-lg shadow-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="text-tertiary font-label-md text-label-md">Autonomous GTM Engine 3.2</span>
+<span class="text-outline">/</span>
+<span>Enterprise Execution Ready</span>
+</div>
+<!-- Main Headline & Subheadline -->
+<div class="text-center max-w-4xl mx-auto">
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight leading-tight mb-space-md">
+        Turn your ICP into a complete <br class="hidden sm:inline"/>
+<span class="text-primary">GTM workflow</span>.
+      </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-space-xl">
+        Fameweb automatically understands your business, qualifies high-intent accounts against your ICP, and turns target prospects into personalized outbound opportunities.
+      </p>
+<!-- Primary Actions -->
+<div class="flex flex-wrap items-center justify-center gap-space-md mb-16">
+<a class="inline-flex items-center gap-space-xs px-6 py-3 bg-primary-container text-on-primary font-label-md text-label-md rounded-xl hover:bg-secondary transition-all shadow-md active:scale-95" href="/signup">
+<span>Get Started Free</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<a class="inline-flex items-center gap-space-xs px-6 py-3 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-xl hover:bg-surface-container transition-all shadow-sm" href="#how-it-works">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+<span>Explore Pipeline Engine</span>
+</a>
+</div>
+</div>
+<!-- HIGH-FIDELITY DASHBOARD MOCKUP CARD (Bento Grid Composition) -->
+<div class="w-full bg-surface-container-lowest rounded-xl shadow-xl p-space-md sm:p-space-lg max-w-6xl" id="demo-preview">
+<!-- Cockpit Bar -->
+<div class="flex flex-wrap items-center justify-between gap-space-md pb-space-md mb-space-md bg-surface-container-low p-space-md rounded-lg">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-error"></span>
+<span class="w-3 h-3 rounded-full bg-amber-400"></span>
+<span class="w-3 h-3 rounded-full bg-tertiary"></span>
+</div>
+<span class="text-outline text-body-sm font-code-sm">fameweb.run / active-icp / hyper-saas-enterprise</span>
+</div>
+<div class="flex items-center gap-space-sm font-label-sm text-label-sm">
+<span class="px-2.5 py-1 rounded bg-surface-container text-primary font-code-sm">SYNCHRONIZED WITH CRM</span>
+<span class="px-2.5 py-1 rounded bg-tertiary-fixed text-on-tertiary-fixed font-code-sm">LIVE FEED 42ms</span>
+</div>
+</div>
+<!-- Analytical Interior Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md">
+<!-- Left Column: Active Model Summary & Health Metrics -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<!-- ICP Model Card -->
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase text-outline">Active Profile</span>
+<span class="px-2 py-0.5 rounded-full bg-tertiary text-on-tertiary font-label-sm text-label-sm">Validated v4</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Mid-Market B2B FinTech &amp; DevOps</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Target ARR: $15M-$80M | Tech Stack: Snowflake, dbt, Segment, Datadog</p>
+<div class="pt-space-sm flex flex-col gap-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface">
+<span>Signal Precision Threshold</span>
+<span class="font-code-sm text-primary">89.4%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-700" style="width: 89.4%"></div>
+</div>
+</div>
+<!-- Signal Pills -->
+<div class="flex flex-wrap gap-1.5 pt-space-xs">
+<span class="px-2 py-1 rounded bg-surface text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span> Inbound Surge
+              </span>
+<span class="px-2 py-1 rounded bg-surface text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span> Headcount +20% QoQ
+              </span>
+<span class="px-2 py-1 rounded bg-surface text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span> Series B/C
+              </span>
+</div>
+</div>
+<!-- Inline Visual Metric Gauge Card -->
+<div class="bg-surface-container-low p-space-md rounded-lg flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase block">Opportunity Match Score</span>
+<span class="font-headline-xl text-headline-xl text-on-surface font-headline-lg">89%</span>
+<span class="font-body-sm text-body-sm text-tertiary block font-label-md">+14% vs conventional scraper</span>
+</div>
+<!-- Progress Ring Visualization -->
+<div class="relative w-20 h-20 flex items-center justify-center">
+<svg class="w-20 h-20 transform -rotate-90" viewbox="0 0 72 72">
+<circle class="text-surface-variant" cx="36" cy="36" fill="transparent" r="30" stroke="currentColor" stroke-width="6"></circle>
+<circle class="text-primary" cx="36" cy="36" fill="transparent" r="30" stroke="currentColor" stroke-dasharray="188.4" stroke-dashoffset="20.7" stroke-linecap="round" stroke-width="6"></circle>
+</svg>
+<span class="absolute font-code-sm text-code-sm font-label-md text-on-surface">89%</span>
+</div>
+</div>
+<!-- Mini Automation Log Card -->
+<div class="bg-surface-container p-space-md rounded-lg flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[24px]">instant_mix</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate">Multi-token Email Personalizer</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">54 accounts awaiting 1-click sequence</span>
+</div>
+</div>
+</div>
+<!-- Right Column: 3 High-Intent Qualified Account Cards -->
+<div class="lg:col-span-8 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-md text-label-md uppercase text-on-surface font-label-sm">High-Intent Account Queue</span>
+<span class="bg-primary text-on-primary px-2 py-0.5 rounded-full font-label-sm text-label-sm">3 Qualified</span>
+</div>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-tertiary">tune</span> Filter: Score &gt; 85%
+            </div>
+</div>
+<!-- Account Row 1 -->
+<div class="p-space-md bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-space-md group">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center font-headline-md text-primary font-headline-lg flex-shrink-0">
+                N
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-md text-headline-md text-on-surface font-label-md">Nordix Cloud Systems</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-code-sm text-code-sm">96% ICP Match</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Identified Need: Inbound pipeline triage automation &amp; CRM cleanup</span>
+<div class="flex items-center gap-2 mt-2">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Hiring: VP RevOps</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">HubSpot to Salesforce Migration</span>
+</div>
+</div>
+</div>
+<div class="flex items-center sm:flex-col sm:items-end justify-between gap-space-xs flex-shrink-0 pt-2 sm:pt-0">
+<span class="font-code-sm text-code-sm text-tertiary font-label-md">High Urgency Trigger</span>
+<button class="px-3 py-1.5 bg-primary text-on-primary rounded font-label-sm text-label-sm hover:bg-secondary transition-colors inline-flex items-center gap-1">
+<span>View 4 Drafts</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Account Row 2 -->
+<div class="p-space-md bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-space-md group">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center font-headline-md text-secondary font-headline-lg flex-shrink-0">
+                V
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-md text-headline-md text-on-surface font-label-md">Veloce Security AI</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-code-sm text-code-sm">92% ICP Match</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Identified Need: Automated enterprise outbound routing for SOC2 renewals</span>
+<div class="flex items-center gap-2 mt-2">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">G2 Category Leader</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Raised $24M Series B</span>
+</div>
+</div>
+</div>
+<div class="flex items-center sm:flex-col sm:items-end justify-between gap-space-xs flex-shrink-0 pt-2 sm:pt-0">
+<span class="font-code-sm text-code-sm text-primary font-label-md">Expansion Signal</span>
+<button class="px-3 py-1.5 bg-surface text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-container transition-colors inline-flex items-center gap-1">
+<span>View 2 Drafts</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Account Row 3 -->
+<div class="p-space-md bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-space-md group">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center font-headline-md text-primary font-headline-lg flex-shrink-0">
+                A
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-md text-headline-md text-on-surface font-label-md">Aethelgard Logistics</span>
+<span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-code-sm text-code-sm">88% ICP Match</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Identified Need: Replacing manual SDR research with real-time web scraping</span>
+<div class="flex items-center gap-2 mt-2">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">280 Target Reps</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">EMEA Territory</span>
+</div>
+</div>
+</div>
+<div class="flex items-center sm:flex-col sm:items-end justify-between gap-space-xs flex-shrink-0 pt-2 sm:pt-0">
+<span class="font-code-sm text-code-sm text-on-surface-variant font-label-md">New Territory Push</span>
+<button class="px-3 py-1.5 bg-surface text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-container transition-colors inline-flex items-center gap-1">
+<span>View 3 Drafts</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: HOW IT WORKS (Horizontal Four-Step Protocol Grid) -->
+<section class="w-full bg-surface-container-low py-24" id="how-it-works">
+<div class="max-w-7xl mx-auto px-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-space-md">
+<div>
+<span class="font-code-sm text-code-sm uppercase tracking-wider text-primary font-label-md block mb-space-xs">Execution Architecture</span>
+<h2 class="font-headline-xl text-headline-xl text-on-surface">How Fameweb Automates Your Engine</h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+          A continuous loop that connects corporate positioning directly into actionable outbound execution without SDR friction.
+        </p>
+</div>
+<!-- 4-Step Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Step 01 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-code-sm text-code-sm font-headline-lg text-primary">01</span>
+<span class="material-symbols-outlined text-outline text-[22px]">domain</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-space-xs">Define your company</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Connect your domain. The intelligence engine auto-enriches your positioning, value proposition, and customer criteria straight from your digital footprint.
+            </p>
+</div>
+<div class="pt-6 mt-6 bg-surface-container-low -mx-space-lg -mb-space-lg p-space-md rounded-b-xl flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Domain Parser</span>
+<span class="text-tertiary font-code-sm font-label-md">Instant Sync</span>
+</div>
+</div>
+<!-- Step 02 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-code-sm text-code-sm font-headline-lg text-primary">02</span>
+<span class="material-symbols-outlined text-outline text-[22px]">target</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-space-xs">Build your ICP</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Formulate precision criteria across company size, ARR tier, target buyer roles, tech stack triggers, and real-time buying signals with zero fluff.
+            </p>
+</div>
+<div class="pt-6 mt-6 bg-surface-container-low -mx-space-lg -mb-space-lg p-space-md rounded-b-xl flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Multi-Layer Filtering</span>
+<span class="text-primary font-code-sm font-label-md">24 Data Points</span>
+</div>
+</div>
+<!-- Step 03 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-code-sm text-code-sm font-headline-lg text-primary">03</span>
+<span class="material-symbols-outlined text-outline text-[22px]">travel_explore</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-space-xs">Find relevant prospects</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Continuous AI research agents crawl high-yield target accounts, evaluate hiring shifts, and dynamically score candidate leads against your buying signals.
+            </p>
+</div>
+<div class="pt-6 mt-6 bg-surface-container-low -mx-space-lg -mb-space-lg p-space-md rounded-b-xl flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Autonomous Web Crawl</span>
+<span class="text-tertiary font-code-sm font-label-md">Deep Search</span>
+</div>
+</div>
+<!-- Step 04 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-code-sm text-code-sm font-headline-lg text-primary">04</span>
+<span class="material-symbols-outlined text-outline text-[22px]">mark_email_read</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-space-xs">Personalize outreach</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Generate bespoke, multi-token personalized email drafts tailored precisely to each account's specific pain points, tech gaps, and verified executive needs.
+            </p>
+</div>
+<div class="pt-6 mt-6 bg-surface-container-low -mx-space-lg -mb-space-lg p-space-md rounded-b-xl flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Dynamic Token Engine</span>
+<span class="text-primary font-code-sm font-label-md">Live Preview</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: FEATURE MATRIX (Bento 4-Card Composition) -->
+<section class="w-full py-24 bg-surface">
+<div class="max-w-7xl mx-auto px-space-lg">
+<div class="text-center max-w-3xl mx-auto mb-16">
+<span class="font-code-sm text-code-sm uppercase tracking-wider text-primary font-label-md block mb-space-xs">Engine Capabilities</span>
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-space-sm">Engineered for RevOps Precision</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+          Ditch generic intent graphs. Fameweb delivers deterministic account intelligence with real evidence trails.
+        </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- Feature Card 1: ICP Intelligence -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-space-md">
+<span class="material-symbols-outlined text-[24px]">psychology</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-space-xs">ICP Intelligence</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+              Dynamic customer modeling and on-demand ICP report generation. Continuous calibration matches actual deal win-rates against target attributes.
+            </p>
+</div>
+<!-- Inline Mock Metric Display -->
+<div class="bg-surface-container-low p-space-md rounded-lg flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline">Cluster Coherence</span>
+<span class="font-code-sm text-on-surface font-label-md">98.2% Correlation</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-6 rounded bg-primary"></span>
+<span class="w-2 h-10 rounded bg-primary"></span>
+<span class="w-2 h-7 rounded bg-primary"></span>
+<span class="w-2 h-12 rounded bg-primary"></span>
+<span class="w-2 h-8 rounded bg-primary-container"></span>
+</div>
+</div>
+</div>
+<!-- Feature Card 2: AI GTM Research -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-space-md">
+<span class="material-symbols-outlined text-[24px]">troubleshoot</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-space-xs">AI GTM Research</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+              Automated prospect discovery powered by synthetic research agents. Gathers context from SEC 10-Ks, press statements, hiring boards, and tech footprint logs.
+            </p>
+</div>
+<!-- Live Research Stream Capsule -->
+<div class="bg-surface-container-low p-space-md rounded-lg flex items-center gap-space-sm font-code-sm text-code-sm text-on-surface-variant">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary animate-ping"></span>
+<span class="truncate">Live Research: Crawling 840 executive profiles across SaaS 100</span>
+</div>
+</div>
+<!-- Feature Card 3: Lead Qualification -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-space-md">
+<span class="material-symbols-outlined text-[24px]">rule</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-space-xs">Lead Qualification</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+              Rule-based scoring, buying triggers, and robust negative exclusions. Ensure zero wasted outreach on legacy competitors or non-converting tiers.
+            </p>
+</div>
+<!-- Negative / Positive Filter Tags -->
+<div class="flex flex-wrap gap-2 pt-space-xs">
+<span class="px-2.5 py-1 rounded bg-error-container text-on-error-container font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">block</span> Exclude: Low ARR (&lt;$5M)
+            </span>
+<span class="px-2.5 py-1 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">done_all</span> Trigger: Multi-Cloud Spend
+            </span>
+</div>
+</div>
+<!-- Feature Card 4: Personalized Outreach -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-space-md">
+<span class="material-symbols-outlined text-[24px]">mail</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-space-xs">Personalized Outreach</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+              Multi-recipient tokenized email composer with live syntax previews. Dynamically embeds verified research notes into high-converting outbound sequences.
+            </p>
+</div>
+<!-- Mock Template Tokens Preview -->
+<div class="bg-surface-container-low p-space-md rounded-lg font-code-sm text-code-sm text-on-surface flex items-center gap-space-xs overflow-x-auto">
+<span class="text-outline">Subject:</span>
+<span class="bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Account.Primary_Need]</span>
+<span class="text-outline">at</span>
+<span class="bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Company.Name]</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: FINAL CALL TO ACTION (Executive Full-Width Card) -->
+<section class="w-full max-w-7xl mx-auto px-space-lg py-16">
+<div class="relative overflow-hidden bg-primary text-on-primary rounded-xl p- space-lg sm:p-16 shadow-xl flex flex-col md:flex-row items-center justify-between gap-space-xl">
+<!-- Decorative Backdrop Overlay -->
+<div class="absolute -right-24 -bottom-24 w-96 h-96 bg-primary-container/40 rounded-full blur-2xl pointer-events-none"></div>
+<div class="relative z-10 max-w-2xl">
+<span class="font-code-sm text-code-sm uppercase tracking-wider text-secondary-fixed block mb-space-xs">Production GTM Pipeline</span>
+<h2 class="font-headline-xl text-headline-xl text-on-primary mb-space-sm leading-tight">
+          Ready to build your GTM pipeline?
+        </h2>
+<p class="font-body-lg text-body-lg text-primary-fixed max-w-xl">
+          Deploy Fameweb’s autonomous discovery agents today and deliver pipeline with high-conversion relevance.
+        </p>
+</div>
+<div class="relative z-10 flex flex-col sm:flex-row items-center gap-space-md flex-shrink-0 w-full md:w-auto">
+<button class="w-full sm:w-auto px-8 py-4 bg-surface-container-lowest text-primary font-headline-md text-headline-md rounded-xl hover:bg-surface-container transition-all shadow-md active:scale-95 text-center">
+          Get Started
+        </button>
+<button class="w-full sm:w-auto px-6 py-4 bg-secondary text-on-secondary font-headline-md text-headline-md rounded-xl hover:bg-secondary-container transition-all text-center">
+          Schedule Demo
+        </button>
+</div>
+</div>
+</section>
+<!-- SECTION 5: CLEAN B2B FOOTER SUB-BAR -->
+<div class="w-full border-t border-surface-container max-w-7xl mx-auto px-space-lg py-8 flex flex-col sm:flex-row items-center justify-between gap-space-md text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-space-md">
+<span class="font-label-md text-label-md text-on-surface">Fameweb</span>
+<span class="text-outline">|</span>
+<span>Enterprise Outbound Architecture</span>
+</div>
+<div class="flex items-center gap-space-lg font-label-sm text-label-sm">
+<a class="hover:text-primary transition-colors" href="#how-it-works">Product</a>
+<a class="hover:text-primary transition-colors" href="javascript:void(0)">Privacy</a>
+<a class="hover:text-primary transition-colors" href="javascript:void(0)">Terms</a>
+<a class="hover:text-primary transition-colors" href="javascript:void(0)">Contact</a>
+<span class="text-outline">© 2025 Fameweb Intelligence Inc.</span>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-container-low py-space-xl mt-space-xl"><div class="max-w-7xl mx-auto px-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant font-body-sm text-body-sm"><div class="flex items-center gap-space-sm"><img alt="Fameweb Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VZtbkcRVrLGtpSv5Ok_0JuX0Eyt04IrbKPiRofwFPTJmvJcbCgerPrirTkTzd8_fCXLgXAwm35syFrTK0FgQ2i4tCfDuweIVAmTtW3i2eUDa8hpNmtqrcSdx_QlW583uGqF_VaNsfHj6N43q2zJvcDkZ3dq7SBq_gnULmB1KMkdAex4HPUU3__4SyLBIfKNGPC2kP9w0SJOT3-YVP5WCrUbL3zgrb0Gv2swDRK-xluwRay_A4XEMxCU0o"/><span class="font-label-md text-label-md text-on-surface">Fameweb Intelligence Inc.</span></div><div class="flex items-center gap-space-lg font-label-sm text-label-sm"><a class="hover:text-on-surface transition-colors" href="javascript:void(0)">Privacy Policy</a><a class="hover:text-on-surface transition-colors" href="javascript:void(0)">Terms of Service</a><a class="hover:text-on-surface transition-colors" href="javascript:void(0)">Security Operations</a></div><span>© 2025 Fameweb. All rights reserved.</span></div></footer></body></html>

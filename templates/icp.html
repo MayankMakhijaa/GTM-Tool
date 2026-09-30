@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_blank" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"primary":"#004ac6","on-primary-container":"#eeefff","surface-variant":"#dae2fd","on-background":"#131b2e","secondary-fixed-dim":"#b7c4ff","error-container":"#ffdad6","on-error":"#ffffff","surface-container-highest":"#dae2fd","tertiary":"#006242","surface-tint":"#0053db","on-secondary-fixed":"#001551","on-primary":"#ffffff","primary-container":"#2563eb","on-secondary-container":"#fffbff","primary-fixed":"#dbe1ff","secondary":"#1d4ed8","on-secondary-fixed-variant":"#0039b5","error":"#ba1a1a","secondary-container":"#4069f2","on-surface":"#131b2e","outline":"#737686","inverse-on-surface":"#eef0ff","surface-bright":"#faf8ff","tertiary-fixed":"#6ffbbe","surface-container-high":"#e2e7ff","on-tertiary-fixed-variant":"#005236","on-tertiary-container":"#bdffdb","surface-container-lowest":"#ffffff","inverse-surface":"#283044","inverse-primary":"#b4c5ff","on-error-container":"#93000a","primary-fixed-dim":"#b4c5ff","on-surface-variant":"#434655","on-tertiary-fixed":"#002113","background":"#faf8ff","tertiary-container":"#007d55","secondary-fixed":"#dce1ff","on-tertiary":"#ffffff","on-secondary":"#ffffff","outline-variant":"#c3c6d7","on-primary-fixed":"#00174b","tertiary-fixed-dim":"#4edea3","surface-container":"#eaedff","surface-dim":"#d2d9f4","surface":"#faf8ff","surface-container-low":"#f2f3ff","on-primary-fixed-variant":"#003ea8"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-xs":"0.25rem","space-lg":"1.25rem","space-md":"0.75rem","gutter":"1.5rem","space-sm":"0.5rem","margin":"2rem","space-xl":"2rem","margin-mobile":"1rem","gutter-mobile":"0.75rem"},"fontFamily":{"label-sm":["Inter"],"code-sm":["JetBrains Mono"],"headline-lg-mobile":["Plus Jakarta Sans"],"body-sm":["Inter"],"headline-lg":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"headline-xl-mobile":["Plus Jakarta Sans"],"body-md":["Inter"],"headline-md":["Plus Jakarta Sans"],"label-md":["Inter"],"body-lg":["Inter"]},"fontSize":{"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"600"}],"code-sm":["12px",{"lineHeight":"16px","letterSpacing":"0","fontWeight":"500"}],"headline-lg-mobile":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"400"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.025em","fontWeight":"700"}],"headline-xl-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","letterSpacing":"0","fontWeight":"400"}],"headline-md":["18px",{"lineHeight":"26px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"500"}],"body-lg":["16px",{"lineHeight":"24px","letterSpacing":"0","fontWeight":"400"}]}}}}</script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+</head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-md"><img alt="Fameweb Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VZtbkcRVrLGtpSv5Ok_0JuX0Eyt04IrbKPiRofwFPTJmvJcbCgerPrirTkTzd8_fCXLgXAwm35syFrTK0FgQ2i4tCfDuweIVAmTtW3i2eUDa8hpNmtqrcSdx_QlW583uGqF_VaNsfHj6N43q2zJvcDkZ3dq7SBq_gnULmB1KMkdAex4HPUU3__4SyLBIfKNGPC2kP9w0SJOT3-YVP5WCrUbL3zgrb0Gv2swDRK-xluwRay_A4XEMxCU0o"/><span class="font-headline-md text-headline-md text-primary tracking-tight">Fameweb</span></div><div class="flex items-center gap-space-lg"><nav class="hidden sm:flex items-center gap-space-md font-label-sm text-label-sm text-outline" data-active-classes="text-primary font-bold"><a class="flex items-center gap-space-xs text-on-surface-variant hover:text-on-surface transition-colors" data-path="company-details" href="javascript:void(0)"><span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center font-code-sm text-code-sm">1</span><span>Company</span></a><span class="text-outline-variant font-code-sm text-code-sm">→</span><a aria-current="page" class="flex items-center gap-space-xs transition-colors text-primary font-bold" data-path="icp" href="javascript:void(0)"><span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center font-code-sm text-code-sm">2</span><span>ICP</span></a><span class="text-outline-variant font-code-sm text-code-sm">→</span><span class="flex items-center gap-space-xs text-outline"><span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center font-code-sm text-code-sm">3</span><span>Profile</span></span><span class="text-outline-variant font-code-sm text-code-sm">→</span><span class="flex items-center gap-space-xs text-outline"><span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center font-code-sm text-code-sm">4</span><span>Ready</span></span></nav></div><div class="flex items-center gap-space-md"><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-space-xs" data-path="dashboard" href="javascript:void(0)"><span class="material-symbols-outlined text-[16px]">save</span><span>Exit &amp; Save Draft</span></a></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<div class="w-full max-w-7xl mx-auto px-space-md sm:px-space-lg py-space-xl">
+<!-- Top Meta Context Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-lg mb-space-xl">
+<!-- Stepper Indicator -->
+<div class="flex items-center gap-space-xs sm:gap-space-sm">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-6 h-6 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</span>
+<span class="hidden sm:inline font-body-md text-body-md text-on-surface">Company</span>
+</div>
+<span class="text-outline-variant font-code-sm text-code-sm px-1">→</span>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm">
+<span class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center font-code-sm text-code-sm shadow-sm">
+            02
+          </span>
+<span class="font-headline-md text-headline-md text-primary font-bold">ICP Definition</span>
+<span class="px-space-xs py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-code-sm text-code-sm text-[10px] ml-1">ACTIVE</span>
+</div>
+<span class="text-outline-variant font-code-sm text-code-sm px-1">→</span>
+<div class="flex items-center gap-space-xs text-outline font-label-sm text-label-sm opacity-60">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-code-sm text-code-sm">03</span>
+<span class="hidden sm:inline">Profile</span>
+</div>
+<span class="text-outline-variant font-code-sm text-code-sm px-1">→</span>
+<div class="flex items-center gap-space-xs text-outline font-label-sm text-label-sm opacity-60">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-code-sm text-code-sm">04</span>
+<span class="hidden sm:inline">Ready</span>
+</div>
+</div>
+<!-- State Switcher Toggle -->
+<div class="flex items-center bg-surface-container p-1 rounded-full shadow-sm self-start md:self-auto">
+<button class="px-space-md py-1.5 rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md shadow-sm transition-all flex items-center gap-space-xs" id="btn-questionnaire">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Questionnaire</span>
+</button>
+<button class="px-space-md py-1.5 rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all flex items-center gap-space-xs" id="btn-preview">
+<span class="material-symbols-outlined text-[16px]">query_stats</span>
+<span>ICP Report Preview</span>
+</button>
+</div>
+</div>
+<!-- Header Section with Live AI Metric Visualizer -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-xl items-stretch">
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl p-space-lg sm:p-space-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded bg-surface-container text-primary font-code-sm text-code-sm mb-space-sm uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            Algorithmic Persona Constructor
+          </div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight mb-space-xs">
+            Define your Ideal Customer Profile
+          </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
+            Tell Fameweb who you want to reach. Our AI engine will structure your target parameters to discover high-fit accounts across millions of verified corporate signals.
+          </p>
+</div>
+<div class="flex flex-wrap items-center gap-space-md mt-space-lg pt-space-md border-t border-surface-container">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">hub</span>
+<span>Signal Ingestion: <strong class="text-on-surface font-code-sm text-code-sm">18.4M Co.</strong></span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-tertiary text-[18px]">verified_user</span>
+<span>Enrichment Confidence: <strong class="text-tertiary font-code-sm text-code-sm">99.4%</strong></span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm ml-auto">
+<span class="material-symbols-outlined text-outline text-[18px]">sync</span>
+<span>Auto-saving draft</span>
+</div>
+</div>
+</div>
+<!-- Live Match Forecast Gauge Box -->
+<div class="lg:col-span-4 bg-primary text-on-primary rounded-xl p-space-lg flex flex-col justify-between relative overflow-hidden shadow-md">
+<div class="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-primary-fixed">Target Reach Pool</span>
+<span class="px-2 py-0.5 bg-white/20 rounded font-code-sm text-code-sm text-on-primary">REAL-TIME</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl font-bold tracking-tight" id="estimated-reach">--</span>
+<span class="font-body-sm text-body-sm text-primary-fixed">Accounts in TAM</span>
+</div>
+<p class="font-body-sm text-body-sm text-primary-fixed mt-1">High conversion propensity (&gt;84% match index)</p>
+</div>
+<div class="my-space-md">
+<div class="flex justify-between font-code-sm text-code-sm mb-1 text-primary-fixed">
+<span>Market Density</span>
+<span id="fit-score-val">--</span>
+</div>
+<div class="w-full h-2 bg-white/25 rounded-full overflow-hidden">
+<div class="h-full bg-on-primary rounded-full transition-all duration-500" id="reach-bar" style="width: 0%"></div>
+</div>
+</div>
+<div class="bg-black/15 p-space-sm rounded-lg flex items-center justify-between text-on-primary">
+<span class="font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed">insights</span>
+            Verified Decision Makers
+          </span>
+<span class="font-code-sm text-code-sm font-bold">--</span>
+</div>
+</div>
+</div>
+<!-- Main Questionnaire Interactive Form -->
+<div class="space-y-space-lg transition-all" id="questionnaire-view">
+<form class="space-y-space-lg" id="icp-form" onsubmit="event.preventDefault();">
+<!-- SECTION 1: Firmographics -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg sm:p-space-xl shadow-sm">
+<div class="flex items-center gap-space-sm pb-space-md mb-space-lg border-b border-surface-container">
+<span class="material-symbols-outlined text-primary text-[24px]">corporate_fare</span>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">1. Firmographics &amp; Market Boundaries</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Specify organization criteria, scale, and capital maturity stage.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-xl">
+<!-- Target Customer Archetypes -->
+<div class="space-y-space-xs">
+<label class="font-label-md text-label-md text-on-surface block font-medium">
+                Target Customer Segment
+              </label>
+<div id="target-customer-container" class="flex flex-wrap gap-space-xs p-space-sm bg-surface-container-low rounded-lg min-h-[48px] items-center">
+<span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
+                  <span class="chip-text">B2B SaaS Companies</span>
+                  <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
+                  <span class="chip-text">Mid-Market Growth Teams</span>
+                  <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+<input id="target-customer-input" class="bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="+ Add custom tag..." type="text"/>
+</div>
+<p class="font-body-sm text-body-sm text-outline">Press Enter to inject semantic attributes.</p>
+</div>
+<!-- Revenue Range Selector -->
+<div class="space-y-space-xs">
+<label class="font-label-md text-label-md text-on-surface block font-medium">
+                Annual Recurring Revenue (ARR)
+              </label>
+<div class="relative">
+<select id="icp-revenue" class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg p-space-md appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow">
+<option value='{"label": "Early Stage", "range": "< $2M ARR"}'>&lt; $2M ARR (Early Stage)</option>
+<option selected="" value='{"label": "Growth Scale", "range": "$2M - $25M ARR"}'>$2M - $25M ARR (Growth Scale)</option>
+<option value='{"label": "Upper Mid-Market", "range": "$25M - $100M ARR"}'>$25M - $100M ARR (Upper Mid-Market)</option>
+<option value='{"label": "Global Enterprise", "range": "$100M+ ARR"}'>$100M+ ARR (Global Enterprise)</option>
+<option value="custom">Add Custom Range...</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-3 top-3.5 text-on-surface-variant text-[20px]">expand_more</span>
+</div>
+<div id="custom-revenue-container" class="hidden mt-2 flex items-center gap-2">
+  <input type="text" id="custom-revenue-input" class="flex-1 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-lg p-space-sm border border-outline focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="e.g. $5M - $10M ARR" />
+</div>
+<p class="font-body-sm text-body-sm text-outline mt-1">Derived from verified secondary filings &amp; hiring proxies.</p>
+</div>
+<!-- Company Size Multi-Select Pills -->
+<div class="md:col-span-2 space-y-space-xs">
+<label class="font-label-md text-label-md text-on-surface block font-medium">
+                Headcount Band (Multi-select)
+              </label>
+<div id="headcount-container" class="flex flex-wrap gap-space-xs">
+<button class="size-pill px-space-lg py-2 rounded-lg font-label-md text-label-md bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors" type="button">
+                  1-10 Employees
+                </button>
+<button class="size-pill active px-space-lg py-2 rounded-lg font-label-md text-label-md bg-primary text-on-primary shadow-sm transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">check</span>
+                  11-50 Employees
+                </button>
+<button class="size-pill active px-space-lg py-2 rounded-lg font-label-md text-label-md bg-primary text-on-primary shadow-sm transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">check</span>
+                  51-200 Employees
+                </button>
+<button class="size-pill px-space-lg py-2 rounded-lg font-label-md text-label-md bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors" type="button">
+                  201-500 Employees
+                </button>
+<button class="size-pill px-space-lg py-2 rounded-lg font-label-md text-label-md bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors" type="button">
+                  500+ Employees
+                </button>
+</div>
+</div>
+<!-- Industry Taxonomy Multi-Select -->
+<div class="space-y-space-xs">
+<label class="font-label-md text-label-md text-on-surface block font-medium">
+                Primary Industry Verticals
+              </label>
+<div id="industry-container" class="flex flex-wrap gap-space-xs p-space-sm bg-surface-container-low rounded-lg min-h-[48px] items-center">
+<span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
+                  <span class="chip-text">FinTech</span>
+                  <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
+                  <span class="chip-text">DevTools &amp; Infrastructure</span>
+                  <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
+                  <span class="chip-text">B2B SaaS</span>
+                  <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+<input id="industry-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type sector & Enter..." type="text"/>
+<button id="add-industry-btn" class="font-label-sm text-label-sm text-primary hover:underline px-2" type="button">+ Add Sector</button>
+</div>
+</div>
+<!-- Geographic Scope -->
+<div class="space-y-space-xs">
+<label class="font-label-md text-label-md text-on-surface block font-medium">
+                Geographic Presence
+              </label>
+<div id="location-container" class="flex flex-wrap gap-space-xs p-space-sm bg-surface-container-low rounded-lg min-h-[48px] items-center">
+<span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px]">public</span>
+                  <span class="chip-text">North America (US &amp; Canada)</span>
+                  <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
+                  <span class="chip-text">Western Europe</span>
+                  <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
+                  <span class="chip-text">Singapore</span>
+                  <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+<input id="location-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type region & Enter..." type="text"/>
+<button id="add-location-btn" class="font-label-sm text-label-sm text-primary hover:underline px-2" type="button">+ Add Region</button>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 2: Persona & Buying Committee -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg sm:p-space-xl shadow-sm">
+<div class="flex items-center gap-space-sm pb-space-md mb-space-lg border-b border-surface-container">
+<span class="material-symbols-outlined text-primary text-[24px]">group</span>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">2. Decision Makers &amp; Semantic Signals</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Calibrate executive roles and matching keyword context.</p>
+</div>
+</div>
+<div class="space-y-space-lg">
+<!-- Target Roles Tag Input -->
+<div class="space-y-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface block font-medium">
+                  Priority Stakeholder Titles &amp; Functions
+                </label>
+<span class="font-code-sm text-code-sm text-tertiary">4 Priority Roles Defined</span>
+</div>
+<div id="roles-container" class="flex flex-wrap gap-space-xs p-space-sm bg-surface-container-low rounded-lg min-h-[52px] items-center">
+<span class="chip-item inline-flex items-center gap-1.5 px-space-md py-1.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                  <span class="chip-text">VP of Sales</span>
+                  <button class="remove-chip material-symbols-outlined text-[16px] text-outline hover:text-error" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1.5 px-space-md py-1.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                  <span class="chip-text">Head of Revenue Operations</span>
+                  <button class="remove-chip material-symbols-outlined text-[16px] text-outline hover:text-error" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1.5 px-space-md py-1.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                  <span class="chip-text">Chief Commercial Officer</span>
+                  <button class="remove-chip material-symbols-outlined text-[16px] text-outline hover:text-error" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1.5 px-space-md py-1.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                  <span class="chip-text">Growth Lead</span>
+                  <button class="remove-chip material-symbols-outlined text-[16px] text-outline hover:text-error" type="button">close</button>
+</span>
+<input id="roles-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1.5 flex-1 min-w-[120px]" placeholder="Type role & Enter..." type="text"/>
+<button id="add-role-btn" class="inline-flex items-center gap-1 px-space-md py-1.5 bg-primary-fixed text-on-primary-fixed hover:bg-primary-fixed-dim rounded font-label-md text-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+                  Add Role
+                </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-xl">
+<!-- Semantic Keyword Signals -->
+<div class="space-y-space-xs">
+<label class="font-label-md text-label-md text-on-surface block font-medium flex items-center justify-between">
+<span>Positive Keywords &amp; Tech Signals</span>
+<span class="font-code-sm text-code-sm text-tertiary">Boolean AND</span>
+</label>
+<div id="keywords-container" class="flex flex-wrap gap-space-xs p-space-sm bg-surface-container-low rounded-lg min-h-[48px] items-center">
+<span class="chip-item inline-flex items-center gap-1 px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded font-code-sm text-code-sm">
+                    <span class="chip-text">outbound automation</span>
+                    <button class="remove-chip material-symbols-outlined text-[14px]" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded font-code-sm text-code-sm">
+                    <span class="chip-text">lead enrichment</span>
+                    <button class="remove-chip material-symbols-outlined text-[14px]" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded font-code-sm text-code-sm">
+                    <span class="chip-text">sales capacity</span>
+                    <button class="remove-chip material-symbols-outlined text-[14px]" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded font-code-sm text-code-sm">
+                    <span class="chip-text">inbound response time</span>
+                    <button class="remove-chip material-symbols-outlined text-[14px]" type="button">close</button>
+</span>
+<input id="keywords-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type keyword & Enter..." type="text"/>
+<button id="add-keyword-btn" class="font-label-sm text-label-sm text-tertiary hover:underline px-2" type="button">+ Add keyword</button>
+</div>
+<p class="font-body-sm text-body-sm text-outline">Synthesized from company job listings and tech stack telemetry.</p>
+</div>
+<!-- Negative Exclusion Chips -->
+<div class="space-y-space-xs">
+<label class="font-label-md text-label-md text-on-surface block font-medium flex items-center justify-between">
+<span>Strict Exclusions &amp; Disqualifiers</span>
+<span class="font-code-sm text-code-sm text-error">Filtered Out</span>
+</label>
+<div id="exclusions-container" class="flex flex-wrap gap-space-xs p-space-sm bg-surface-container-low rounded-lg min-h-[48px] items-center">
+<span class="chip-item inline-flex items-center gap-1 px-2.5 py-1 bg-error-container text-on-error-container rounded font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">block</span>
+                    <span class="chip-text">B2C / Consumer</span>
+                    <button class="remove-chip material-symbols-outlined text-[14px]" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-2.5 py-1 bg-error-container text-on-error-container rounded font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">block</span>
+                    <span class="chip-text">Agency / Freelance</span>
+                    <button class="remove-chip material-symbols-outlined text-[14px]" type="button">close</button>
+</span>
+<span class="chip-item inline-flex items-center gap-1 px-2.5 py-1 bg-error-container text-on-error-container rounded font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">block</span>
+                    <span class="chip-text">&lt; $1M ARR</span>
+                    <button class="remove-chip material-symbols-outlined text-[14px]" type="button">close</button>
+</span>
+<input id="exclusions-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type exclusion & Enter..." type="text"/>
+<button id="add-exclusion-btn" class="font-label-sm text-label-sm text-error hover:underline px-2" type="button">+ Add exclusion</button>
+</div>
+<p class="font-body-sm text-body-sm text-outline">Fameweb automatically excludes these leads from generated pipeline.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 3: Dynamic Buying Signals & Timing Triggers -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg sm:p-space-xl shadow-sm">
+<div class="flex items-center justify-between pb-space-md mb-space-lg border-b border-surface-container">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[24px]">bolt</span>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">3. Buying Intent Triggers</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Prioritize accounts showing real-world timing signals.</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded font-semibold uppercase">3 Active Triggers</span>
+</div>
+<div id="signals-container" class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Signal Item 1 -->
+<label class="signal-item flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors" data-signal-key="active_hiring">
+<input checked="" class="signal-checkbox mt-1 w-4 h-4 rounded text-primary focus:ring-0" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-headline-md text-[15px] text-on-surface font-semibold">Active Hiring: SDRs or RevOps</span>
+<span class="signal-meta font-code-sm text-code-sm px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded" data-meta-key="window">90d Window</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Identifies outbound expansion capacity and operational scaling pressure.</p>
+</div>
+</label>
+<!-- Signal Item 2 -->
+<label class="signal-item flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors" data-signal-key="fresh_capital">
+<input checked="" class="signal-checkbox mt-1 w-4 h-4 rounded text-primary focus:ring-0" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-headline-md text-[15px] text-on-surface font-semibold">Fresh Capital Infusion</span>
+<span class="signal-meta font-code-sm text-code-sm px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded" data-meta-key="stage">Series A / B</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Disclosed equity funding within the last 6 months indicating immediate GTM budget.</p>
+</div>
+</label>
+<!-- Signal Item 3 -->
+<label class="signal-item flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors" data-signal-key="web_traffic_surge">
+<input checked="" class="signal-checkbox mt-1 w-4 h-4 rounded text-primary focus:ring-0" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-headline-md text-[15px] text-on-surface font-semibold">Web Traffic Surge &gt;15% QoQ</span>
+<span class="signal-meta font-code-sm text-code-sm px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded" data-meta-key="threshold">+15% QoQ</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Accelerating organic demand signal and potential lead handling strain.</p>
+</div>
+</label>
+<!-- Signal Item 4 -->
+<label class="signal-item flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors opacity-75" data-signal-key="crm_stack_migration">
+<input class="signal-checkbox mt-1 w-4 h-4 rounded text-primary focus:ring-0" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-headline-md text-[15px] text-on-surface font-semibold">CRM Stack Migration Detected</span>
+<span class="signal-meta font-code-sm text-code-sm px-2 py-0.5 bg-surface-container text-on-surface-variant rounded" data-meta-key="type">Tech Stack</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Transition between legacy CRM to enterprise setups (e.g. HubSpot to Salesforce).</p>
+</div>
+</label>
+</div>
+</div>
+<!-- SECTION 4: Tone & Persona Delivery Strategy -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg sm:p-space-xl shadow-sm">
+<div class="flex items-center gap-space-sm pb-space-md mb-space-lg border-b border-surface-container">
+<span class="material-symbols-outlined text-primary text-[24px]">chat_bubble</span>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">4. Outreach Resonance Profile</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Select the psychological positioning our copy engine applies to outreach messaging.</p>
+</div>
+</div>
+<div id="tone-container" class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Tone 1 (Selected) -->
+<label class="tone-item relative flex flex-col p-space-lg rounded-xl bg-surface-container-low border-2 border-primary cursor-pointer shadow-sm" data-tone-value="CASUAL">
+<input type="radio" name="tone" value="CASUAL" checked class="hidden">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-headline-md text-[16px] text-primary font-bold">Direct &amp; Value-First</span>
+<span class="tone-icon material-symbols-outlined text-primary text-[20px]">radio_button_checked</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex-1">
+                Concise, pain-point oriented, backed by ROI math and tactical execution metrics. Cuts immediately to pipeline leverage.
+              </p>
+<div class="mt-space-md pt-space-xs border-t border-surface-container font-code-sm text-code-sm text-primary">
+                Conversion Index: Highest in DevTools/FinTech
+              </div>
+</label>
+<!-- Tone 2 -->
+<label class="tone-item relative flex flex-col p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors border-2 border-transparent" data-tone-value="FORMAL">
+<input type="radio" name="tone" value="FORMAL" class="hidden">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-headline-md text-[16px] text-on-surface font-bold">Consultative &amp; Analytical</span>
+<span class="tone-icon material-symbols-outlined text-outline text-[20px]">radio_button_unchecked</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex-1">
+                Grounded in industry benchmark comparisons, market shift telemetry, and structural peer-group audits.
+              </p>
+<div class="mt-space-md pt-space-xs border-t border-surface-container font-code-sm text-code-sm text-outline">
+                Conversion Index: Strong in Mid-Market RevOps
+              </div>
+</label>
+<!-- Tone 3 -->
+<label class="tone-item relative flex flex-col p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors border-2 border-transparent" data-tone-value="FRIENDLY">
+<input type="radio" name="tone" value="FRIENDLY" class="hidden">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-headline-md text-[16px] text-on-surface font-bold">Warm &amp; Narrative</span>
+<span class="tone-icon material-symbols-outlined text-outline text-[20px]">radio_button_unchecked</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex-1">
+                Founder-to-founder collegial tone emphasizing shared journey challenges, strategic alignment, and organic dialogue.
+              </p>
+<div class="mt-space-md pt-space-xs border-t border-surface-container font-code-sm text-code-sm text-outline">
+                Conversion Index: Best for Seed/Early Growth
+              </div>
+</label>
+</div>
+</div>
+<!-- Sticky Footer Navigation Bar -->
+<div class="flex items-center justify-between pt-space-lg pb-space-xl">
+<a class="px-space-lg py-space-md rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors flex items-center gap-space-xs" data-path="company-details" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>Back to Company Details</span>
+</a>
+<div class="flex items-center gap-space-md">
+<button class="hidden sm:inline-flex px-space-lg py-space-md rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface bg-surface-container-low hover:bg-surface-container transition-colors" type="button">
+              Save Segment as Template
+            </button>
+<button class="px-space-xl py-space-md rounded-lg bg-primary hover:bg-secondary text-on-primary font-headline-md text-[15px] font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-space-xs" id="btn-submit-icp" type="button">
+<span>Generate ICP Report</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</form>
+</div>
+<!-- Preview Report Overlay/View (Shown when toggling State Switcher) -->
+<div class="hidden space-y-space-lg transition-all" id="preview-view">
+<div class="bg-surface-container-lowest rounded-xl p-space-lg sm:p-space-xl shadow-sm">
+<div class="flex items-center justify-between pb-space-md mb-space-lg border-b border-surface-container">
+<div>
+<span class="px-2.5 py-1 rounded bg-tertiary-fixed text-on-tertiary-fixed font-code-sm text-code-sm font-semibold">SYNTHESIZED BLUEPRINT</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mt-1">ICP Profile: Mid-Market B2B Growth Engine</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Calculated account affinity snapshot based on defined parameters.</p>
+</div>
+<button class="px-space-md py-space-xs bg-surface-container rounded-lg font-label-md text-label-md text-primary flex items-center gap-1 hover:bg-surface-container-high transition-colors" id="btn-edit-questionnaire">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+            Modify Criteria
+          </button>
+</div>
+<!-- Analytical Breakdown Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg mb-space-xl">
+<div class="p-space-md rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Identified Universe</span>
+<div class="font-headline-xl text-headline-xl text-primary font-bold mt-1">--</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Accounts matching headcount, funding, and revenue criteria.</p>
+</div>
+<div class="p-space-md rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Estimated GTM ARR Pool</span>
+<div class="font-headline-xl text-headline-xl text-tertiary font-bold mt-1">$48.2M</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Addressable annual contract volume across primary target segment.</p>
+</div>
+<div class="p-space-md rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Readiness Confidence</span>
+<div class="font-headline-xl text-headline-xl text-on-surface font-bold mt-1">94.8%</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Verified against verified outbound triggers and signal freshness.</p>
+</div>
+</div>
+<!-- Sample Mocked High-Affinity Account Targets -->
+<h3 class="font-headline-md text-headline-md text-on-surface mb-space-md">Top Sample Accounts in Current Reach Pool</h3>
+<div class="space-y-space-xs">
+<div class="flex items-center justify-between p-space-md bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded bg-primary-fixed flex items-center justify-center font-bold text-primary font-headline-md">S</div>
+<div>
+<div class="font-headline-md text-[15px] font-semibold text-on-surface">Synthetix Labs Inc.</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">DevTools • Series B ($18M) • 84 Employees • SF &amp; Remote</div>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="px-space-sm py-1 bg-tertiary-fixed text-on-tertiary-fixed font-code-sm text-code-sm rounded">98% Match</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Hiring 3 SDRs</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-space-md bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded bg-secondary-fixed flex items-center justify-center font-bold text-secondary font-headline-md">C</div>
+<div>
+<div class="font-headline-md text-[15px] font-semibold text-on-surface">Clearpulse Data</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">FinTech Analytics • Series A ($9.2M) • 42 Employees • New York</div>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="px-space-sm py-1 bg-tertiary-fixed text-on-tertiary-fixed font-code-sm text-code-sm rounded">94% Match</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Web Traffic +28%</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-space-md bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-highest flex items-center justify-center font-bold text-primary font-headline-md">V</div>
+<div>
+<div class="font-headline-md text-[15px] font-semibold text-on-surface">Veloce Systems</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">B2B SaaS / Security • Series B ($24M) • 160 Employees • London</div>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="px-space-sm py-1 bg-tertiary-fixed text-on-tertiary-fixed font-code-sm text-code-sm rounded">91% Match</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Salesforce Adoption</span>
+</div>
+</div>
+</div>
+<div class="mt-space-xl pt-space-lg border-t border-surface-container flex justify-end">
+<button class="px-space-xl py-space-md rounded-lg bg-primary text-on-primary font-headline-md text-[15px] font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-space-xs" id="btn-proceed-from-preview">
+<span>Accept Parameters &amp; Finalize Profile</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Interactive UI Script for Onboarding Step 2: ICP
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnQuestionnaire = document.getElementById('btn-questionnaire');
+    const btnPreview = document.getElementById('btn-preview');
+    const questionnaireView = document.getElementById('questionnaire-view');
+    const previewView = document.getElementById('preview-view');
+    const btnSubmit = document.getElementById('btn-submit-icp');
+    const btnEditQuestionnaire = document.getElementById('btn-edit-questionnaire');
+    const btnProceedPreview = document.getElementById('btn-proceed-from-preview');
+
+    function showQuestionnaire() {
+      questionnaireView.classList.remove('hidden');
+      previewView.classList.add('hidden');
+      
+      btnQuestionnaire.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      btnQuestionnaire.classList.remove('text-on-surface-variant');
+      
+      btnPreview.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      btnPreview.classList.add('text-on-surface-variant');
+    }
+
+    function showPreview() {
+      questionnaireView.classList.add('hidden');
+      previewView.classList.remove('hidden');
+
+      btnPreview.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      btnPreview.classList.remove('text-on-surface-variant');
+
+      btnQuestionnaire.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      btnQuestionnaire.classList.add('text-on-surface-variant');
+    }
+
+    if (btnQuestionnaire && btnPreview) {
+      btnQuestionnaire.addEventListener('click', showQuestionnaire);
+      btnPreview.addEventListener('click', showPreview);
+    }
+
+    if (btnSubmit) {
+      btnSubmit.addEventListener('click', () => {
+        showPreview();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    if (btnEditQuestionnaire) {
+      btnEditQuestionnaire.addEventListener('click', () => {
+        showQuestionnaire();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    if (btnProceedPreview) {
+      btnProceedPreview.addEventListener('click', () => {
+        // Direct to next onboarding step (03 Profile / Ready)
+        const readyPath = document.querySelector('a[data-path="profile"]') || { href: '#' };
+        window.location.hash = '#profile';
+      });
+    }
+
+    // Headcount size pills multi-select toggle
+    const sizePills = document.querySelectorAll('.size-pill');
+    const estimatedReach = document.getElementById('estimated-reach');
+    const reachBar = document.getElementById('reach-bar');
+
+    sizePills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const isSelected = pill.classList.contains('active');
+        if (isSelected) {
+          pill.classList.remove('active', 'bg-primary', 'text-on-primary', 'shadow-sm');
+          pill.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+          const checkIcon = pill.querySelector('.material-symbols-outlined');
+          if (checkIcon) checkIcon.remove();
+        } else {
+          pill.classList.add('active', 'bg-primary', 'text-on-primary', 'shadow-sm');
+          pill.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+          const icon = document.createElement('span');
+          icon.className = 'material-symbols-outlined text-[16px] mr-1';
+          icon.textContent = 'check';
+          pill.prepend(icon);
+        }
+
+        // Dynamically simulate pool recalculation
+        const activeCount = document.querySelectorAll('.size-pill.active').length;
+        const newPool = (activeCount * 2410);
+        if (estimatedReach) {
+          estimatedReach.textContent = newPool > 0 ? newPool.toLocaleString() : '120';
+        }
+        if (reachBar) {
+          reachBar.style.width = Math.min(100, Math.max(15, activeCount * 30)) + '%';
+        }
+      });
+    });
+
+    // Tag Removal Micro-interaction
+    document.querySelectorAll('#icp-form button.material-symbols-outlined').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tag = e.target.closest('span');
+        if (tag && tag.parentElement) {
+          tag.remove();
+        }
+      });
+    });
+  });
+</script></main><script src="/static/js/onboarding_new/icp.js"></script>
+</body></html>

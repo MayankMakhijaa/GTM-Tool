@@ -62,6 +62,7 @@ class Tone(str, enum.Enum):
     FORMAL = "FORMAL"
     SEMI_FORMAL = "SEMI_FORMAL"
     CASUAL = "CASUAL"
+    FRIENDLY = "FRIENDLY"
 
 class UsersICP(Base):
     __tablename__ = 'users_icp'

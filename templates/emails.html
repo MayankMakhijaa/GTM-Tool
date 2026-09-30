@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% block title %}Fameweb{% endblock %}
+{% block content %}
+<div class="flex flex-col w-full">
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const navLinks = document.querySelectorAll("aside nav a");
+      navLinks.forEach((link) => {
+        const text = link.textContent.trim();
+        if (text.includes("Emails")) {
+          link.className = "flex items-center gap-space-md px-space-md py-space-sm rounded-lg bg-primary-container text-on-primary font-label-md text-label-md shadow-sm";
+          const icon = link.querySelector(".material-symbols-outlined");
+          if (icon) icon.className = "material-symbols-outlined text-[20px] text-on-primary";
+        } else {
+          link.className = "flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors";
+        }
+      });
+    });
+  </script>
+<div class="w-full px-space-xl py-space-lg flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Email Outreach</span>
+<span class="inline-flex items-center gap-1 ml-space-sm px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+            AI Personalized Sequence
+          </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Create personalized outreach for your selected leads.</p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<div class="inline-flex p-1 bg-surface-container rounded-lg">
+<button class="px-space-md py-1.5 rounded-lg font-label-md text-label-md text-on-surface-variant transition-colors hover:text-on-surface" id="mode-single-btn" onclick="setMode('single')" type="button">
+            Single Lead Preview (Shivam Dubey)
+          </button>
+<button class="px-space-md py-1.5 rounded-lg font-label-md text-label-md bg-surface-container-lowest text-primary shadow-sm font-semibold transition-all" id="mode-template-btn" onclick="setMode('template')" type="button">
+            Template Mode (<span id="btn-selected-count">4</span> selected)
+          </button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+<section class="xl:col-span-5 flex flex-col gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<div class="flex items-center justify-between pb-space-sm bg-surface-container-lowest">
+<div class="flex flex-col">
+<h2 class="font-headline-md text-headline-md text-on-surface">Target Recipients</h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Prioritize key stakeholders &amp; account fits</span>
+</div>
+<span class="px-space-sm py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm" id="selected-pill">
+            4 recipients selected
+          </span>
+</div>
+<div class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-low">
+<label class="flex items-center gap-space-sm cursor-pointer select-none">
+<input checked="" class="w-4 h-4 rounded text-primary focus:ring-primary accent-primary cursor-pointer" id="select-all-checkbox" onchange="toggleSelectAll(this)" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Select All</span>
+</label>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+<span>Sorted by Fit Score</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs" id="lead-list-container">
+          </div>
+          <div class="p-space-md rounded-xl bg-surface-container flex flex-col gap-space-sm mt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Account Enrichment</span>
+<span class="font-label-sm text-label-sm text-primary flex items-center gap-0.5"><span class="w-2 h-2 rounded-full bg-tertiary inline-block"></span> 4 of 4 Ready</span>
+</div>
+<div class="grid grid-cols-3 gap-space-xs text-center">
+<div class="bg-surface-container-lowest p-2 rounded-lg">
+<div class="font-headline-md text-headline-md text-on-surface">3.8x</div>
+<div class="font-body-sm text-[11px] text-on-surface-variant">Avg Reply Rate</div>
+</div>
+<div class="bg-surface-container-lowest p-2 rounded-lg">
+<div class="font-headline-md text-headline-md text-on-surface">&lt;2min</div>
+<div class="font-body-sm text-[11px] text-on-surface-variant">Speed to Lead</div>
+</div>
+<div class="bg-surface-container-lowest p-2 rounded-lg">
+<div class="font-headline-md text-headline-md text-on-surface">100%</div>
+<div class="font-body-sm text-[11px] text-on-surface-variant">Deliverability</div>
+</div>
+</div>
+</div>
+</section>
+<section class="xl:col-span-7 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md text-on-surface">Personalized Template Composer</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm">Dynamic Variables</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-3 py-1 rounded-lg font-label-sm text-label-sm bg-primary text-on-primary transition-all" id="tab-compose" onclick="switchViewTab('compose')" type="button">Composer</button>
+<button class="px-3 py-1 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container transition-all" id="tab-preview" onclick="switchViewTab('preview')" type="button">Preview for Lead</button>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface font-semibold flex items-center justify-between">
+<span>Subject Line</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Resolved for Elena: "Quick idea for Veloce Security AI"</span>
+</label>
+<div class="flex items-center gap-space-xs px-space-md py-2.5 rounded-lg bg-surface-container-low focus-within:bg-surface-container-lowest focus-within:shadow-sm transition-all">
+<span class="font-body-md text-body-md text-on-surface">Quick idea for</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary text-on-primary font-label-sm text-label-sm shadow-xs select-none">
+<span class="material-symbols-outlined text-[13px]">dataset</span>
+                Company Name
+                <span class="text-[10px] opacity-80">✕</span>
+</span>
+<input class="bg-transparent border-0 outline-none flex-1 font-body-md text-body-md text-on-surface placeholder:text-outline" id="subject-tail" placeholder="[Type additional context...]" type="text"/>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Personalization Token Palette (Click to append into editor)</span>
+<span class="font-body-sm text-body-sm text-primary flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">bolt</span> Autofilled from CRM
+              </span>
+</div>
+<div class="flex flex-wrap gap-1.5 p-space-sm rounded-lg bg-surface-container-low">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('First Name')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span> First Name
+              </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Company Name')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span> Company Name
+              </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Business Need')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span> Business Need
+              </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Result Metric')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span> Result Metric
+              </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Your Name')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span> Your Name
+              </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Your Role')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span> Your Role
+              </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Your Link')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span> Your Link
+              </button>
+</div>
+</div>
+<div class="flex flex-col gap-0 rounded-xl overflow-hidden bg-surface-container-low shadow-inner" id="composer-mode-panel">
+<div class="flex items-center flex-wrap justify-between gap-space-xs p-space-sm bg-surface-container">
+<div class="flex items-center gap-1">
+<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface font-bold text-sm" title="Bold" type="button">B</button>
+<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface italic text-sm" title="Italic" type="button">I</button>
+<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface underline text-sm" title="Underline" type="button">U</button>
+<div class="h-4 w-px bg-outline-variant mx-1"></div>
+<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Link" type="button">
+<span class="material-symbols-outlined text-[18px]">link</span>
+</button>
+<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Bullet List" type="button">
+<span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+</button>
+<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Numbered List" type="button">
+<span class="material-symbols-outlined text-[18px]">format_list_numbered</span>
+</button>
+<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Insert Image" type="button">
+<span class="material-symbols-outlined text-[18px]">image</span>
+</button>
+<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Add Attachment" type="button">
+<span class="material-symbols-outlined text-[18px]">attach_file</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-xs hover:bg-surface-container-highest transition-colors" onclick="insertToken('Company Name')" type="button">
+<span class="material-symbols-outlined text-[14px] text-primary">data_object</span>
+<span>Insert Token ▼</span>
+</button>
+</div>
+</div>
+<div class="p-space-lg bg-surface-container-lowest min-h-[300px] outline-none font-body-lg text-body-lg text-on-surface leading-relaxed" contenteditable="true" id="email-editor">
+<p class="mb-4">Hi <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-md text-label-md align-middle shadow-xs">First Name</span>,</p>
+<p class="mb-4">Noticed <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-md text-label-md align-middle shadow-xs">Company Name</span> has been scaling <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-md text-label-md align-middle shadow-xs">Business Need</span> lately — congrats on the growth.</p>
+<p class="mb-4">Usually at that stage, teams start missing leads simply because there aren't enough hours to follow up with everyone fast enough, and speed-to-lead can make a major difference in conversions.</p>
+<p class="mb-4">We build AI agents that handle this automatically — responding to inbound leads in seconds, qualifying them, and booking calls straight into your calendar, 24/7.</p>
+<p class="mb-4">One client added <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary font-label-md text-label-md align-middle shadow-xs">Result Metric</span> more booked calls in their first month without hiring anyone new.</p>
+<p class="mb-6">Worth a quick look at how this could work for <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-md text-label-md align-middle shadow-xs">Company Name</span>?</p>
+<p class="font-medium text-on-surface"><span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-surface-variant text-on-surface font-label-md text-label-md align-middle">Your Name</span></p>
+<p class="text-on-surface-variant font-body-sm"><span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-surface-variant text-on-surface font-label-md text-label-md align-middle">Your Role</span></p>
+<p class="text-primary font-body-sm"><span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-surface-variant text-on-surface font-label-md text-label-md align-middle">Your Link</span></p>
+</div>
+</div>
+<div class="hidden flex flex-col gap-space-sm p-space-lg rounded-xl bg-surface-container-low" id="preview-mode-panel">
+<div class="flex items-center justify-between pb-space-xs bg-surface-container-high/60 p-space-sm rounded-lg">
+<div class="flex items-center gap-space-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+<span class="font-label-md text-label-md text-on-surface font-semibold" id="preview-lead-heading">Elena Rostova @ Veloce Security AI</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant" id="preview-lead-email">elena.rostova@velocesec.ai</span>
+</div>
+<div class="p-space-lg rounded-xl bg-surface-container-lowest flex flex-col gap-space-md shadow-xs">
+<div class="flex flex-col gap-1 pb-space-sm bg-surface-container-lowest">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Subject</span>
+<span class="font-headline-md text-headline-md text-on-surface" id="preview-subject-text">Quick idea for Veloce Security AI</span>
+</div>
+<div class="font-body-lg text-body-lg text-on-surface leading-relaxed flex flex-col gap-space-md" id="preview-body-content">
+<p>Hi Elena,</p>
+<p>Noticed Veloce Security AI has been scaling manual SDR automation lately — congrats on the growth.</p>
+<p>Usually at that stage, teams start missing leads simply because there aren't enough hours to follow up with everyone fast enough, and speed-to-lead can make a major difference in conversions.</p>
+<p>We build AI agents that handle this automatically — responding to inbound leads in seconds, qualifying them, and booking calls straight into your calendar, 24/7.</p>
+<p>One client added 38% more booked calls in their first month without hiring anyone new.</p>
+<p>Worth a quick look at how this could work for Veloce Security AI?</p>
+<div>
+<p class="font-semibold text-on-surface">Sarah Jenkins</p>
+<p class="text-on-surface-variant font-body-sm">Head of Growth, Fameweb AI</p>
+<p class="text-primary font-body-sm">fameweb.ai/meet-sarah</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-sm">
+<div class="flex items-center gap-space-xs self-start sm:self-auto">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">description</span>
+<span class="font-medium">pitch_deck_summary.pdf</span>
+<span class="text-on-surface-variant text-[10px]">(1.2 MB)</span>
+<button class="hover:text-error transition-colors ml-1 text-on-surface-variant" type="button">✕</button>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded transition-colors" title="Add another attachment" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<div class="flex items-center gap-space-sm w-full sm:w-auto justify-end">
+<button class="px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors shadow-xs" onclick="saveDraft()" type="button">
+                Save Draft
+              </button>
+<button class="flex items-center gap-space-xs px-space-lg py-2 rounded-lg bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md transition-all shadow-sm hover:shadow" onclick="triggerMailtoCampaign()" type="button">
+<span>Prepare Mailto: Campaign</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<div class="p-space-md rounded-xl bg-surface-container-lowest flex items-start gap-space-sm shadow-sm">
+<div class="p-2 rounded-lg bg-surface-container text-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">mark_email_read</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Zero-Spam Verification</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">MX &amp; DMARC records checked across 4 domains. All mailboxes warmed.</p>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-lowest flex items-start gap-space-sm shadow-sm">
+<div class="p-2 rounded-lg bg-surface-container text-tertiary shrink-0">
+<span class="material-symbols-outlined text-[20px]">schedule_send</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Native Mailto Orchestrator</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Dispatches cleanly into your default desktop email client with variables baked in.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<div class="fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-on-surface text-surface font-label-md text-label-md shadow-xl flex items-center gap-2 transform translate-y-16 opacity-0 transition-all duration-300 pointer-events-none z-50" id="toast">
+<span class="material-symbols-outlined text-tertiary-fixed text-[18px]">check_circle</span>
+<span id="toast-message">Draft saved successfully.</span>
+</div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/email-outreach.js"></script>
+{% endblock %}
