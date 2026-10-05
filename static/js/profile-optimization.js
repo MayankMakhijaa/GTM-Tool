@@ -1,18 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const btnGenerate = document.getElementById('generate-suggestions-btn');
-    const btnRefresh = document.getElementById('refresh-data-btn');
-    const recHeadline = document.getElementById('rec-headline-text');
-    const recAbout = document.getElementById('rec-about-text');
-    const recExp = document.getElementById('rec-exp-text');
-    
-    // For toasts
     const toast = document.getElementById('toast-notification');
     const toastMessage = document.getElementById('toast-message');
     
     const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     
-    let currentExtractedData = null;
-
     window.showToast = function(message) {
         if (!toast || !toastMessage) return alert(message);
         toastMessage.innerText = message;
@@ -38,59 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    window.applyToDraft = function(btn, message) {
-        const original = btn.innerHTML;
-        btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Applying...</span>';
-        setTimeout(() => {
-            btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span><span>Applied</span>';
-            btn.classList.remove('bg-primary-container', 'hover:bg-secondary');
-            btn.classList.add('bg-tertiary-container', 'text-on-tertiary');
-            showToast(message || 'Applied to draft workspace');
-        }, 800);
-    };
-
-    if (btnRefresh) {
-        btnRefresh.addEventListener('click', async () => {
-            const url = prompt("Enter LinkedIn URL to analyze:");
-            if (!url) return;
-            
-            const original = btnRefresh.innerHTML;
-            btnRefresh.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Syncing...</span>';
-            btnRefresh.disabled = true;
-            
-            try {
-                // Since this uses SSE in the original implementation (/api/extract-profile-stream), 
-                // we'll hit the fallback /api/extract-profile POST endpoint
-                const res = await fetch('/api/extract-profile', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCsrfToken()
-                    },
-                    body: JSON.stringify({ linkedin_url: url })
-                });
-                
-                const data = await res.json();
-                if (data.success) {
-                    currentExtractedData = data.profile;
-                    showToast('Profile sync complete');
-                    // Data would be updated in the DOM here ideally
-                } else {
-                    throw new Error(data.error || 'Failed to extract profile');
-                }
-            } catch (err) {
-                alert(err.message);
-            } finally {
-                btnRefresh.disabled = false;
-                btnRefresh.innerHTML = original;
-            }
-        });
-    }
-
     if (btnGenerate) {
         btnGenerate.addEventListener('click', async () => {
             const original = btnGenerate.innerHTML;
-            btnGenerate.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Synthesizing ICP Data...</span>';
+            btnGenerate.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Analyzing your profile...</span>';
             btnGenerate.disabled = true;
             
             try {
@@ -100,41 +43,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCsrfToken()
                     },
-                    body: JSON.stringify({ 
-                        profile_data: currentExtractedData || {},
-                        icp_context: "Generate improvements for my profile based on my ICP." // We pass dummy if needed
-                    })
+                    body: JSON.stringify({}) // Backend pulls data from DB
                 });
                 
                 const data = await res.json();
-                if (data.success && data.optimization) {
-                    if (recHeadline) recHeadline.textContent = '"' + data.optimization.headline + '"';
-                    if (recAbout) recAbout.textContent = '"' + data.optimization.about + '"';
-                    showToast('Generated fresh optimizations');
+                if (data.success) {
+                    showToast('Analysis complete');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 } else {
-                    throw new Error(data.error || 'Failed to optimize profile');
+                    throw new Error(data.error || 'Failed to analyze profile');
                 }
             } catch (err) {
-                alert(err.message);
-            } finally {
+                alert('Unable to analyze profile: ' + err.message);
                 btnGenerate.disabled = false;
                 btnGenerate.innerHTML = original;
             }
-        });
-    }
-
-    const reorderBtn = document.getElementById('reorder-skills-btn');
-    if (reorderBtn) {
-        reorderBtn.addEventListener('click', () => {
-            showToast('Skill priorities updated for GTM discoverability');
-            reorderBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] text-tertiary">check</span><span>Prioritized</span>';
-        });
-    }
-
-    const exportBtn = document.getElementById('export-summary-btn');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', () => {
-            showToast('Generating profile optimization brief (PDF)...');
         });
     }
 });

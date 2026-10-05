@@ -140,8 +140,45 @@
 </div>
 </div>
 </div>
+<!-- Connect Accounts -->
+<div class="flex flex-col gap-1.5 mt-2">
+<label class="font-label-md text-label-md text-on-surface flex justify-between items-center">
+<span>Connect your accounts</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">Required</span>
+</label>
+
+<!-- LinkedIn Connect Card -->
+<div class="flex items-center justify-between p-3 rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
+    <div class="flex items-center gap-3">
+        <img src="https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg" alt="LinkedIn" class="w-6 h-6 object-contain" />
+        <div class="flex flex-col">
+            <span class="font-label-md text-label-md text-on-surface">LinkedIn</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant" id="linkedin-status-text">Not connected</span>
+        </div>
+    </div>
+    <button type="button" id="connect-linkedin-btn" class="px-3 py-1.5 bg-surface-container-high hover:bg-surface-dim text-on-surface font-label-md text-label-md font-medium rounded-md transition-colors border border-outline-variant">
+        Connect
+    </button>
+</div>
+
+<!-- Email Connect Card (Disabled) -->
+<div class="flex items-center justify-between p-3 rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm opacity-60">
+    <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-[24px] text-on-surface-variant">mail</span>
+        <div class="flex flex-col">
+            <span class="font-label-md text-label-md text-on-surface">Email</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Not connected</span>
+        </div>
+    </div>
+    <div class="px-2 py-1 bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-medium rounded-md">
+        Coming Soon
+    </div>
+</div>
+
+</div>
+
 <!-- Terms Disclaimer -->
-<div class="pt-1">
+<div class="pt-1 mt-2">
 <p class="font-body-sm text-body-sm text-on-surface-variant text-center leading-relaxed">
               By continuing, you agree to Fameweb
               <a class="text-primary font-medium hover:underline" href="javascript:void(0)">Terms of Service</a>
@@ -150,9 +187,9 @@
             </p>
 </div>
 <!-- Primary CTA Button -->
-<button class="w-full mt-2 py-3 px-space-md bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md font-semibold rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer" type="submit">
+<button id="create-account-btn" disabled class="w-full mt-2 py-3 px-space-md bg-surface-container-high text-outline font-label-md text-label-md font-semibold rounded-lg transition-all flex items-center justify-center gap-2 cursor-not-allowed" type="submit">
 <span>Create Account</span>
-<span class="material-symbols-outlined text-[18px] group-hover:translate-x-0.5 transition-transform">
+<span class="material-symbols-outlined text-[18px]">
               arrow_forward
             </span>
 </button>

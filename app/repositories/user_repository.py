@@ -18,7 +18,7 @@ def create_user(name: str, email: str, phone: str, password_hash: str) -> Option
         email_id=email,
         phone_no=phone,
         password_hash=password_hash,
-        onboarding_step="LINKEDIN",
+        onboarding_step="COMPANY",
         optimization_status="NOT_OFFERED",
         is_active=True
     )

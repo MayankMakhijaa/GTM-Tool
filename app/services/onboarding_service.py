@@ -2,7 +2,10 @@ import re
 from typing import Dict, Any, Optional, List
 from urllib.parse import urlparse
 from app.database import db_session
-from app.models.all_models import UsersCompanyDetails, UsersICP, UserTable, Tone
+import os
+from cryptography.fernet import Fernet
+from datetime import datetime
+from app.models.all_models import UsersCompanyDetails, UsersICP, UserTable, Tone, UsersLinkedinDetails, ConnectionStatus
 
 def normalize_website_url(url: str) -> str:
     if not url:
@@ -80,7 +83,7 @@ def save_company(user_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         
     # Advance onboarding state if applicable
     user = db_session.query(UserTable).filter_by(user_id=user_id).first()
-    if user and user.onboarding_step in ["LINKEDIN", "COMPANY"]:
+    if user and user.onboarding_step == "COMPANY":
         user.onboarding_step = "ICP"
     
     try:
@@ -183,3 +186,37 @@ def get_onboarding_status(user_id: int) -> Dict[str, Any]:
         "icp_completed": icp is not None,
         "optimization_status": "NOT_OFFERED"
     }
+
+from app.integrations.linkedin.voyager_client import encrypt_credential, decrypt_credential
+def get_linkedin_connection_status(user_id: int) -> Dict[str, Any]:
+    linkedin = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+    return {
+        "connected": linkedin is not None and linkedin.connection_status == ConnectionStatus.CONNECTED.value,
+        "status": linkedin.connection_status if linkedin else ConnectionStatus.DISCONNECTED.value
+    }
+
+def save_linkedin_connection(user_id: int, session_cookie: str) -> Dict[str, Any]:
+    if not session_cookie:
+        raise ValueError("Session credential is required")
+        
+    linkedin = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+    if not linkedin:
+        linkedin = UsersLinkedinDetails(user_id=user_id)
+        db_session.add(linkedin)
+        
+    linkedin.auth_data_encrypted = encrypt_credential(session_cookie)
+    linkedin.connection_status = ConnectionStatus.CONNECTED.value
+    linkedin.consent_at = datetime.utcnow()
+    
+    # Advance onboarding state if applicable
+    user = db_session.query(UserTable).filter_by(user_id=user_id).first()
+    if user and user.onboarding_step == "LINKEDIN":
+        user.onboarding_step = "COMPANY"
+        
+    try:
+        db_session.commit()
+    except Exception as e:
+        db_session.rollback()
+        raise e
+        
+    return get_linkedin_connection_status(user_id)

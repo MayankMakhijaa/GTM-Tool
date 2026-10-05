@@ -5,8 +5,7 @@ from datetime import datetime
 from google import genai
 from google.genai import types
 
-
-def optimize_linkedin_profile(extracted_profile: Dict[str, Any], gtm_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def optimize_linkedin_profile(extracted_profile: Dict[str, Any], icp_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     Use Gemini to evaluate the extracted LinkedIn profile and generate structured lead-generation recommendations.
     Uses a single structured request for cost control and fast evaluation.
@@ -16,153 +15,92 @@ def optimize_linkedin_profile(extracted_profile: Dict[str, Any], gtm_context: Op
         raise ValueError("GEMINI_API_KEY not found in environment.")
 
     client = genai.Client(api_key=api_key)
-
-    profile_data = extracted_profile.get("profile", extracted_profile)
-    profile_json = json.dumps(profile_data, indent=2)
-    gtm_context_json = json.dumps(gtm_context, indent=2) if gtm_context else "None provided."
+    
+    # Deterministic preparation
+    profile_data = extracted_profile.get("profile", extracted_profile) if isinstance(extracted_profile, dict) else {}
+    
+    # Prepare stripped profile to reduce tokens
+    stripped_profile = {
+        "name": profile_data.get("name"),
+        "headline": profile_data.get("headline"),
+        "location": profile_data.get("location"),
+        "current_position": profile_data.get("current_position"),
+        "about": profile_data.get("about"),
+        "experience": profile_data.get("experience", []),
+        "education": profile_data.get("education", []),
+        "skills": profile_data.get("skills", []),
+        "certifications": profile_data.get("certifications", []),
+        "projects": profile_data.get("projects", []),
+        "featured": profile_data.get("featured", []),
+        "honors_awards": profile_data.get("honors_awards", []),
+        "publications": profile_data.get("publications", []),
+        "courses": profile_data.get("courses", []),
+        "volunteer_experience": profile_data.get("volunteer_experience", []),
+        "languages": profile_data.get("languages", []),
+        "recommendations": profile_data.get("recommendations", [])
+    }
+    
+    icp_json = json.dumps(icp_profile, indent=2) if icp_profile else "No ICP context provided."
+    profile_json = json.dumps(stripped_profile, indent=2)
 
     prompt = f"""
 You are an elite executive LinkedIn lead-generation strategist and professional positioning consultant.
 
-GTM STRATEGY CONTEXT:
+GTM STRATEGY / ICP CONTEXT:
 The user is targeting the following offer and audience:
-{gtm_context_json}
+{icp_json}
 Ensure the optimization strongly aligns with this Go-To-Market strategy.
-
-MASTER OPTIMIZATION OBJECTIVE:
-Your primary objective is to optimize the user's LinkedIn profile to generate more relevant LEADS, BUSINESS OPPORTUNITIES, HIGH-VALUE CONVERSATIONS, and PROFESSIONAL OPPORTUNITIES.
-The user is optimizing THEIR OWN LinkedIn profile.
-
-HIERARCHICAL ANALYSIS RULES:
-1. IDENTIFY ROLE & IDENTITY: Inspect the extracted profile to determine the user's core professional role:
-   - Founder / Co-Founder / CEO / Managing Director / Business Owner / Agency Owner
-   - Consultant / Freelancer / Independent Advisor
-   - Professional / Employee / Specialist
-   - Student / Early Career
-   - Other
-
-2. POSITIONING STRATEGY BASED ON ROLE:
-   - FOR FOUNDERS / CEOS / BUSINESS OWNERS:
-     * DO NOT optimize the profile as if they are searching for employment.
-     * NEVER recommend "Open to Work", "Looking for opportunities", "Seeking Software Engineer roles", job-search keywords, or resume framing.
-     * Instead, optimize toward: attracting potential clients, attracting qualified leads, communicating company value proposition, establishing market authority, increasing trust, encouraging inbound business inquiries, and improving visitor-to-lead conversion.
-     * Frame headline/about to answer: "Does this make the target prospect immediately understand what this founder/company offers and why they should start a conversation?"
-   - FOR CONSULTANTS / FREELANCERS / EMPLOYEES / STUDENTS:
-     * Focus on demonstrating deep domain expertise, establishing authority, attracting business/client/career opportunities, and driving meaningful inbound conversations.
-
-3. ABSOLUTE TRUTHFULNESS CONSTRAINTS:
-   - NEVER invent companies, clients, projects, achievements, technologies, job titles, metrics, revenue, years of experience, or credentials.
-   - Work strictly from the user's actual profile facts.
-   - Do NOT assume the user is looking for a job unless the profile explicitly indicates that.
-
-4. ACTION TYPES PER RECOMMENDATION:
-   For every profile section recommendation, assign one of three action_types:
-   - "none": When current content is already effective or no change is needed (`change_required`: false, `suggested`: null).
-   - "copy": When suggesting specific replacement or refined text for existing content (Headline, About, Experience bullet points, Education details) (`change_required`: true, `suggested`: "<actual recommended text to copy>").
-   - "ask_chatgpt": When recommending that the user CREATE or ADD something new that doesn't currently exist (e.g., adding a missing Projects section, missing Featured post, missing certifications) where they need guidance to draft content (`change_required`: true, `suggested`: "<specific advice/prompt context on what to create>").
 
 INPUT EXTRACTED PROFILE:
 {profile_json}
 
-OUTPUT INSTRUCTIONS:
-Return a SINGLE JSON object with this exact schema:
+INSTRUCTIONS:
+Analyze the user's profile against their ICP. 
+For EVERY applicable section in the profile (headline, about, experience, education, skills, certifications, projects, featured, honors_awards, publications, courses, volunteer_experience, languages, recommendations), you MUST classify it based on its presence and ICP relevance.
+DO NOT EQUATE 'empty section = bad profile'. An empty section like 'languages' might be MISSING_OPTIONAL if irrelevant to ICP.
+
+CLASSIFICATIONS:
+- PRESENT_STRONG: Exists and is aligned with the ICP/profile objective.
+- PRESENT_WEAK: Exists but could be significantly improved for ICP alignment, clarity, positioning.
+- PRESENT_IRRELEVANT: Exists but contributes little/nothing toward the ICP. (Do not automatically recommend deleting it).
+- MISSING_RELEVANT: Genuinely empty (an empty array or null) AND would materially help the ICP objective.
+- MISSING_OPTIONAL: Genuinely empty BUT not important enough to affect the current objective.
+- NOT_APPLICABLE: Does not meaningfully apply.
+
+You must return a structured JSON response matching the following schema.
+
+OUTPUT SCHEMA:
 {{
-  "user_role_category": "Founder / CEO" | "Consultant / Freelancer" | "Professional / Employee" | "Student / Early Career" | "Other",
-  "overall_score": 82,
-  "category_scores": {{
-    "positioning": 85,
-    "headline": 80,
-    "about": 75,
-    "experience": 82,
-    "skills": 88,
-    "completeness": 78
-  }},
-  "summary_assessment": "Concise overview of current lead-generation positioning, target audience alignment, and key improvement areas.",
+  "overall_score": <integer 0-100 reflecting ICP relevance and profile objective, weighted transparently. Don't simply average equal weights>,
+  "score_rationale": "<brief explanation of how the score was calculated based on ICP relevance>",
+  "section_analysis": [
+    {{
+      "section": "<section_name>",
+      "status": "<PRESENT_STRONG|PRESENT_WEAK|PRESENT_IRRELEVANT|MISSING_RELEVANT|MISSING_OPTIONAL|NOT_APPLICABLE>",
+      "relevance": "<HIGH|MEDIUM|LOW>",
+      "score": <0-100 or null if not scored>,
+      "reason": "<explanation of the status>",
+      "issues": ["list of issues if any"],
+      "suggestions": ["list of improvement suggestions"]
+    }}
+  ],
   "recommendations": [
     {{
-      "section": "headline",
-      "title": "Profile Headline",
-      "change_required": true,
-      "current": "<actual extracted headline>",
-      "suggested": "<strategic value-focused headline>",
-      "reason": "Explains why this headline attracts more qualified leads and business conversations.",
-      "priority": "high",
-      "action_type": "copy"
-    }},
-    {{
-      "section": "about",
-      "title": "About / Summary",
-      "change_required": true,
-      "current": "<actual extracted about>",
-      "suggested": "<prospect-focused summary framing core offer, credibility, and call-to-action>",
-      "reason": "Sharpens value proposition and visitor-to-lead conversion.",
-      "priority": "high",
-      "action_type": "copy"
-    }},
-    {{
-      "section": "experience",
-      "title": "Experience Descriptions",
-      "change_required": true,
-      "current": "<actual experience>",
-      "suggested": "<outcome and authority-focused bullet points>",
-      "reason": "Replaces generic duty listings with high-trust achievements.",
-      "priority": "medium",
-      "action_type": "copy"
-    }},
-    {{
-      "section": "skills",
-      "title": "Skills & Core Competencies",
-      "change_required": true,
-      "current": "<actual list of skills>",
-      "suggested": "<recommended core skills and domain keywords>",
-      "reason": "Aligns skill profile with target prospect search and domain authority.",
-      "priority": "medium",
-      "action_type": "copy"
-    }},
-    {{
-      "section": "projects",
-      "title": "Featured Projects",
-      "change_required": true,
-      "current": "<actual projects or No projects found>",
-      "suggested": "Add key client projects or case studies showcasing problem-solving capability.",
-      "reason": "Providing tangible proof of execution increases prospect confidence.",
-      "priority": "medium",
-      "action_type": "ask_chatgpt"
-    }},
-    {{
-      "section": "featured",
-      "title": "Featured Section",
-      "change_required": true,
-      "current": "<actual featured content or Not available>",
-      "suggested": "Feature high-performing posts, client testimonials, or case study media.",
-      "reason": "Increases visual proof of authority for profile visitors.",
-      "priority": "low",
-      "action_type": "ask_chatgpt"
-    }},
-    {{
-      "section": "certifications",
-      "title": "Certifications & Licenses",
-      "change_required": false,
-      "current": "<actual certifications>",
-      "suggested": null,
-      "reason": "Certifications section is adequately presented.",
-      "priority": "none",
-      "action_type": "none"
-    }},
-    {{
-      "section": "education",
-      "title": "Education",
-      "change_required": false,
-      "current": "<actual education>",
-      "suggested": null,
-      "reason": "Education details are clear and complete.",
-      "priority": "none",
-      "action_type": "none"
+      "priority": "<HIGH|MEDIUM|LOW>",
+      "section": "<section_name>",
+      "problem": "<description>",
+      "why_it_matters": "<impact explanation>",
+      "recommended_action": "<what to do>",
+      "original_content": "<actual original content if applicable, else null>",
+      "suggested_content": "<suggested draft if applicable, else null>",
+      "reason": "<reasoning for suggestion>"
     }}
   ]
 }}
 """
 
+    # We use gemini-1.5-flash as it's the widely available and reliable API version for typical genai usage
+    # We fallback to older models if necessary, but 1.5-flash is ideal for speed and JSON output.
     response = client.models.generate_content(
         model='gemini-3.5-flash-lite',
         contents=prompt,
@@ -178,21 +116,11 @@ Return a SINGLE JSON object with this exact schema:
         raise ValueError("Gemini returned an empty response.")
 
     result_data = json.loads(result_text)
-    recs = result_data.get("recommendations", [])
-
-    selected_sections = extracted_profile.get("selected_sections")
-    if selected_sections and isinstance(selected_sections, list):
-        sel_set = set(s.lower().strip() for s in selected_sections)
-        filtered_recs = [r for r in recs if r.get("section", "").lower() in sel_set]
-        recs = filtered_recs
-
+    
     return {
-        "tenant_id": extracted_profile.get("tenant_id", "default_tenant"),
-        "user_id": extracted_profile.get("user_id", "pro_user"),
         "analyzed_at": datetime.now().isoformat(),
-        "user_role_category": result_data.get("user_role_category", "Professional / Employee"),
-        "overall_score": result_data.get("overall_score", 75),
-        "category_scores": result_data.get("category_scores", {}),
-        "summary_assessment": result_data.get("summary_assessment", ""),
-        "recommendations": recs
+        "overall_score": result_data.get("overall_score", 0),
+        "score_rationale": result_data.get("score_rationale", ""),
+        "section_analysis": result_data.get("section_analysis", []),
+        "recommendations": result_data.get("recommendations", [])
     }

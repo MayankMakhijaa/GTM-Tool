@@ -740,11 +740,15 @@ class Linkedin(object):
         """
         # NOTE this still works for now, but will probably eventually have to be converted to
         # https://www.linkedin.com/voyager/api/identity/profiles/ACoAAAKT9JQBsH7LwKaE9Myay9WcX8OVGuDq9Uw
-        res = self._fetch(f"/identity/profiles/{public_id or urn_id}/profileView")
+        endpoint = f"/identity/profiles/{public_id or urn_id}/profileView"
+        print(f"\n[DIAGNOSTIC] 6. get_profile() is requesting exact endpoint: {endpoint}")
+        res = self._fetch(endpoint)
 
+        print(f"[DIAGNOSTIC] 7 & 8. get_profile() request returned HTTP status: {res.status_code}")
         data = res.json()
         if data and "status" in data and data["status"] != 200:
-            self.logger.info("request failed: {}".format(data["message"]))
+            print(f"[DIAGNOSTIC] get_profile() inner JSON status: {data['status']}")
+            self.logger.info("request failed: {}".format(data.get("message", data)))
             return {}
 
         # massage [profile] data

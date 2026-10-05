@@ -37,6 +37,7 @@ def enforce_onboarding(user, current_endpoint):
         
     return None
 
+
 @pages_bp.route("/")
 def home():
     if session.get("user_id"):
@@ -85,7 +86,19 @@ def profile_optimization():
     user = get_current_user()
     if redir := enforce_onboarding(user, "pages.profile_optimization"):
         return redir
-    return render_template("profileoptimization.html", user=user)
+        
+    from app.models.all_models import UsersLinkedinDetails, UsersICP
+    from app.database import db_session
+    linkedin_profile = db_session.query(UsersLinkedinDetails).filter_by(user_id=user.user_id).first()
+    icp_profile = db_session.query(UsersICP).filter_by(user_id=user.user_id).first()
+    
+    import logging
+    logging.info(f"[PROFILE OPTIMIZATION] Current user identifier = {user.user_id}")
+    logging.info(f"[PROFILE OPTIMIZATION] UsersLinkedinDetails row = {linkedin_profile.id if linkedin_profile else 'None'}")
+    logging.info(f"[PROFILE OPTIMIZATION] Profile name = {linkedin_profile.name if linkedin_profile else 'None'}")
+    logging.info(f"[PROFILE OPTIMIZATION] Profile headline = {linkedin_profile.headline if linkedin_profile else 'None'}")
+    
+    return render_template("profileoptimization.html", user=user, linkedin_profile=linkedin_profile, icp_profile=icp_profile)
 
 @pages_bp.route("/gtm")
 @login_required
