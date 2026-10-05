@@ -175,6 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // 1. Check existing saved company details
+    let hasSavedData = false;
     try {
         const res = await fetch('/api/onboarding/company');
         if (res.ok) {
@@ -183,7 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Saved data exists - load it and do NOT trigger auto-scrape
                 populateForm(result.data, true);
                 showBanner('<strong>Loaded Profile:</strong> Saved company details loaded. Review and edit below.', 'info');
-                return;
+                hasSavedData = true;
             }
         }
     } catch (err) {
@@ -191,59 +192,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 2. No saved data found -> Auto-discovery and extraction flow
-    showBanner('<strong>Auto-Discovery:</strong> Identifying company profile from your business email...', 'info');
+    if (!hasSavedData) {
+        showBanner('<strong>Auto-Discovery:</strong> Identifying company profile from your business email...', 'info');
 
-    try {
-        const idRes = await fetch('/api/onboarding/company/identify');
-        if (idRes.ok) {
-            const idResult = await idRes.json();
-            if (idResult.success && idResult.identification_status === 'CONFIRMED') {
-                const website = idResult.official_website;
-                const companyName = idResult.company_name;
+        try {
+            const idRes = await fetch('/api/onboarding/company/identify');
+            if (idRes.ok) {
+                const idResult = await idRes.json();
+                if (idResult.success && idResult.identification_status === 'CONFIRMED') {
+                    const website = idResult.official_website;
+                    const companyName = idResult.company_name;
 
-                if (document.getElementById('comp-name')) document.getElementById('comp-name').value = companyName || '';
-                if (document.getElementById('comp-web')) document.getElementById('comp-web').value = website || '';
-                if (urlInput) urlInput.value = website || '';
+                    if (document.getElementById('comp-name')) document.getElementById('comp-name').value = companyName || '';
+                    if (document.getElementById('comp-web')) document.getElementById('comp-web').value = website || '';
+                    if (urlInput) urlInput.value = website || '';
 
-                showBanner(`<strong>Company Identified:</strong> Sourced ${companyName || 'company'} (${website}). Extracting website details...`, 'info');
-                await triggerScrape(website, 'CONFIRMED', true);
-            } else if (idResult.success && idResult.identification_status === 'NEEDS_CONFIRMATION') {
-                // Confirmation required
-                if (confirmationBanner && proposedCompanyName && proposedWebsiteLink) {
-                    proposedCompanyName.textContent = idResult.company_name || 'your company';
-                    proposedWebsiteLink.textContent = idResult.official_website || 'official website';
-                    proposedWebsiteLink.href = idResult.official_website || '#';
-                    confirmationBanner.classList.remove('hidden');
-                    confirmationBanner.classList.add('flex');
-                    if (fetchBanner) fetchBanner.style.display = 'none';
+                    showBanner(`<strong>Company Identified:</strong> Sourced ${companyName || 'company'} (${website}). Extracting website details...`, 'info');
+                    await triggerScrape(website, 'CONFIRMED', true);
+                } else if (idResult.success && idResult.identification_status === 'NEEDS_CONFIRMATION') {
+                    // Confirmation required
+                    if (confirmationBanner && proposedCompanyName && proposedWebsiteLink) {
+                        proposedCompanyName.textContent = idResult.company_name || 'your company';
+                        proposedWebsiteLink.textContent = idResult.official_website || 'official website';
+                        proposedWebsiteLink.href = idResult.official_website || '#';
+                        confirmationBanner.classList.remove('hidden');
+                        confirmationBanner.classList.add('flex');
+                        if (fetchBanner) fetchBanner.style.display = 'none';
 
-                    if (document.getElementById('comp-name')) document.getElementById('comp-name').value = idResult.company_name || '';
-                    if (document.getElementById('comp-web')) document.getElementById('comp-web').value = idResult.official_website || '';
-                    if (urlInput) urlInput.value = idResult.official_website || '';
+                        if (document.getElementById('comp-name')) document.getElementById('comp-name').value = idResult.company_name || '';
+                        if (document.getElementById('comp-web')) document.getElementById('comp-web').value = idResult.official_website || '';
+                        if (urlInput) urlInput.value = idResult.official_website || '';
 
-                    if (btnConfirmScrape) {
-                        btnConfirmScrape.onclick = async () => {
-                            confirmationBanner.classList.add('hidden');
-                            confirmationBanner.classList.remove('flex');
-                            showBanner(`<strong>Confirmed:</strong> Extracting details for ${idResult.company_name}...`, 'info');
-                            await triggerScrape(idResult.official_website, 'CONFIRMED', true);
-                        };
+                        if (btnConfirmScrape) {
+                            btnConfirmScrape.onclick = async () => {
+                                confirmationBanner.classList.add('hidden');
+                                confirmationBanner.classList.remove('flex');
+                                showBanner(`<strong>Confirmed:</strong> Extracting details for ${idResult.company_name}...`, 'info');
+                                await triggerScrape(idResult.official_website, 'CONFIRMED', true);
+                            };
+                        }
+                        if (btnCancelConfirmation) {
+                            btnCancelConfirmation.onclick = () => {
+                                confirmationBanner.classList.add('hidden');
+                                confirmationBanner.classList.remove('flex');
+                                showBanner('Please verify or enter your company website URL below.', 'warning');
+                            };
+                        }
                     }
-                    if (btnCancelConfirmation) {
-                        btnCancelConfirmation.onclick = () => {
-                            confirmationBanner.classList.add('hidden');
-                            confirmationBanner.classList.remove('flex');
-                            showBanner('Please verify or enter your company website URL below.', 'warning');
-                        };
-                    }
+                } else {
+                    showBanner(`<strong>Identification:</strong> ${idResult.message || 'No automatic website match found for your email. Please enter your website URL below.'}`, 'warning');
                 }
-            } else {
-                showBanner(`<strong>Identification:</strong> ${idResult.message || 'No automatic website match found for your email. Please enter your website URL below.'}`, 'warning');
             }
+        } catch (idErr) {
+            console.error('Company identification error:', idErr);
+            showBanner('Unable to auto-identify company. Please enter your website details manually.', 'warning');
         }
-    } catch (idErr) {
-        console.error('Company identification error:', idErr);
-        showBanner('Unable to auto-identify company. Please enter your website details manually.', 'warning');
     }
 
     // 3. Manual Fetch / Refresh Button Handler
