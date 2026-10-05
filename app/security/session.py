@@ -28,11 +28,16 @@ def login_required(f):
     return decorated_function
 
 def set_user_session(user_id: int):
-    """Sets the authenticated user in the session. Regenerates session to prevent fixation."""
-    # Flask regenerates the session ID automatically when contents change or session is cleared.
+    """Sets the authenticated user in the session. Preserves CSRF token to prevent token invalidation."""
+    csrf_token = session.get('csrf_token')
     session.clear()
     session['user_id'] = user_id
+    if csrf_token:
+        session['csrf_token'] = csrf_token
 
 def clear_user_session():
-    """Clears the session completely."""
+    """Clears user session attributes while preserving CSRF token."""
+    csrf_token = session.get('csrf_token')
     session.clear()
+    if csrf_token:
+        session['csrf_token'] = csrf_token

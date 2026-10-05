@@ -57,9 +57,10 @@
               </span>
 <input class="w-full pl-9 pr-3 py-2.5 bg-surface-container-lowest text-on-surface placeholder:text-outline/70 font-body-md text-body-md rounded-lg focus:outline-none focus:bg-surface-container-low transition-colors shadow-sm" id="businessEmail" placeholder="alex@acme.com" required="" type="email"/>
 </div>
-<p class="font-body-sm text-body-sm text-on-surface-variant/80 pl-1">
-              Please use your work email domain for organization verification.
-            </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant/80 pl-1 flex items-center gap-1 transition-colors" id="email-feedback-msg">
+<span class="material-symbols-outlined text-[14px] hidden" id="email-feedback-icon">error</span>
+<span id="email-feedback-text">Please use your work email domain for organization verification.</span>
+</p>
 </div>
 <!-- Phone Number with Attached Country-Code Selector -->
 <div class="flex flex-col gap-1.5">
@@ -119,14 +120,14 @@
 <span class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">
                 lock
               </span>
-<input class="w-full pl-9 pr-10 py-2.5 bg-surface-container-lowest text-on-surface placeholder:text-outline/70 font-body-md text-body-md rounded-lg focus:outline-none focus:bg-surface-container-low transition-colors shadow-sm" id="passwordField" placeholder="Create a secure password (min. 8 characters)" required="" type="password"/>
+<input class="w-full pl-9 pr-10 py-2.5 bg-surface-container-lowest text-on-surface placeholder:text-outline/70 font-body-md text-body-md rounded-lg focus:outline-none focus:bg-surface-container-low transition-colors shadow-sm" id="passwordField" placeholder="Create a secure password (min. 9 characters)" required="" type="password"/>
 <button class="absolute right-2.5 p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors" id="togglePassword" title="Toggle Visibility" type="button">
 <span class="material-symbols-outlined text-[18px] block" id="togglePasswordIcon">
                   visibility
                 </span>
 </button>
 </div>
-<!-- Password Strength Indicator -->
+<!-- Password Strength Indicator & Real-Time Requirements Checklist -->
 <div class="mt-1 flex flex-col gap-1.5">
 <div class="grid grid-cols-4 gap-1.5 w-full">
 <div id="strength-bar-1" class="h-1.5 rounded-full bg-surface-container-high transition-all duration-300"></div>
@@ -135,8 +136,30 @@
 <div id="strength-bar-4" class="h-1.5 rounded-full bg-surface-container-high transition-all duration-300"></div>
 </div>
 <div class="flex justify-between items-center text-on-surface-variant font-label-sm text-label-sm">
-<span id="strength-text">Strength: Needs 8+ chars</span>
-<span class="font-code-sm text-code-sm text-on-surface-variant">Min. 8 chars</span>
+<span id="strength-text">Strength: Enter password</span>
+<span id="strength-status-badge" class="font-code-sm text-code-sm text-outline">0 / 5 Rules</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-1 text-[11px] font-body-sm text-outline" id="password-requirements-list">
+<div class="flex items-center gap-1 transition-colors" id="req-length">
+<span class="material-symbols-outlined text-[14px]" id="req-length-icon">radio_button_unchecked</span>
+<span>Min. 9 characters</span>
+</div>
+<div class="flex items-center gap-1 transition-colors" id="req-uppercase">
+<span class="material-symbols-outlined text-[14px]" id="req-uppercase-icon">radio_button_unchecked</span>
+<span>Uppercase letter (A-Z)</span>
+</div>
+<div class="flex items-center gap-1 transition-colors" id="req-lowercase">
+<span class="material-symbols-outlined text-[14px]" id="req-lowercase-icon">radio_button_unchecked</span>
+<span>Lowercase letter (a-z)</span>
+</div>
+<div class="flex items-center gap-1 transition-colors" id="req-number">
+<span class="material-symbols-outlined text-[14px]" id="req-number-icon">radio_button_unchecked</span>
+<span>Number (0-9)</span>
+</div>
+<div class="flex items-center gap-1 sm:col-span-2 transition-colors" id="req-special">
+<span class="material-symbols-outlined text-[14px]" id="req-special-icon">radio_button_unchecked</span>
+<span>Special character (!@#$%^&amp;*...)</span>
+</div>
 </div>
 </div>
 </div>
@@ -150,7 +173,7 @@
             </p>
 </div>
 <!-- Primary CTA Button -->
-<button class="w-full mt-2 py-3 px-space-md bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md font-semibold rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer" type="submit">
+<button class="w-full mt-2 py-3 px-space-md bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md font-semibold rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-container" id="signupSubmitBtn" type="submit" disabled>
 <span>Create Account</span>
 <span class="material-symbols-outlined text-[18px] group-hover:translate-x-0.5 transition-transform">
               arrow_forward
@@ -160,7 +183,7 @@
 <!-- Bottom Footer Switcher -->
 <div class="mt-space-lg pt-space-md flex items-center justify-center gap-1.5 font-body-sm text-body-sm text-on-surface-variant bg-surface-container-low/50 -mx-space-lg sm:-mx-space-xl -mb-space-lg sm:-mb-space-xl py-3 rounded-b-xl">
 <span>Already have an account?</span>
-<a class="text-primary font-label-md text-label-md font-semibold hover:underline flex items-center gap-0.5" href="javascript:void(0)">
+<a class="text-primary font-label-md text-label-md font-semibold hover:underline flex items-center gap-0.5" href="/login">
             Sign In
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
 </a>

@@ -75,7 +75,7 @@
 <span class="material-symbols-outlined text-[20px]">language</span>
 </div>
 <span class="absolute left-10 text-outline font-body-md text-body-md select-none hidden sm:inline">https://</span>
-<input class="w-full pl-10 sm:pl-28 pr-space-md py-3 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container focus:text-on-surface transition-all" id="company-url-input" placeholder="example.com" type="text" value="fameweb.ai"/>
+<input class="w-full pl-10 sm:pl-28 pr-space-md py-3 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container focus:text-on-surface transition-all" id="company-url-input" placeholder="example.com" type="text" value=""/>
 </div>
 <button class="bg-primary hover:bg-secondary text-on-primary font-label-md text-label-md px-space-lg py-3 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95" id="fetch-button" type="button">
 <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
@@ -84,14 +84,33 @@
 </div>
 <div class="flex items-start sm:items-center justify-between gap-space-md bg-surface-container-high text-on-surface p-space-md rounded-lg" id="fetch-banner">
 <div class="flex items-center gap-space-sm">
-<span class="material-symbols-outlined text-primary text-[20px] shrink-0">verified</span>
-<span class="font-body-sm text-body-sm text-on-surface">
-<strong>AI &amp; Website sourced:</strong> Information extracted from public repositories, DNS records, and landing page positioning. Review and refine below.
-          </span>
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0" id="fetch-banner-icon">verified</span>
+<span class="font-body-sm text-body-sm text-on-surface" id="fetch-banner-message">
+<strong>AI &amp; Website discovery:</strong> Identifying your company profile from your email domain...
+</span>
 </div>
-<button class="text-outline hover:text-on-surface transition-colors p-1" onclick="document.getElementById('fetch-banner').remove()" type="button">
+<button class="text-outline hover:text-on-surface transition-colors p-1" onclick="document.getElementById('fetch-banner').style.display='none'" type="button">
 <span class="material-symbols-outlined text-[16px]">close</span>
 </button>
+</div>
+<div class="hidden flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md bg-amber-500/10 border border-amber-500/30 text-on-surface p-space-md rounded-lg" id="confirmation-banner">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-amber-600 text-[22px] shrink-0">help_outline</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Confirm Official Website</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="confirmation-text">
+Is <strong id="proposed-company-name">Company</strong> (<a id="proposed-website-link" href="#" target="_blank" class="text-primary underline font-code-sm">website</a>) your official company website?
+</span>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button type="button" id="btn-confirm-scrape" class="bg-primary hover:bg-secondary text-on-primary font-label-md text-label-md px-4 py-2 rounded-lg transition-all shadow-sm">
+Confirm &amp; Extract
+</button>
+<button type="button" id="btn-cancel-confirmation" class="bg-surface-container-high hover:bg-surface-container text-on-surface font-label-md text-label-md px-4 py-2 rounded-lg transition-all">
+Enter Manually
+</button>
+</div>
 </div>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
@@ -101,33 +120,38 @@
 <span class="font-headline-md text-headline-md text-on-surface">Firmographic &amp; Positioning Record</span>
 <span class="font-body-sm text-body-sm text-on-surface-variant">Explicit parameters leveraged across pipeline filters</span>
 </div>
-<span class="font-code-sm text-code-sm text-tertiary bg-tertiary-fixed/30 px-2 py-1 rounded">PARSED &amp; SYNCED</span>
+<span class="font-code-sm text-code-sm text-tertiary bg-tertiary-fixed/30 px-2 py-1 rounded" id="scrape-status-badge">READY</span>
 </div>
 <form class="grid grid-cols-1 sm:grid-cols-2 gap-space-lg" id="company-form">
 <div class="flex flex-col gap-space-xs sm:col-span-1">
 <label class="font-label-sm text-label-sm text-on-surface font-semibold uppercase tracking-wider" for="comp-name">
               Company Name <span class="text-error">*</span>
 </label>
-<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" id="comp-name" type="text" value="Fameweb Technologies"/>
+<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" id="comp-name" type="text" value="" placeholder="e.g. Fameweb"/>
 </div>
 <div class="flex flex-col gap-space-xs sm:col-span-1">
 <label class="font-label-sm text-label-sm text-on-surface font-semibold uppercase tracking-wider" for="comp-web">
               Canonical Domain
             </label>
-<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container font-code-sm text-code-sm" id="comp-web" type="text" value="https://fameweb.ai"/>
+<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container font-code-sm text-code-sm" id="comp-web" type="text" value="" placeholder="https://fameweb.in"/>
 </div>
 <div class="flex flex-col gap-space-xs sm:col-span-2">
 <label class="font-label-sm text-label-sm text-on-surface font-semibold uppercase tracking-wider" for="comp-desc">
               Value Proposition &amp; Overview
             </label>
-<textarea class="w-full p-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container resize-none leading-relaxed" id="comp-desc" rows="3">AI-powered GTM automation platform helping B2B teams qualify inbound/outbound leads against dynamic ICPs and run personalized email workflows.</textarea>
-<span class="font-code-sm text-code-sm text-outline self-end">142 / 300 characters</span>
+<textarea class="w-full p-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container resize-none leading-relaxed" id="comp-desc" rows="3" placeholder="Company overview and value proposition..."></textarea>
 </div>
 <div class="flex flex-col gap-space-xs sm:col-span-2">
 <label class="font-label-sm text-label-sm text-on-surface font-semibold uppercase tracking-wider" for="comp-sells">
               What the Company Sells (Core Offering)
             </label>
-<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" id="comp-sells" type="text" value="Automated B2B Lead Qualification &amp; Outbound Personalization Software"/>
+<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" id="comp-sells" type="text" value="" placeholder="Core offering description..."/>
+</div>
+<div class="flex flex-col gap-space-xs sm:col-span-2">
+<label class="font-label-sm text-label-sm text-on-surface font-semibold uppercase tracking-wider" for="comp-products">
+              Products &amp; Services
+            </label>
+<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" id="comp-products" type="text" value="" placeholder="e.g. Strategy, Brand, GTM, Growth Marketing"/>
 </div>
 <div class="flex flex-col gap-space-xs sm:col-span-1">
 <label class="font-label-sm text-label-sm text-on-surface font-semibold uppercase tracking-wider" for="comp-ind">
@@ -135,11 +159,19 @@
             </label>
 <div class="relative">
 <select class="w-full appearance-none px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container pr-10" id="comp-ind">
-<option selected="">Enterprise Software / B2B SaaS</option>
-<option>Fintech &amp; Payments</option>
-<option>HealthTech &amp; Life Sciences</option>
-<option>Supply Chain &amp; Logistics</option>
-<option>Developer Tools &amp; Cloud Infrastructure</option>
+<option value="" disabled selected>Select Industry</option>
+<option>Software &amp; SaaS</option>
+<option>Marketing &amp; Advertising</option>
+<option>FinTech &amp; Financial Services</option>
+<option>HealthTech &amp; Healthcare</option>
+<option>E-Commerce &amp; Retail</option>
+<option>Cybersecurity</option>
+<option>Artificial Intelligence &amp; Data</option>
+<option>Education &amp; EdTech</option>
+<option>Real Estate &amp; PropTech</option>
+<option>Logistics &amp; Supply Chain</option>
+<option>Manufacturing &amp; Industrial</option>
+<option>Professional Services &amp; Consulting</option>
 </select>
 <span class="material-symbols-outlined absolute right-3 top-2.5 pointer-events-none text-outline text-[20px]">expand_more</span>
 </div>
@@ -150,11 +182,13 @@
             </label>
 <div class="relative">
 <select class="w-full appearance-none px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container pr-10" id="comp-size">
-<option>1 - 10 employees</option>
-<option selected="">11 - 50 employees</option>
-<option>51 - 200 employees</option>
-<option>201 - 500 employees</option>
-<option>500+ employees</option>
+<option value="" disabled selected>Select Company Size</option>
+<option>1–10 employees</option>
+<option>11–50 employees</option>
+<option>51–200 employees</option>
+<option>201–500 employees</option>
+<option>501–1000 employees</option>
+<option>1000+ employees</option>
 </select>
 <span class="material-symbols-outlined absolute right-3 top-2.5 pointer-events-none text-outline text-[20px]">expand_more</span>
 </div>
@@ -165,26 +199,33 @@
             </label>
 <div class="relative">
 <select class="w-full appearance-none px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container pr-10" id="comp-rev">
-<option>&lt; $1M ARR</option>
-<option selected="">$1M - $5M ARR</option>
-<option>$5M - $20M ARR</option>
-<option>$20M - $50M ARR</option>
-<option>$50M+ ARR</option>
+<option value="" disabled selected>Select Revenue Range</option>
+<option>&lt; $1M annual revenue</option>
+<option>$1M–$5M annual revenue</option>
+<option>$5M–$20M annual revenue</option>
+<option>$20M–$50M annual revenue</option>
+<option>$50M+ annual revenue</option>
 </select>
 <span class="material-symbols-outlined absolute right-3 top-2.5 pointer-events-none text-outline text-[20px]">expand_more</span>
 </div>
 </div>
 <div class="flex flex-col gap-space-xs sm:col-span-1">
 <label class="font-label-sm text-label-sm text-on-surface font-semibold uppercase tracking-wider" for="comp-loc">
-              HQ &amp; Regional Hubs
+              HQ &amp; Location
             </label>
-<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" id="comp-loc" type="text" value="San Francisco, CA &amp; Bengaluru, India"/>
+<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" id="comp-loc" type="text" value="" placeholder="e.g. India"/>
+</div>
+<div class="flex flex-col gap-space-xs sm:col-span-1">
+<label class="font-label-sm text-label-sm text-on-surface font-semibold uppercase tracking-wider" for="comp-rating">
+              Rating
+            </label>
+<input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" id="comp-rating" type="text" value="" placeholder="Not available"/>
 </div>
 <div class="flex flex-col gap-space-xs sm:col-span-2">
 <label class="font-label-sm text-label-sm text-on-surface font-semibold uppercase tracking-wider" for="comp-notes">
-              Contextual Notes / GTM Nuances
+              Contextual Notes / Other Details
             </label>
-<textarea class="w-full p-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container resize-none leading-relaxed" id="comp-notes" rows="3">Primary focus on mid-market SaaS companies looking to cut lead response time and boost SDR capacity.</textarea>
+<textarea class="w-full p-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container resize-none leading-relaxed" id="comp-notes" rows="3" placeholder="Target audience, GTM nuances, or positioning notes..."></textarea>
 </div>
 </form>
 </div>
@@ -272,43 +313,5 @@
 </div>
 </div>
 </div>
-<script>
-  (function() {
-    const fetchBtn = document.getElementById('fetch-button');
-    const urlInput = document.getElementById('company-url-input');
-
-    if (fetchBtn && urlInput) {
-      fetchBtn.addEventListener('click', function() {
-        const originalContent = fetchBtn.innerHTML;
-        fetchBtn.disabled = true;
-        fetchBtn.innerHTML = `
-          <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-          <span>Enriching Signals...</span>
-        `;
-        
-        setTimeout(() => {
-          fetchBtn.disabled = false;
-          fetchBtn.innerHTML = `
-            <span class="material-symbols-outlined text-[18px]">check</span>
-            <span>Signals Refreshed!</span>
-          `;
-          setTimeout(() => {
-            fetchBtn.innerHTML = originalContent;
-          }, 2500);
-        }, 1200);
-      });
-    }
-
-    const saveDraftBtn = document.getElementById('btn-save-draft');
-    if (saveDraftBtn) {
-      saveDraftBtn.addEventListener('click', function() {
-        const prev = saveDraftBtn.innerText;
-        saveDraftBtn.innerText = 'Saved!';
-        setTimeout(() => {
-          saveDraftBtn.innerText = prev;
-        }, 1500);
-      });
-    }
-  })();
-</script></main><script src="/static/js/onboarding_new/company.js"></script>
+</main><script src="/static/js/onboarding_new/company.js"></script>
 </body></html>

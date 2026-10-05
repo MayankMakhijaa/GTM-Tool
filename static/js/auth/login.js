@@ -11,7 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show/Hide password
     if (togglePasswordBtn && passwordInput && pwdIcon) {
-        togglePasswordBtn.addEventListener('click', () => {
+        togglePasswordBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 pwdIcon.textContent = 'visibility_off';

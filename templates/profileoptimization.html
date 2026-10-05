@@ -24,14 +24,14 @@
 <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
 <div class="flex items-start gap-space-md">
 <div class="relative shrink-0">
-<img alt="Sarah Jenkins" class="w-20 h-20 rounded-full object-cover shadow-sm ring-4 ring-surface-container-low" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqaMPD789AAkt9VatCyAaFw5ZZQH6kJZ3QNZv3Jf91eN2Ms8weqJubSrY6izoGpke7BQJjc1V0-m3vDuC8TbhPNcrfbFqV4Ogc6-vhf_AfXEkvGYYb3s2rByz2aH3bVX7u86B4ZaNZhMK3tE_jwjb6PYC_cTWL6Ao6CxLeaOdJo62uPiMEBmWld55eOaTpJ9JUFXKUtBrJJ11n-AmF1dlfIuVGz-au5Di7augGkbfQ-9zv4HXn58mD"/>
+<img alt="{{ user.name if (user and user.name) else 'User Profile' }}" class="w-20 h-20 rounded-full object-cover shadow-sm ring-4 ring-surface-container-low" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqaMPD789AAkt9VatCyAaFw5ZZQH6kJZ3QNZv3Jf91eN2Ms8weqJubSrY6izoGpke7BQJjc1V0-m3vDuC8TbhPNcrfbFqV4Ogc6-vhf_AfXEkvGYYb3s2rByz2aH3bVX7u86B4ZaNZhMK3tE_jwjb6PYC_cTWL6Ao6CxLeaOdJo62uPiMEBmWld55eOaTpJ9JUFXKUtBrJJ11n-AmF1dlfIuVGz-au5Di7augGkbfQ-9zv4HXn58mD"/>
 <span class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-tertiary flex items-center justify-center text-on-tertiary shadow-sm">
 <span class="material-symbols-outlined text-[12px]">check</span>
 </span>
 </div>
 <div class="flex flex-col min-w-0">
 <div class="flex items-center gap-space-xs">
-<h2 class="font-headline-md text-headline-md text-on-surface truncate">Sarah Jenkins</h2>
+<h2 class="font-headline-md text-headline-md text-on-surface truncate">{{ user.name if (user and user.name) else 'User' }}</h2>
 </div>
 <span class="font-label-md text-label-md text-primary font-semibold truncate">Head of Growth &amp; GTM Strategy</span>
 <div class="flex items-center gap-1 text-on-surface-variant mt-1">
@@ -334,7 +334,54 @@
 </div>
 </div>
 
+<div id="settings-modal" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+  <div class="bg-surface-container-lowest rounded-2xl p-space-xl max-w-lg w-full mx-4 shadow-2xl flex flex-col gap-space-lg">
+    <div class="flex items-center justify-between border-b border-surface-container pb-space-md">
+      <div class="flex items-center gap-space-sm">
+        <span class="material-symbols-outlined text-primary text-[24px]">settings</span>
+        <h2 class="font-headline-md text-headline-md text-on-surface">Optimization Settings</h2>
+      </div>
+      <button id="close-settings-modal" type="button" class="text-outline hover:text-on-surface p-1">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+    <div class="flex flex-col gap-space-md">
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface font-semibold">Optimization Status</label>
+        <select id="setting-opt-status" class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-on-surface focus:outline-none focus:bg-surface-container">
+          <option value="NOT_OFFERED">Not Offered</option>
+          <option value="ACCEPTED">Accepted / In Progress</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="SKIPPED">Skipped</option>
+        </select>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface font-semibold">Default Priority Filter</label>
+        <select id="setting-priority-filter" class="w-full px-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-on-surface focus:outline-none focus:bg-surface-container">
+          <option value="all">All Priorities</option>
+          <option value="high">High Impact Only</option>
+          <option value="draft">Draft Stage Only</option>
+        </select>
+      </div>
+      <div class="flex items-center justify-between p-space-md bg-surface-container-low rounded-lg">
+        <div class="flex flex-col">
+          <span class="font-label-md text-label-md text-on-surface font-semibold">Auto-save changes to draft</span>
+          <span class="font-body-sm text-body-sm text-on-surface-variant">Automatically persist profile optimizations</span>
+        </div>
+        <input type="checkbox" id="setting-autosave" checked class="w-5 h-5 accent-primary rounded cursor-pointer" />
+      </div>
+    </div>
+    <div class="flex items-center justify-end gap-space-md pt-space-md border-t border-surface-container">
+      <button id="cancel-settings-btn" type="button" class="px-space-lg py-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors">
+        Cancel
+      </button>
+      <button id="save-settings-btn" type="button" class="px-space-xl py-2.5 rounded-lg bg-primary hover:bg-secondary text-on-primary font-label-md text-label-md transition-colors shadow-sm">
+        Save Settings
+      </button>
+    </div>
+  </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}

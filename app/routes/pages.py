@@ -19,8 +19,8 @@ def enforce_onboarding(user, current_endpoint):
         return None
         
     step = user.onboarding_step
-    if step == "DONE":
-        # Can access anything
+    if step in ("DONE", "DASHBOARD", "OPTIMIZATION"):
+        # Can access any main application page once onboarding has reached OPTIMIZATION, DASHBOARD, or DONE
         return None
         
     # Mapping of state to the correct endpoint

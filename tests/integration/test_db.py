@@ -4,8 +4,10 @@ from sqlalchemy import create_engine
 from app.database import Base
 from app import models
 
-# Use a test DB URL or fallback to fameweb
-DB_URL = os.environ.get("DATABASE_URL", "postgresql+psycopg://postgres:root@localhost:5432/fameweb")
+from tests.conftest import TEST_DB_URL, assert_safe_test_db
+
+DB_URL = TEST_DB_URL
+assert_safe_test_db(DB_URL)
 
 def test_postgres_connection():
     engine = create_engine(DB_URL)
