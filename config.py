@@ -33,3 +33,11 @@ class Config:
     GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_PLACES_API_KEY')
     GOOGLE_SEARCH_KEY = os.environ.get('GOOGLE_SEARCH_KEY')
     GOOGLE_SEARCH_CX = os.environ.get('GOOGLE_SEARCH_CX')
+
+    # SMTP Email Configuration
+    SMTP_HOST = os.environ.get('SMTP_HOST')
+    SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+    SMTP_USER = os.environ.get('SMTP_USER')
+    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
+    SMTP_FROM_EMAIL = os.environ.get('SMTP_FROM_EMAIL', 'no-reply@fameweb.com')
+    SMTP_USE_TLS = os.environ.get('SMTP_USE_TLS', 'true').lower() in ('true', '1', 'yes')

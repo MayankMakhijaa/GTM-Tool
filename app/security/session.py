@@ -22,6 +22,20 @@ def login_required(f):
                 "error": "UNAUTHORIZED",
                 "message": "User inactive or not found."
             }), 401
+
+        if user.email_verified_at is None:
+            if request.path.startswith('/api/'):
+                if request.endpoint not in ('auth.verify_otp', 'auth.resend_otp', 'auth.logout'):
+                    return jsonify({
+                        "success": False,
+                        "error": "EMAIL_NOT_VERIFIED",
+                        "message": "Email verification required.",
+                        "redirect": "/verify-email"
+                    }), 403
+            else:
+                from flask import redirect, url_for
+                if request.endpoint != "pages.verify_email":
+                    return redirect(url_for("pages.verify_email"))
             
         request.user_id = user_id
         return f(*args, **kwargs)

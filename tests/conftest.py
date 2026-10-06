@@ -52,7 +52,7 @@ if "app_module" not in sys.modules:
 from app_module import app as flask_app
 import app.database as app_db
 from app.database import Base, engine, db_session
-from app.models.all_models import UserTable, UsersCompanyDetails, UsersICP
+from app.models.all_models import UserTable, UsersCompanyDetails, UsersICP, EmailVerificationOTP
 from app.security.session import login_required
 
 if '/api/protected_test' not in [rule.rule for rule in flask_app.url_map.iter_rules()]:
@@ -76,6 +76,7 @@ def print_effective_test_db():
 def clean_db():
     assert_safe_test_db(str(engine.url))
     # Clean up test database before test
+    db_session.query(EmailVerificationOTP).delete(synchronize_session=False)
     db_session.query(UsersICP).delete(synchronize_session=False)
     db_session.query(UsersCompanyDetails).delete(synchronize_session=False)
     db_session.query(UserTable).delete(synchronize_session=False)

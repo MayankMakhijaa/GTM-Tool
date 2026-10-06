@@ -323,6 +323,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 if (res.ok && data.success) {
+                    if (data.requires_verification) {
+                        const emailForVerify = data.email || emailInput.value.trim().toLowerCase();
+                        sessionStorage.setItem('fameweb_pending_verification_email', emailForVerify);
+                        window.location.href = `/verify-email?email=${encodeURIComponent(emailForVerify)}`;
+                        return;
+                    }
                     window.location.href = '/dashboard';
                 } else {
                     throw new Error(data.message || 'Error signing up');

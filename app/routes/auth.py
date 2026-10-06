@@ -1,8 +1,12 @@
+import logging
 from flask import Blueprint, request, jsonify
 from app.services.auth_service import signup_user, authenticate_user
 from app.security.session import set_user_session, clear_user_session, login_required
 from app.repositories.user_repository import get_user_by_id
 from app.security.limiter import limiter
+from app.services.otp_service import create_and_send_otp, verify_user_otp, resend_user_otp
+
+logger = logging.getLogger(__name__)
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -17,20 +21,13 @@ def signup():
     
     try:
         user = signup_user(name, email, phone, password)
-        # Auth the user right after signup
-        set_user_session(user.user_id)
+        # Generate and send verification OTP - DO NOT set_user_session yet
+        create_and_send_otp(user)
         return jsonify({
             "success": True,
-            "message": "User created successfully",
-            "user": {
-                "user_id": user.user_id,
-                "name": user.name,
-                "email_id": user.email_id,
-                "phone_no": user.phone_no,
-                "onboarding_step": user.onboarding_step,
-                "optimization_status": user.optimization_status,
-                "is_active": user.is_active
-            }
+            "requires_verification": True,
+            "message": "Account created successfully. Please verify your business email to continue.",
+            "email": user.email_id
         }), 201
     except ValueError as e:
         error_msg = str(e)
@@ -48,6 +45,13 @@ def signup():
                 field: error_msg
             }
         }), 400
+    except Exception as e:
+        logger.error(f"Error during signup: {str(e)}")
+        user_message = str(e) if "email" in str(e).lower() else "Unable to complete signup. Please try again."
+        return jsonify({
+            "success": False,
+            "message": user_message
+        }), 500
 
 @auth_bp.route('/login', methods=['POST'])
 @limiter.limit("5 per minute")
@@ -63,6 +67,15 @@ def login():
             "error": "INVALID_CREDENTIALS",
             "message": "Invalid credentials"
         }), 401
+
+    if user.email_verified_at is None:
+        return jsonify({
+            "success": False,
+            "error": "EMAIL_NOT_VERIFIED",
+            "message": "Please verify your business email before logging in.",
+            "email": user.email_id,
+            "redirect": "/verify-email"
+        }), 403
         
     set_user_session(user.user_id)
     return jsonify({
@@ -78,6 +91,66 @@ def login():
             "is_active": user.is_active
         }
     }), 200
+
+@auth_bp.route('/verify-otp', methods=['POST'])
+@limiter.limit("10 per minute")
+def verify_otp():
+    data = request.get_json() or {}
+    email = data.get('email', '')
+    otp = data.get('otp', '')
+
+    if not email or not otp:
+        return jsonify({
+            "success": False,
+            "message": "Email and 6-digit verification code are required."
+        }), 400
+
+    success, message, user = verify_user_otp(email, otp)
+    if not success:
+        return jsonify({
+            "success": False,
+            "message": message
+        }), 400
+
+    # Verification successful -> establish authenticated session
+    set_user_session(user.user_id)
+    return jsonify({
+        "success": True,
+        "message": message,
+        "redirect": "/company",
+        "user": {
+            "user_id": user.user_id,
+            "name": user.name,
+            "email_id": user.email_id,
+            "onboarding_step": user.onboarding_step
+        }
+    }), 200
+
+@auth_bp.route('/resend-otp', methods=['POST'])
+@limiter.limit("3 per 5 minutes")
+def resend_otp():
+    data = request.get_json() or {}
+    email = data.get('email', '')
+
+    if not email:
+        return jsonify({
+            "success": False,
+            "message": "Email is required."
+        }), 400
+
+    success, message, retry_after = resend_user_otp(email)
+    if not success:
+        status_code = 429 if retry_after else 400
+        resp = {"success": False, "message": message}
+        if retry_after:
+            resp["retry_after"] = retry_after
+        return jsonify(resp), status_code
+
+    return jsonify({
+        "success": True,
+        "message": message
+    }), 200
+
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():

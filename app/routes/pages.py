@@ -17,6 +17,11 @@ def enforce_onboarding(user, current_endpoint):
     """
     if not user:
         return None
+
+    if user.email_verified_at is None:
+        if current_endpoint != "pages.verify_email":
+            return redirect(url_for("pages.verify_email"))
+        return None
         
     step = user.onboarding_step
     if step in ("DONE", "DASHBOARD", "OPTIMIZATION"):
@@ -43,15 +48,28 @@ def home():
         return redirect(url_for("pages.dashboard"))
     return render_template("home.html")
 
+@pages_bp.route("/verify-email")
+def verify_email():
+    user = get_current_user()
+    if user and user.email_verified_at is not None:
+        return redirect(url_for("pages.dashboard"))
+    return render_template("verify_email.html", user=user)
+
 @pages_bp.route("/login")
 def login():
-    if session.get("user_id"):
+    user = get_current_user()
+    if user:
+        if user.email_verified_at is None:
+            return redirect(url_for("pages.verify_email"))
         return redirect(url_for("pages.dashboard"))
     return render_template("login.html")
 
 @pages_bp.route("/signup")
 def signup():
-    if session.get("user_id"):
+    user = get_current_user()
+    if user:
+        if user.email_verified_at is None:
+            return redirect(url_for("pages.verify_email"))
         return redirect(url_for("pages.dashboard"))
     return render_template("signup.html")
 
