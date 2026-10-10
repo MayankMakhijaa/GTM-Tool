@@ -40,6 +40,9 @@ assert_safe_test_db(TEST_DB_URL)
 
 os.environ["DATABASE_URL"] = TEST_DB_URL
 os.environ["FLASK_TESTING"] = "1"
+os.environ["SMTP_HOST"] = ""
+os.environ["GOOGLE_MAPS_API_KEY"] = ""
+os.environ["GOOGLE_PLACES_API_KEY"] = ""
 
 # Load root app.py as sys.modules["app_module"] if not present
 if "app_module" not in sys.modules:
@@ -87,6 +90,7 @@ def clean_db():
 @pytest.fixture
 def client(clean_db):
     flask_app.config['TESTING'] = True
+    flask_app.config['SMTP_HOST'] = None
     flask_app.config['WTF_CSRF_ENABLED'] = False
     flask_app.config['RATELIMIT_ENABLED'] = False
     from app.security.limiter import limiter

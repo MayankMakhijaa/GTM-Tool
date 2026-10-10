@@ -4,7 +4,12 @@ from app.services.auth_service import signup_user, authenticate_user
 from app.security.session import set_user_session, clear_user_session, login_required
 from app.repositories.user_repository import get_user_by_id
 from app.security.limiter import limiter
-from app.services.otp_service import create_and_send_otp, verify_user_otp, resend_user_otp
+from app.services.otp_service import (
+    create_and_send_otp,
+    verify_user_otp,
+    resend_user_otp,
+    is_user_email_verified
+)
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +73,7 @@ def login():
             "message": "Invalid credentials"
         }), 401
 
-    if user.email_verified_at is None:
+    if not is_user_email_verified(user):
         return jsonify({
             "success": False,
             "error": "EMAIL_NOT_VERIFIED",

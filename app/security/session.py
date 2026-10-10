@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import session, jsonify, request, current_app
 from app.repositories.user_repository import get_user_by_id
+from app.services.otp_service import is_user_email_verified
 
 def login_required(f):
     @wraps(f)
@@ -23,7 +24,7 @@ def login_required(f):
                 "message": "User inactive or not found."
             }), 401
 
-        if user.email_verified_at is None:
+        if not is_user_email_verified(user):
             if request.path.startswith('/api/'):
                 if request.endpoint not in ('auth.verify_otp', 'auth.resend_otp', 'auth.logout'):
                     return jsonify({

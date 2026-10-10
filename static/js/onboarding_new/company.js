@@ -12,6 +12,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnConfirmScrape = document.getElementById('btn-confirm-scrape');
     const btnCancelConfirmation = document.getElementById('btn-cancel-confirmation');
     const scrapeStatusBadge = document.getElementById('scrape-status-badge');
+    const loadingModal = document.getElementById('extract-loading-modal');
+    const loadingCard = document.getElementById('extract-loading-card');
+
+    const showLoadingModal = () => {
+        if (!loadingModal) return;
+        loadingModal.classList.remove('pointer-events-none', 'opacity-0');
+        loadingModal.classList.add('opacity-100');
+        if (loadingCard) {
+            loadingCard.classList.remove('scale-95');
+            loadingCard.classList.add('scale-100');
+        }
+    };
+
+    const hideLoadingModal = () => {
+        if (!loadingModal) return;
+        loadingModal.classList.remove('opacity-100');
+        loadingModal.classList.add('opacity-0');
+        if (loadingCard) {
+            loadingCard.classList.remove('scale-100');
+            loadingCard.classList.add('scale-95');
+        }
+        setTimeout(() => {
+            if (!isScrapingActive && loadingModal) {
+                loadingModal.classList.add('pointer-events-none');
+            }
+        }, 300);
+    };
 
     const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
@@ -118,14 +145,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isScrapingActive) return;
         isScrapingActive = true;
 
+        showLoadingModal();
+
         const originalBtnContent = fetchButton ? fetchButton.innerHTML : '';
         if (fetchButton) {
             fetchButton.disabled = true;
+            fetchButton.classList.add('opacity-50', 'cursor-not-allowed');
             fetchButton.innerHTML = `
                 <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-                <span>Extracting Signals...</span>
+                <span>Extracting Details...</span>
             `;
         }
+        if (urlInput) urlInput.disabled = true;
+        if (btnConfirmScrape) btnConfirmScrape.disabled = true;
 
         try {
             const res = await fetch('/api/onboarding/company/scrape', {
@@ -143,34 +175,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const result = await res.json();
             if (res.ok && result.success && result.scraped_data) {
+                hideLoadingModal();
                 populateForm(result.scraped_data, true);
                 showBanner('<strong>Success:</strong> Company website scraped and enriched! Review and edit details below.', 'info');
                 if (fetchButton) {
                     fetchButton.innerHTML = `
                         <span class="material-symbols-outlined text-[18px]">check</span>
-                        <span>Signals Extracted!</span>
+                        <span>Details Extracted!</span>
                     `;
                     setTimeout(() => {
                         fetchButton.innerHTML = originalBtnContent;
                         fetchButton.disabled = false;
+                        fetchButton.classList.remove('opacity-50', 'cursor-not-allowed');
                     }, 2500);
                 }
             } else {
+                hideLoadingModal();
                 showBanner(`<strong>Extraction warning:</strong> ${result.message || 'Unable to extract full details automatically. Please review and fill in missing fields.'}`, 'warning');
                 if (fetchButton) {
                     fetchButton.disabled = false;
+                    fetchButton.classList.remove('opacity-50', 'cursor-not-allowed');
                     fetchButton.innerHTML = originalBtnContent;
                 }
             }
         } catch (err) {
             console.error('Scraping error:', err);
+            hideLoadingModal();
             showBanner('<strong>Error:</strong> Failed to extract company details. You can enter details manually.', 'error');
             if (fetchButton) {
                 fetchButton.disabled = false;
+                fetchButton.classList.remove('opacity-50', 'cursor-not-allowed');
                 fetchButton.innerHTML = originalBtnContent;
             }
         } finally {
             isScrapingActive = false;
+            if (urlInput) urlInput.disabled = false;
+            if (btnConfirmScrape) btnConfirmScrape.disabled = false;
         }
     };
 
@@ -250,11 +290,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 3. Manual Fetch / Refresh Button Handler
+    if (urlInput) {
+        urlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!isScrapingActive && fetchButton) {
+                    fetchButton.click();
+                }
+            }
+        });
+    }
+
     if (fetchButton) {
         fetchButton.addEventListener('click', async () => {
+            if (isScrapingActive) return;
             const enteredUrl = urlInput?.value?.trim() || document.getElementById('comp-web')?.value?.trim();
             if (!enteredUrl) {
-                alert('Please enter a company website URL to fetch information.');
+                alert('Please enter a company website URL to extract details.');
                 return;
             }
             if (confirmationBanner) {
@@ -268,6 +320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 4. Save and Continue / Draft Handlers
     const saveCompanyForm = async (redirectToIcp = true, isDraft = false) => {
+        if (isScrapingActive) return;
         const getVal = (id) => document.getElementById(id)?.value?.trim() || '';
 
         const payload = {
@@ -312,6 +365,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnContinue) {
         btnContinue.addEventListener('click', async (e) => {
             e.preventDefault();
+            if (isScrapingActive) return;
             const originalText = btnContinue.innerHTML;
             btnContinue.style.pointerEvents = 'none';
             btnContinue.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Saving...</span>';
@@ -329,6 +383,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnSaveDraft) {
         btnSaveDraft.addEventListener('click', async (e) => {
             e.preventDefault();
+            if (isScrapingActive) return;
             const originalText = btnSaveDraft.innerHTML;
             btnSaveDraft.disabled = true;
             btnSaveDraft.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Saving Draft...</span>';
@@ -353,6 +408,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     dashboardNavLinks.forEach(link => {
         link.addEventListener('click', async (e) => {
             e.preventDefault();
+            if (isScrapingActive) return;
             try {
                 await saveCompanyForm(false, true);
             } catch (err) {

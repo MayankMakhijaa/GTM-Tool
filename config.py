@@ -35,9 +35,19 @@ class Config:
     GOOGLE_SEARCH_CX = os.environ.get('GOOGLE_SEARCH_CX')
 
     # SMTP Email Configuration
-    SMTP_HOST = os.environ.get('SMTP_HOST')
+    SMTP_HOST = None if _is_testing else os.environ.get('SMTP_HOST')
     SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
     SMTP_USER = os.environ.get('SMTP_USER')
     SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
     SMTP_FROM_EMAIL = os.environ.get('SMTP_FROM_EMAIL', 'no-reply@fameweb.com')
     SMTP_USE_TLS = os.environ.get('SMTP_USE_TLS', 'true').lower() in ('true', '1', 'yes')
+
+    # Signup OTP Configuration
+    # Accounts created before this cutoff timestamp are treated as grandfathered legacy accounts
+    OTP_CUTOFF_TIMESTAMP = os.environ.get('OTP_CUTOFF_TIMESTAMP', '2026-10-06T00:00:00Z')
+    # Specific accounts that must ALWAYS require OTP regardless of creation timestamp (e.g. e2e test accounts)
+    OTP_FORCE_VERIFICATION_EMAILS = [
+        email.strip().lower()
+        for email in os.environ.get('OTP_FORCE_VERIFICATION_EMAILS', 'mayank@fameweb.in').split(',')
+        if email.strip()
+    ]

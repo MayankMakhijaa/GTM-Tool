@@ -6,8 +6,10 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Tuple
 from urllib.parse import urlparse, urljoin
 
+import os
 import time
 import requests
+from bs4 import BeautifulSoup
 from config import Config
 from app.services.company_discovery_service import (
     is_safe_ip,
@@ -20,6 +22,12 @@ logger = logging.getLogger(__name__)
 # In-memory Rating Cache (root_domain -> (timestamp, rating_map))
 RATING_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}
 RATING_CACHE_TTL: int = 86400  # 24 hours
+SEARCH_QUERY_DELAY: float = 1.0  # Delay between external public-search queries to prevent rate-limiting
+
+
+class SearchEngineUnavailableError(RuntimeError):
+    """Raised when external public search engines are unreachable or returning anti-bot challenges (e.g. HTTP 202 / 429 / timeouts)."""
+    pass
 
 # Excluded URL path keywords to avoid crawling irrelevant/sensitive pages
 EXCLUDED_PATH_KEYWORDS = [
@@ -92,7 +100,12 @@ def validate_and_normalize_url(url: str) -> Tuple[Optional[str], Optional[str]]:
         return None, f"Malformed URL: {str(e)}"
 
 
-def fetch_url_safely(url: str, timeout: float = 5.0, max_bytes: int = 1024 * 1024) -> Dict[str, Any]:
+def fetch_url_safely(
+    url: str,
+    timeout: float = 5.0,
+    max_bytes: int = 1024 * 1024,
+    headers: Optional[Dict[str, str]] = None
+) -> Dict[str, Any]:
     """
     Safely fetches a single web page with SSRF guards, redirect checks, size caps, and timeouts.
     Acts as the reliable HTTP fallback if Crawl4AI browser initialization fails.
@@ -108,6 +121,9 @@ def fetch_url_safely(url: str, timeout: float = 5.0, max_bytes: int = 1024 * 102
     session.headers.update({
         "User-Agent": "FamewebBot/1.0 (+https://fameweb.ai)"
     })
+    if headers:
+        session.headers.update(headers)
+
 
     while redirect_count < max_redirects:
         parsed = urlparse(current_url)
@@ -1091,6 +1107,425 @@ def extract_company_data_heuristically(website_url: str, metadata: Dict[str, Any
     return extract_company_data_deterministically("", website_url, metadata, [])
 
 
+STOP_COMPANY_WORDS = {
+    "pvt", "ltd", "private", "limited", "inc", "incorporated", "llc", "corp",
+    "corporation", "co", "technologies", "solutions", "services", "group", "holdings"
+}
+
+
+def clean_company_name_for_matching(name: str) -> str:
+    cleaned = re.sub(r'[^\w\s]', ' ', (name or "").lower())
+    tokens = [t for t in cleaned.split() if t not in STOP_COMPANY_WORDS and len(t) > 1]
+    return " ".join(tokens) if tokens else cleaned.strip()
+
+
+def match_candidate_entity(
+    title: str,
+    snippet: str,
+    url: str,
+    company_name: str,
+    website_url: str = "",
+    location: Optional[str] = None
+) -> bool:
+    """
+    Validates whether a search candidate or directory listing belongs to the target company.
+    Uses company name token overlap, root domain match, and URL slug checks.
+    """
+    target_clean = clean_company_name_for_matching(company_name)
+    target_tokens = set(target_clean.split())
+    if not target_tokens:
+        return False
+
+    title_lower = (title or "").lower()
+    snip_lower = (snippet or "").lower()
+    url_lower = (url or "").lower()
+    combined_text = f"{title_lower} {snip_lower} {url_lower}"
+
+    # 1. Domain match check if website_url is known
+    if website_url:
+        parsed = urlparse(website_url if website_url.startswith("http") else f"http://{website_url}")
+        domain_name = parsed.netloc or parsed.path
+        domain_root = domain_name.split(":")[0].lower().replace("www.", "")
+        domain_brand = domain_root.split(".")[0] if "." in domain_root else domain_root
+        if domain_root in combined_text or (len(domain_brand) >= 3 and domain_brand in url_lower):
+            return True
+
+    # 2. Check title or URL slug for distinctive brand tokens (length >= 3)
+    for t in target_tokens:
+        if len(t) >= 3:
+            pattern = rf'\b{re.escape(t)}\b'
+            if re.search(pattern, title_lower) or re.search(rf'[-/_]{re.escape(t)}[-/_]', url_lower):
+                return True
+
+    # 3. Multi-token match: at least 70% of tokens match
+    matched_count = sum(1 for t in target_tokens if re.search(rf'\b{re.escape(t)}\b', title_lower))
+    if matched_count / len(target_tokens) >= 0.7:
+        return True
+
+    return False
+
+
+def extract_rating_from_text(text: str, source_name: str) -> Optional[Dict[str, Any]]:
+    """
+    Deterministically extracts aggregate numeric rating and review count from text/snippets.
+    Validates rating value bounds (1.0 to 5.0) and formats canonical rating string.
+    """
+    if not text:
+        return None
+
+    score = None
+    review_count = None
+
+    # Pattern A: Score with explicit review count
+    m_with_reviews = re.search(
+        r'(?:rated\s+|rating\s+of\s+|rating:\s*)?([1-5](?:\.[0-9])?)\s*(?:out of 5|\/5|\/ 5|\*|stars)?'
+        r'(?:[^\.\n\r]*?(?:based on|across|from))\s+(\d+[\d,]*)\s+(?:customer\s+|employee\s+|client\s+)?(?:reviews|ratings|votes)',
+        text,
+        re.IGNORECASE
+    )
+    if m_with_reviews:
+        try:
+            val = float(m_with_reviews.group(1))
+            if 1.0 <= val <= 5.0:
+                score = val
+                review_count = int(m_with_reviews.group(2).replace(',', ''))
+        except (ValueError, TypeError):
+            pass
+
+    # Pattern B: Other standard rating score patterns
+    if score is None:
+        patterns = [
+            r'(?:rated|rating|rate|stars?)\s*(?:is|of|:)?\s*([1-5]\.[0-9]|[1-5])\s*(?:out of 5|\/5|\/ 5|\*|stars)',
+            r'([1-5]\.[0-9]|[1-5])\s*(?:out of 5|\/5|\/ 5)\s*(?:stars)?',
+            r'(?:holds an average rating of|overall rating of)\s*([1-5]\.[0-9]|[1-5])',
+            r'Rated\s+([1-5]\.[0-9]|[1-5])\b',
+        ]
+        for pat in patterns:
+            m = re.search(pat, text, re.IGNORECASE)
+            if m:
+                try:
+                    val = float(m.group(1))
+                    if 1.0 <= val <= 5.0:
+                        score = val
+                        break
+                except (ValueError, TypeError):
+                    pass
+
+    # Pattern C: Check review count if score was found without it
+    if score is not None and review_count is None:
+        m_rev = re.search(r'(\d+[\d,]*)\s+(?:customer\s+|employee\s+)?(?:reviews|ratings|votes)', text, re.IGNORECASE)
+        if m_rev:
+            try:
+                cnt = int(m_rev.group(1).replace(',', ''))
+                if cnt > 0:
+                    review_count = cnt
+            except (ValueError, TypeError):
+                pass
+
+    if score is not None:
+        if review_count:
+            formatted_val = f"{score:.1f} / 5 ({review_count:,} reviews on {source_name})"
+        else:
+            formatted_val = f"{score:.1f} / 5 ({source_name})"
+        return {
+            "score": score,
+            "max_rating": 5.0,
+            "review_count": review_count,
+            "value": formatted_val,
+            "source_name": source_name,
+            "verification_status": "VERIFIED"
+        }
+    return None
+
+
+def extract_ambitionbox_rating_direct(lead_url: str) -> Optional[Dict[str, Any]]:
+    """
+    Extracts AmbitionBox ratings from Schema.org JSON-LD, meta/OG tags, title tags, Next.js __NEXT_DATA__, or page microdata.
+    """
+    if not lead_url:
+        return None
+    browser_headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9"
+    }
+    res = fetch_url_safely(lead_url, timeout=4.0, headers=browser_headers)
+    if not res.get("success") or not res.get("html"):
+        return None
+    html = res["html"]
+
+    # 1. Schema.org JSON-LD microdata (EmployerAggregateRating / AggregateRating)
+    matches = re.findall(r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', html, re.DOTALL | re.IGNORECASE)
+    for m in matches:
+        try:
+            data = json.loads(m.strip())
+            items = data if isinstance(data, list) else [data]
+            for item in items:
+                if isinstance(item, dict):
+                    agg = item.get("aggregateRating") if "aggregateRating" in item else (item if item.get("@type") in ("EmployerAggregateRating", "AggregateRating") else None)
+                    if agg and isinstance(agg, dict):
+                        rating_val = agg.get("ratingValue")
+                        review_cnt = agg.get("reviewCount") or agg.get("ratingCount") or 0
+                        best_val = agg.get("bestRating") or 5.0
+                        item_rev = agg.get("itemReviewed") or item.get("itemReviewed") or {}
+                        item_name = item_rev.get("name") if isinstance(item_rev, dict) else ""
+                        if rating_val is not None:
+                            try:
+                                score = float(rating_val)
+                                if 1.0 <= score <= 5.0:
+                                    cnt = int(review_cnt) if review_cnt else None
+                                    val_str = f"{score:.1f} / {int(float(best_val))} ({cnt:,} reviews on AmbitionBox)" if cnt else f"{score:.1f} / {int(float(best_val))} (AmbitionBox)"
+                                    return {
+                                        "value": val_str,
+                                        "score": score,
+                                        "max_rating": float(best_val),
+                                        "review_count": cnt,
+                                        "source_name": "AmbitionBox",
+                                        "source_url": lead_url,
+                                        "item_reviewed_name": item_name,
+                                        "evidence": f"AmbitionBox verified rating: {score:.1f}/5" + (f" across {cnt} reviews" if cnt else ""),
+                                        "retrieval_timestamp": get_iso_timestamp(),
+                                        "verification_status": "VERIFIED"
+                                    }
+                            except (ValueError, TypeError):
+                                pass
+        except Exception:
+            pass
+
+    # 2. Meta description or OG description tags
+    meta_m = re.search(r'<meta[^>]*name=["\']description["\'][^>]*content=["\'](.*?)["\']', html, re.IGNORECASE) or \
+             re.search(r'<meta[^>]*property=["\']og:description["\'][^>]*content=["\'](.*?)["\']', html, re.IGNORECASE)
+    if meta_m:
+        meta_desc = meta_m.group(1).strip()
+        m_rate = re.search(r'rated\s+([1-5](?:\.[0-9]+)?)\s*\/\s*5', meta_desc, re.I)
+        m_cnt = re.search(r'based\s+on\s+(\d+[\d,]*)\s+employee\s+reviews', meta_desc, re.I)
+        m_name = re.search(r'^([^.]+?)\s+is\s+rated', meta_desc, re.I)
+        if m_rate:
+            try:
+                score = float(m_rate.group(1))
+                if 1.0 <= score <= 5.0:
+                    cnt = int(m_cnt.group(1).replace(',', '')) if m_cnt else None
+                    org_name = m_name.group(1).strip() if m_name else ""
+                    val_str = f"{score:.1f} / 5 ({cnt:,} reviews on AmbitionBox)" if cnt else f"{score:.1f} / 5 (AmbitionBox)"
+                    return {
+                        "value": val_str,
+                        "score": score,
+                        "max_rating": 5.0,
+                        "review_count": cnt,
+                        "source_name": "AmbitionBox",
+                        "source_url": lead_url,
+                        "item_reviewed_name": org_name,
+                        "evidence": f"AmbitionBox verified rating: {score:.1f}/5" + (f" across {cnt} reviews" if cnt else ""),
+                        "retrieval_timestamp": get_iso_timestamp(),
+                        "verification_status": "VERIFIED"
+                    }
+            except (ValueError, TypeError):
+                pass
+
+    # 3. Title tag (e.g., "Fameweb Reviews by 3 Employees | Rated 5.0/5 | AmbitionBox")
+    t_m = re.search(r'<title[^>]*>(.*?)</title>', html, re.I)
+    if t_m:
+        title_text = t_m.group(1).strip()
+        m_rate = re.search(r'Rated\s+([1-5](?:\.[0-9]+)?)\s*\/\s*5', title_text, re.I)
+        m_cnt = re.search(r'Reviews\s+by\s+(\d+[\d,]*)\s+Employees', title_text, re.I)
+        m_name = re.search(r'^(.*?)\s+Reviews\s+by', title_text, re.I)
+        if m_rate:
+            try:
+                score = float(m_rate.group(1))
+                if 1.0 <= score <= 5.0:
+                    cnt = int(m_cnt.group(1).replace(',', '')) if m_cnt else None
+                    org_name = m_name.group(1).strip() if m_name else ""
+                    val_str = f"{score:.1f} / 5 ({cnt:,} reviews on AmbitionBox)" if cnt else f"{score:.1f} / 5 (AmbitionBox)"
+                    return {
+                        "value": val_str,
+                        "score": score,
+                        "max_rating": 5.0,
+                        "review_count": cnt,
+                        "source_name": "AmbitionBox",
+                        "source_url": lead_url,
+                        "item_reviewed_name": org_name,
+                        "evidence": f"AmbitionBox verified rating: {score:.1f}/5" + (f" across {cnt} reviews" if cnt else ""),
+                        "retrieval_timestamp": get_iso_timestamp(),
+                        "verification_status": "VERIFIED"
+                    }
+            except (ValueError, TypeError):
+                pass
+
+    # 4. Next.js __NEXT_DATA__
+    m_next = re.search(r'<script\s+id="__NEXT_DATA__"[^>]*>(.*?)</script>', html)
+    if m_next:
+        try:
+            nd = json.loads(m_next.group(1).strip())
+            page_props = nd.get("props", {}).get("pageProps", {})
+            company_data = page_props.get("companyOverview") or page_props.get("aggregatedRatingsData") or {}
+            score = company_data.get("rating") or company_data.get("overallRating")
+            reviews = company_data.get("reviewsCount") or company_data.get("overallRatingCount") or company_data.get("totalReviews")
+            if score:
+                f_score = float(score)
+                if 1.0 <= f_score <= 5.0:
+                    cnt = int(reviews) if reviews else None
+                    val_str = f"{f_score:.1f} / 5 ({cnt:,} reviews on AmbitionBox)" if cnt else f"{f_score:.1f} / 5 (AmbitionBox)"
+                    return {
+                        "value": val_str,
+                        "score": f_score,
+                        "max_rating": 5.0,
+                        "review_count": cnt,
+                        "source_name": "AmbitionBox",
+                        "source_url": lead_url,
+                        "evidence": f"AmbitionBox verified rating: {f_score:.1f}/5",
+                        "retrieval_timestamp": get_iso_timestamp(),
+                        "verification_status": "VERIFIED"
+                    }
+        except Exception:
+            pass
+
+    # 5. Fallback text extraction
+    raw_res = extract_rating_from_text(html, "AmbitionBox")
+    if raw_res:
+        raw_res["source_url"] = lead_url
+        raw_res["evidence"] = f"AmbitionBox public rating: {raw_res['score']:.1f}/5"
+        raw_res["retrieval_timestamp"] = get_iso_timestamp()
+    return raw_res
+
+
+def lookup_ambitionbox_rating_by_company(
+    company_name: str,
+    website_url: Optional[str] = None,
+    location: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
+    """
+    Attempts direct AmbitionBox company review page lookup without web search engines.
+    Derives candidate company slugs, fetches the review profile, and parses Schema.org microdata.
+    Validates entity matching against target company name / domain.
+    """
+    if not company_name:
+        return None
+
+    cleaned_name = re.sub(r'\b(pte|ltd|pvt|private|limited|inc|llc|corp|corporation|co)\b', '', company_name, flags=re.IGNORECASE)
+    cleaned_name = re.sub(r'[^a-zA-Z0-9\s-]', '', cleaned_name).strip()
+
+    slugs = []
+    slug_clean = re.sub(r'[\s_]+', '-', cleaned_name).lower().strip('-')
+    if slug_clean:
+        slugs.append(slug_clean)
+
+    raw_cleaned = re.sub(r'[^a-zA-Z0-9\s-]', '', company_name).strip()
+    slug_raw = re.sub(r'[\s_]+', '-', raw_cleaned).lower().strip('-')
+    if slug_raw and slug_raw not in slugs:
+        slugs.append(slug_raw)
+
+    for slug in slugs:
+        url = f"https://www.ambitionbox.com/reviews/{slug}-reviews"
+        rating_res = extract_ambitionbox_rating_direct(url)
+        if rating_res:
+            item_name = rating_res.get("item_reviewed_name") or slug
+            if match_candidate_entity(
+                title=item_name,
+                snippet="",
+                url=url,
+                company_name=company_name,
+                website_url=website_url or "",
+                location=location
+            ):
+                return rating_res
+    return None
+
+
+
+def extract_goodfirms_rating_direct(lead_url: str) -> Optional[Dict[str, Any]]:
+    """
+    Extracts GoodFirms aggregate rating from JSON-LD or page microdata.
+    """
+    if not lead_url:
+        return None
+    res = fetch_url_safely(lead_url, timeout=4.0)
+    if not res.get("success") or not res.get("html"):
+        return None
+    html = res["html"]
+    matches = re.findall(r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', html, re.DOTALL | re.IGNORECASE)
+    for m in matches:
+        try:
+            data = json.loads(m.strip())
+            items = data if isinstance(data, list) else [data]
+            for item in items:
+                if isinstance(item, dict):
+                    agg = item.get("aggregateRating") or (item if item.get("@type") == "AggregateRating" else None)
+                    if agg and isinstance(agg, dict):
+                        rating_val = agg.get("ratingValue")
+                        review_cnt = agg.get("reviewCount") or agg.get("ratingCount") or 0
+                        if rating_val is not None:
+                            f_score = float(rating_val)
+                            if 1.0 <= f_score <= 5.0:
+                                cnt = int(review_cnt) if review_cnt else None
+                                val_str = f"{f_score:.1f} / 5 ({cnt:,} reviews on GoodFirms)" if cnt else f"{f_score:.1f} / 5 (GoodFirms)"
+                                return {
+                                    "value": val_str,
+                                    "score": f_score,
+                                    "max_rating": 5.0,
+                                    "review_count": cnt,
+                                    "source_name": "GoodFirms",
+                                    "source_url": lead_url,
+                                    "evidence": f"GoodFirms AggregateRating: {f_score:.1f}/5",
+                                    "retrieval_timestamp": get_iso_timestamp(),
+                                    "verification_status": "VERIFIED"
+                                }
+        except Exception:
+            pass
+    raw_res = extract_rating_from_text(html, "GoodFirms")
+    if raw_res:
+        raw_res["source_url"] = lead_url
+        raw_res["evidence"] = f"GoodFirms public rating: {raw_res['score']:.1f}/5"
+        raw_res["retrieval_timestamp"] = get_iso_timestamp()
+    return raw_res
+
+
+def extract_sulekha_rating_direct(lead_url: str) -> Optional[Dict[str, Any]]:
+    """
+    Extracts Sulekha aggregate rating from JSON-LD or page microdata.
+    """
+    if not lead_url:
+        return None
+    res = fetch_url_safely(lead_url, timeout=4.0)
+    if not res.get("success") or not res.get("html"):
+        return None
+    html = res["html"]
+    matches = re.findall(r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', html, re.DOTALL | re.IGNORECASE)
+    for m in matches:
+        try:
+            data = json.loads(m.strip())
+            items = data if isinstance(data, list) else [data]
+            for item in items:
+                if isinstance(item, dict):
+                    agg = item.get("aggregateRating") or (item if item.get("@type") == "AggregateRating" else None)
+                    if agg and isinstance(agg, dict):
+                        rating_val = agg.get("ratingValue")
+                        review_cnt = agg.get("reviewCount") or agg.get("ratingCount") or 0
+                        if rating_val is not None:
+                            f_score = float(rating_val)
+                            if 1.0 <= f_score <= 5.0:
+                                cnt = int(review_cnt) if review_cnt else None
+                                val_str = f"{f_score:.1f} / 5 ({cnt:,} reviews on Sulekha)" if cnt else f"{f_score:.1f} / 5 (Sulekha)"
+                                return {
+                                    "value": val_str,
+                                    "score": f_score,
+                                    "max_rating": 5.0,
+                                    "review_count": cnt,
+                                    "source_name": "Sulekha",
+                                    "source_url": lead_url,
+                                    "evidence": f"Sulekha AggregateRating: {f_score:.1f}/5",
+                                    "retrieval_timestamp": get_iso_timestamp(),
+                                    "verification_status": "VERIFIED"
+                                }
+        except Exception:
+            pass
+    raw_res = extract_rating_from_text(html, "Sulekha")
+    if raw_res:
+        raw_res["source_url"] = lead_url
+        raw_res["evidence"] = f"Sulekha public rating: {raw_res['score']:.1f}/5"
+        raw_res["retrieval_timestamp"] = get_iso_timestamp()
+    return raw_res
+
+
 def extract_trustpilot_rating_direct(root_domain: str) -> Optional[Dict[str, Any]]:
     """
     Attempts direct Trustpilot profile schema lookup for a company's root domain.
@@ -1139,15 +1574,27 @@ def extract_trustpilot_rating_direct(root_domain: str) -> Optional[Dict[str, Any
     return None
 
 
-def research_public_company_ratings(company_name: str, website_url: str) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
+def research_public_company_ratings(
+    company_name: str,
+    website_url: str,
+    location: Optional[str] = None
+) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
     """
-    Retrieves company ratings directly from publicly accessible review sources (Trustpilot, G2, Justdial, Yelp, Capterra, Google Reviews)
-    without requiring a Google Maps API key. Uses exact domain lookup, public web search, and schema validation.
+    Retrieves public company ratings strictly using public review sources:
+    1. Justdial (HTTP search)
+    2. AmbitionBox (Direct schema lookup + HTTP search fallback)
+    3. GoodFirms (HTTP search)
+    4. Sulekha (HTTP search)
+    5. Clutch (HTTP search)
+    6. Trustpilot (Direct schema lookup + HTTP search fallback)
+
+    Stops immediately upon finding a VERIFIED rating.
+    Deterministic extraction only (no LLM rating generation, no Google Places runtime dependency).
     """
     root_dom = get_root_domain(website_url) if website_url else ""
     cache_key = f"{company_name.lower().strip()}_{root_dom}"
 
-    # Check in-memory TTL cache
+    # Check in-memory TTL cache (only contains VERIFIED ratings)
     now = time.time()
     if cache_key in RATING_CACHE:
         ts, cached_res = RATING_CACHE[cache_key]
@@ -1156,7 +1603,180 @@ def research_public_company_ratings(company_name: str, website_url: str) -> Tupl
 
     telemetry: Dict[str, Any] = {"sources_checked": [], "status": "NO_RATING_FOUND"}
 
-    # Step 1: Direct Trustpilot Domain Match (100% exact domain matching)
+    search_engine_errors: List[str] = []
+    successful_searches: int = 0
+    executed_search_count: int = 0
+
+    def safe_search(q: str) -> List[Dict[str, str]]:
+        nonlocal successful_searches, executed_search_count
+        if executed_search_count > 0 and SEARCH_QUERY_DELAY > 0:
+            time.sleep(SEARCH_QUERY_DELAY)
+        executed_search_count += 1
+        try:
+            leads = perform_public_web_search(q, max_results=3)
+            successful_searches += 1
+            return leads
+        except (SearchEngineUnavailableError, requests.RequestException) as err:
+            logger.warning(f"Public search query failed for '{q}': {err}")
+            search_engine_errors.append(f"{q}: {str(err)}")
+            return []
+        except Exception as err:
+            logger.warning(f"Unexpected error in public search for '{q}': {err}")
+            search_engine_errors.append(f"{q}: {str(err)}")
+            return []
+
+    # -------------------------------------------------------------
+    # 1. Justdial (Public Search)
+    # -------------------------------------------------------------
+    jd_queries = [f'"{company_name}" site:justdial.com']
+    if location and len(location.strip()) > 2:
+        jd_queries.append(f'"{company_name}" "{location}" site:justdial.com')
+
+    for q in jd_queries:
+        leads = safe_search(q)
+        jd_leads = [l for l in leads if "justdial.com" in l.get("url", "").lower()]
+        for lead in jd_leads:
+            telemetry["sources_checked"].append(lead["url"])
+            if match_candidate_entity(lead.get("title", ""), lead.get("snippet", ""), lead["url"], company_name, website_url, location):
+                rating_data = extract_rating_from_text(f"{lead.get('title', '')}. {lead.get('snippet', '')}", "Justdial")
+                if rating_data:
+                    rating_item = {
+                        "value": rating_data["value"],
+                        "score": rating_data["score"],
+                        "max_rating": 5.0,
+                        "review_count": rating_data.get("review_count"),
+                        "source_name": "Justdial",
+                        "source_url": lead["url"],
+                        "evidence": f"Justdial verified public rating: {rating_data['score']:.1f}/5" + (f" across {rating_data['review_count']} reviews" if rating_data.get('review_count') else ""),
+                        "retrieval_timestamp": get_iso_timestamp(),
+                        "verification_status": "VERIFIED"
+                    }
+                    res_map = {"rating": rating_item}
+                    RATING_CACHE[cache_key] = (now, res_map)
+                    telemetry["status"] = "SUCCESS_JUSTDIAL"
+                    return res_map, telemetry
+
+    # -------------------------------------------------------------
+    # 2. AmbitionBox (Direct Profile Lookup + Search Fallback)
+    # -------------------------------------------------------------
+    telemetry["sources_checked"].append("AmbitionBox Direct")
+    ab_direct = lookup_ambitionbox_rating_by_company(company_name, website_url, location=location)
+    if ab_direct:
+        res_map = {"rating": ab_direct}
+        RATING_CACHE[cache_key] = (now, res_map)
+        telemetry["status"] = "SUCCESS_AMBITIONBOX"
+        return res_map, telemetry
+
+    ab_leads = safe_search(f'"{company_name}" site:ambitionbox.com')
+    for lead in ab_leads:
+        if "ambitionbox.com" in lead.get("url", "").lower():
+            telemetry["sources_checked"].append(lead["url"])
+            if match_candidate_entity(lead.get("title", ""), lead.get("snippet", ""), lead["url"], company_name, website_url, location):
+                rating_data = extract_rating_from_text(f"{lead.get('title', '')}. {lead.get('snippet', '')}", "AmbitionBox")
+                if not rating_data:
+                    rating_data = extract_ambitionbox_rating_direct(lead["url"])
+                if rating_data:
+                    rating_item = {
+                        "value": rating_data["value"],
+                        "score": rating_data["score"],
+                        "max_rating": 5.0,
+                        "review_count": rating_data.get("review_count"),
+                        "source_name": "AmbitionBox",
+                        "source_url": lead["url"],
+                        "evidence": f"AmbitionBox verified rating: {rating_data['score']:.1f}/5" + (f" across {rating_data['review_count']} reviews" if rating_data.get('review_count') else ""),
+                        "retrieval_timestamp": get_iso_timestamp(),
+                        "verification_status": "VERIFIED"
+                    }
+                    res_map = {"rating": rating_item}
+                    RATING_CACHE[cache_key] = (now, res_map)
+                    telemetry["status"] = "SUCCESS_AMBITIONBOX"
+                    return res_map, telemetry
+
+    # -------------------------------------------------------------
+    # 3. GoodFirms (Public Search)
+    # -------------------------------------------------------------
+    gf_leads = safe_search(f'"{company_name}" site:goodfirms.co')
+    for lead in gf_leads:
+        if "goodfirms.co" in lead.get("url", "").lower():
+            telemetry["sources_checked"].append(lead["url"])
+            if match_candidate_entity(lead.get("title", ""), lead.get("snippet", ""), lead["url"], company_name, website_url, location):
+                rating_data = extract_rating_from_text(f"{lead.get('title', '')}. {lead.get('snippet', '')}", "GoodFirms")
+                if not rating_data:
+                    rating_data = extract_goodfirms_rating_direct(lead["url"])
+                if rating_data:
+                    rating_item = {
+                        "value": rating_data["value"],
+                        "score": rating_data["score"],
+                        "max_rating": 5.0,
+                        "review_count": rating_data.get("review_count"),
+                        "source_name": "GoodFirms",
+                        "source_url": lead["url"],
+                        "evidence": f"GoodFirms verified public rating: {rating_data['score']:.1f}/5",
+                        "retrieval_timestamp": get_iso_timestamp(),
+                        "verification_status": "VERIFIED"
+                    }
+                    res_map = {"rating": rating_item}
+                    RATING_CACHE[cache_key] = (now, res_map)
+                    telemetry["status"] = "SUCCESS_GOODFIRMS"
+                    return res_map, telemetry
+
+    # -------------------------------------------------------------
+    # 4. Sulekha (Public Search)
+    # -------------------------------------------------------------
+    su_leads = safe_search(f'"{company_name}" site:sulekha.com')
+    for lead in su_leads:
+        if "sulekha.com" in lead.get("url", "").lower():
+            telemetry["sources_checked"].append(lead["url"])
+            if match_candidate_entity(lead.get("title", ""), lead.get("snippet", ""), lead["url"], company_name, website_url, location):
+                rating_data = extract_rating_from_text(f"{lead.get('title', '')}. {lead.get('snippet', '')}", "Sulekha")
+                if not rating_data:
+                    rating_data = extract_sulekha_rating_direct(lead["url"])
+                if rating_data:
+                    rating_item = {
+                        "value": rating_data["value"],
+                        "score": rating_data["score"],
+                        "max_rating": 5.0,
+                        "review_count": rating_data.get("review_count"),
+                        "source_name": "Sulekha",
+                        "source_url": lead["url"],
+                        "evidence": f"Sulekha verified public rating: {rating_data['score']:.1f}/5",
+                        "retrieval_timestamp": get_iso_timestamp(),
+                        "verification_status": "VERIFIED"
+                    }
+                    res_map = {"rating": rating_item}
+                    RATING_CACHE[cache_key] = (now, res_map)
+                    telemetry["status"] = "SUCCESS_SULEKHA"
+                    return res_map, telemetry
+
+    # -------------------------------------------------------------
+    # 5. Clutch (Public Search)
+    # -------------------------------------------------------------
+    cl_leads = safe_search(f'"{company_name}" site:clutch.co')
+    for lead in cl_leads:
+        if "clutch.co" in lead.get("url", "").lower():
+            telemetry["sources_checked"].append(lead["url"])
+            if match_candidate_entity(lead.get("title", ""), lead.get("snippet", ""), lead["url"], company_name, website_url, location):
+                rating_data = extract_rating_from_text(f"{lead.get('title', '')}. {lead.get('snippet', '')}", "Clutch")
+                if rating_data:
+                    rating_item = {
+                        "value": rating_data["value"],
+                        "score": rating_data["score"],
+                        "max_rating": 5.0,
+                        "review_count": rating_data.get("review_count"),
+                        "source_name": "Clutch",
+                        "source_url": lead["url"],
+                        "evidence": f"Clutch verified public rating: {rating_data['score']:.1f}/5",
+                        "retrieval_timestamp": get_iso_timestamp(),
+                        "verification_status": "VERIFIED"
+                    }
+                    res_map = {"rating": rating_item}
+                    RATING_CACHE[cache_key] = (now, res_map)
+                    telemetry["status"] = "SUCCESS_CLUTCH"
+                    return res_map, telemetry
+
+    # -------------------------------------------------------------
+    # 6. Trustpilot (Direct Domain Lookup + Search Fallback)
+    # -------------------------------------------------------------
     if root_dom:
         telemetry["sources_checked"].append("Trustpilot Direct")
         tp_res = extract_trustpilot_rating_direct(root_dom)
@@ -1166,84 +1786,76 @@ def research_public_company_ratings(company_name: str, website_url: str) -> Tupl
             telemetry["status"] = "SUCCESS_TRUSTPILOT"
             return res_map, telemetry
 
-    # Step 2: Public Web Search across Trustpilot, G2, Justdial, Capterra, Yelp, Google Reviews
-    search_queries = [
-        f'"{company_name}" site:trustpilot.com',
-        f'"{company_name}" site:g2.com',
-        f'"{company_name}" site:justdial.com',
-        f'"{company_name}" {root_dom} rating reviews'
-    ]
+    tp_leads = safe_search(f'"{company_name}" site:trustpilot.com')
+    for lead in tp_leads:
+        if "trustpilot.com" in lead.get("url", "").lower():
+            telemetry["sources_checked"].append(lead["url"])
+            if match_candidate_entity(lead.get("title", ""), lead.get("snippet", ""), lead["url"], company_name, website_url, location):
+                rating_data = extract_rating_from_text(f"{lead.get('title', '')}. {lead.get('snippet', '')}", "Trustpilot")
+                if rating_data:
+                    rating_item = {
+                        "value": rating_data["value"],
+                        "score": rating_data["score"],
+                        "max_rating": 5.0,
+                        "review_count": rating_data.get("review_count"),
+                        "source_name": "Trustpilot",
+                        "source_url": lead["url"],
+                        "evidence": f"Trustpilot verified public rating: {rating_data['score']:.1f}/5",
+                        "retrieval_timestamp": get_iso_timestamp(),
+                        "verification_status": "VERIFIED"
+                    }
+                    res_map = {"rating": rating_item}
+                    RATING_CACHE[cache_key] = (now, res_map)
+                    telemetry["status"] = "SUCCESS_TRUSTPILOT"
+                    return res_map, telemetry
 
-    for q in search_queries:
-        leads = perform_public_web_search(q, max_results=3)
-        if not leads:
-            continue
-
-        telemetry["sources_checked"].extend([l["url"] for l in leads])
-
-        val, src_name, src_url, evidence, status = validate_search_evidence_with_gemini(
-            "rating", leads, company_name, website_url
-        )
-
-        if val and status in ("VERIFIED", "UNVERIFIED"):
-            # Determine source platform
-            domain_src = get_root_domain(src_url) if src_url else ""
-            if "trustpilot" in domain_src:
-                clean_src = "Trustpilot"
-            elif "g2" in domain_src:
-                clean_src = "G2"
-            elif "capterra" in domain_src:
-                clean_src = "Capterra"
-            elif "justdial" in domain_src:
-                clean_src = "Justdial"
-            elif "yelp" in domain_src:
-                clean_src = "Yelp"
-            elif "google" in domain_src:
-                clean_src = "Google Reviews"
-            else:
-                clean_src = src_name or "Public Review Site"
-
-            formatted_val = val
-            if clean_src and clean_src not in val:
-                formatted_val = f"{val} ({clean_src})"
-
-            rating_item = {
-                "value": formatted_val,
-                "source_name": clean_src,
-                "source_url": src_url or f"https://{root_dom}",
-                "evidence": evidence or f"Public rating from {clean_src}",
+    # -------------------------------------------------------------
+    # EXHAUSTION / FAILURE HANDLING
+    # -------------------------------------------------------------
+    if search_engine_errors and successful_searches == 0:
+        res_map = {
+            "rating": {
+                "value": "Search unavailable",
+                "source_name": "Public Sources",
+                "source_url": website_url,
+                "evidence": f"Public search engines unavailable due to anti-bot challenge or network timeout ({'; '.join(search_engine_errors[:2])}).",
                 "retrieval_timestamp": get_iso_timestamp(),
-                "verification_status": status
+                "verification_status": "SEARCH_UNAVAILABLE"
             }
-            res_map = {"rating": rating_item}
-            RATING_CACHE[cache_key] = (now, res_map)
-            telemetry["status"] = f"SUCCESS_{clean_src.upper().replace(' ', '_')}"
-            return res_map, telemetry
+        }
+        telemetry["status"] = "SEARCH_UNAVAILABLE"
+        telemetry["search_engine_errors"] = search_engine_errors
+        return res_map, telemetry
 
-    # No rating found across public sources
     res_map = {
         "rating": {
             "value": "Not available",
             "source_name": "Public Sources",
             "source_url": website_url,
-            "evidence": "No verified public rating profiles found.",
+            "evidence": "No verified public rating profiles found across Justdial, AmbitionBox, GoodFirms, Sulekha, Clutch, or Trustpilot.",
             "retrieval_timestamp": get_iso_timestamp(),
             "verification_status": "NOT_FOUND"
         }
     }
-    RATING_CACHE[cache_key] = (now, res_map)
+    telemetry["status"] = "NO_RATING_FOUND"
     return res_map, telemetry
+
+
 
 
 def perform_public_web_search(query: str, max_results: int = 3) -> List[Dict[str, str]]:
     """
-    Performs a permitted public web search using DuckDuckGo HTML search (or Google Custom Search API if configured).
+    Performs a permitted public web search using DuckDuckGo (or Google Custom Search API if configured).
     Returns list of dicts: [{"title": ..., "snippet": ..., "url": ...}].
     Applies SSRF guards on lead URLs.
+    Fast execution: strict 2.5s timeout, no headless browser spawns, fails fast with SearchEngineUnavailableError.
     """
     query = query.strip()
     if not query:
         return []
+
+    engine_errors: List[str] = []
+    search_succeeded: bool = False
 
     # Option A: Google Custom Search API if configured
     if Config.GOOGLE_SEARCH_KEY and Config.GOOGLE_SEARCH_CX:
@@ -1251,9 +1863,10 @@ def perform_public_web_search(query: str, max_results: int = 3) -> List[Dict[str
             res = requests.get(
                 "https://www.googleapis.com/customsearch/v1",
                 params={"key": Config.GOOGLE_SEARCH_KEY, "cx": Config.GOOGLE_SEARCH_CX, "q": query, "num": max_results},
-                timeout=5.0
+                timeout=3.0
             )
             if res.status_code == 200:
+                search_succeeded = True
                 items = res.json().get("items") or []
                 leads = []
                 for item in items:
@@ -1269,61 +1882,128 @@ def perform_public_web_search(query: str, max_results: int = 3) -> List[Dict[str
                             })
                 if leads:
                     return leads[:max_results]
+            else:
+                engine_errors.append(f"Google HTTP {res.status_code}")
         except Exception as e:
             logger.debug(f"Google Custom Search failed: {str(e)}")
+            engine_errors.append(f"Google error: {type(e).__name__}")
 
-    # Option B: DuckDuckGo HTML / Lite Permitted Search
+    # Option B1: DuckDuckGo Lite Permitted Search
+    ddg_host_unreachable = False
     try:
-        url = f"https://html.duckduckgo.com/html/?q={requests.utils.quote(query)}"
-        headers = {
-            "User-Agent": "FamewebBot/1.0 (+https://fameweb.ai)"
+        lite_url = "https://lite.duckduckgo.com/lite/"
+        lite_headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
-        res = requests.get(url, headers=headers, timeout=5.0)
-        if res.status_code == 200:
-            html = res.text
-            leads = []
-            blocks = re.findall(
-                r'<a[^>]*class=["\']result__url["\'][^>]*href=["\'](.*?)["\'][^>]*>(.*?)</a>.*?<a[^>]*class=["\']result__snippet["\'][^>]*>(.*?)</a>',
-                html, re.DOTALL | re.IGNORECASE
-            )
-            if not blocks:
-                hrefs = re.findall(r'href=["\'](/l/\?uddg=.*?)["\']', html, re.IGNORECASE)
-                snips = re.findall(r'<a[^>]*class=["\']result__snippet["\'][^>]*>(.*?)</a>', html, re.DOTALL | re.IGNORECASE)
-                for i, raw_h in enumerate(hrefs[:max_results]):
-                    m = re.search(r"uddg=(https?%3A%2F%2F[^&]+)", raw_h)
-                    if m:
-                        actual_url = requests.utils.unquote(m.group(1))
+        res_lite = requests.post(lite_url, data={"q": query}, headers=lite_headers, timeout=2.5)
+        if res_lite.status_code == 200:
+            if "anomaly-modal" in res_lite.text or "challenge-form" in res_lite.text or "anomaly.js" in res_lite.text:
+                engine_errors.append("DuckDuckGo Lite bot challenge detected")
+            else:
+                search_succeeded = True
+                soup = BeautifulSoup(res_lite.text, "html.parser")
+                leads_lite = []
+                rows = soup.find_all("tr")
+                for tr in rows:
+                    link = tr.find("a", class_="result-link")
+                    if link:
+                        actual_url = link.get("href") or ""
+                        if "uddg=" in actual_url:
+                            m = re.search(r"uddg=(https?%3A%2F%2F[^&]+)", actual_url)
+                            if m:
+                                actual_url = requests.utils.unquote(m.group(1))
                         parsed = urlparse(actual_url)
                         safe_host, _ = resolve_and_validate_hostname(parsed.hostname)
                         if safe_host:
-                            snip_text = re.sub(r"<[^>]+>", " ", snips[i] if i < len(snips) else "").strip()
-                            leads.append({
-                                "title": f"Lead from {parsed.netloc}",
+                            next_tr = tr.find_next_sibling("tr")
+                            snip_text = next_tr.get_text().strip() if next_tr else ""
+                            title_text = link.get_text().strip()
+                            leads_lite.append({
+                                "title": title_text,
                                 "snippet": snip_text,
                                 "url": actual_url
                             })
-            else:
-                for raw_url, raw_title, raw_snip in blocks[:max_results]:
-                    actual_url = raw_url
-                    if "/l/?uddg=" in raw_url:
-                        m = re.search(r"uddg=(https?%3A%2F%2F[^&]+)", raw_url)
-                        if m:
-                            actual_url = requests.utils.unquote(m.group(1))
-                    parsed = urlparse(actual_url)
-                    safe_host, _ = resolve_and_validate_hostname(parsed.hostname)
-                    if safe_host:
-                        t_text = re.sub(r"<[^>]+>", " ", raw_title).strip()
-                        s_text = re.sub(r"<[^>]+>", " ", raw_snip).strip()
-                        leads.append({
-                            "title": t_text,
-                            "snippet": s_text,
-                            "url": actual_url
-                        })
-            return leads[:max_results]
-    except Exception as err:
-        logger.debug(f"Public web search failed for '{query}': {str(err)}")
+                            if len(leads_lite) >= max_results:
+                                break
+                if leads_lite:
+                    return leads_lite
+        else:
+            engine_errors.append(f"DuckDuckGo Lite HTTP {res_lite.status_code}")
+    except (requests.ConnectTimeout, requests.ConnectionError) as e:
+        logger.debug(f"DuckDuckGo Lite connection failed: {str(e)}")
+        engine_errors.append(f"DuckDuckGo Lite connection failed: {type(e).__name__}")
+        ddg_host_unreachable = True
+    except Exception as e:
+        logger.debug(f"DuckDuckGo Lite search failed: {str(e)}")
+        engine_errors.append(f"DuckDuckGo Lite error: {type(e).__name__}")
 
-    return []
+    # Option B2: DuckDuckGo HTML Permitted Search Fallback (only if host was reachable)
+    if not ddg_host_unreachable:
+        try:
+            url = f"https://html.duckduckgo.com/html/?q={requests.utils.quote(query)}"
+            headers = {
+                "User-Agent": "FamewebBot/1.0 (+https://fameweb.ai)"
+            }
+            res = requests.get(url, headers=headers, timeout=2.5)
+            if res.status_code == 200:
+                if "anomaly-modal" in res.text or "challenge-form" in res.text or "anomaly.js" in res.text:
+                    engine_errors.append("DuckDuckGo HTML bot challenge detected")
+                else:
+                    search_succeeded = True
+                    html = res.text
+                    leads = []
+                    blocks = re.findall(
+                        r'<a[^>]*class=["\']result__url["\'][^>]*href=["\'](.*?)["\'][^>]*>(.*?)</a>.*?<a[^>]*class=["\']result__snippet["\'][^>]*>(.*?)</a>',
+                        html, re.DOTALL | re.IGNORECASE
+                    )
+                    if not blocks:
+                        hrefs = re.findall(r'href=["\'](/l/\?uddg=.*?)["\']', html, re.IGNORECASE)
+                        snips = re.findall(r'<a[^>]*class=["\']result__snippet["\'][^>]*>(.*?)</a>', html, re.DOTALL | re.IGNORECASE)
+                        for i, raw_h in enumerate(hrefs[:max_results]):
+                            m = re.search(r"uddg=(https?%3A%2F%2F[^&]+)", raw_h)
+                            if m:
+                                actual_url = requests.utils.unquote(m.group(1))
+                                parsed = urlparse(actual_url)
+                                safe_host, _ = resolve_and_validate_hostname(parsed.hostname)
+                                if safe_host:
+                                    snip_text = re.sub(r"<[^>]+>", " ", snips[i] if i < len(snips) else "").strip()
+                                    leads.append({
+                                        "title": f"Lead from {parsed.netloc}",
+                                        "snippet": snip_text,
+                                        "url": actual_url
+                                    })
+                    else:
+                        for raw_url, raw_title, raw_snip in blocks[:max_results]:
+                            actual_url = raw_url
+                            if "/l/?uddg=" in raw_url:
+                                m = re.search(r"uddg=(https?%3A%2F%2F[^&]+)", raw_url)
+                                if m:
+                                    actual_url = requests.utils.unquote(m.group(1))
+                            parsed = urlparse(actual_url)
+                            safe_host, _ = resolve_and_validate_hostname(parsed.hostname)
+                            if safe_host:
+                                t_text = re.sub(r"<[^>]+>", " ", raw_title).strip()
+                                s_text = re.sub(r"<[^>]+>", " ", raw_snip).strip()
+                                leads.append({
+                                    "title": t_text,
+                                    "snippet": s_text,
+                                    "url": actual_url
+                                })
+                    if leads:
+                        return leads[:max_results]
+            else:
+                engine_errors.append(f"DuckDuckGo HTML HTTP {res.status_code}")
+        except Exception as err:
+            logger.debug(f"Public web search failed for '{query}': {str(err)}")
+            engine_errors.append(f"DuckDuckGo HTML error: {type(err).__name__}")
+
+    if search_succeeded:
+        return []
+
+    raise SearchEngineUnavailableError(
+        f"External public search engines unavailable for query '{query}': {', '.join(engine_errors) if engine_errors else 'No response'}"
+    )
 
 
 def validate_search_evidence_with_gemini(
@@ -1471,8 +2151,6 @@ def enrich_company_with_multi_source_research(
     research_diag = {
         "research_executed": bool(missing_fields),
         "missing_fields_before_research": list(missing_fields),
-        "google_places_api_configured": False,
-        "google_places_status": "SKIPPED",
         "search_queries_executed": [],
         "sources_searched": [],
         "fields_enriched": [],
@@ -1487,15 +2165,17 @@ def enrich_company_with_multi_source_research(
 
     root_dom = get_root_domain(website_url)
 
-    # Step 1: Public Rating Source Research (Trustpilot direct + Multi-source public review search)
+    # Step 1: Public Rating Source Research (Justdial + AmbitionBox + GoodFirms + Sulekha + Clutch/Trustpilot)
     if "rating" in missing_fields:
-        rating_res_map, rating_telemetry = research_public_company_ratings(company_name, website_url)
+        rating_res_map, rating_telemetry = research_public_company_ratings(
+            company_name, website_url, location=scraped_data.get("location")
+        )
         if rating_telemetry and rating_telemetry.get("sources_checked"):
             research_diag["sources_searched"].extend(rating_telemetry.get("sources_checked", []))
         if rating_res_map and "rating" in rating_res_map:
             item = rating_res_map["rating"]
             val = item.get("value")
-            if val and item.get("verification_status") in ("VERIFIED", "UNVERIFIED"):
+            if val and val != "Not available" and item.get("verification_status") in ("VERIFIED", "UNVERIFIED"):
                 scraped_data["rating"] = val
                 prov["rating"] = {
                     "value": val,
@@ -1511,7 +2191,7 @@ def enrich_company_with_multi_source_research(
                     "value": "Not available",
                     "source_name": "Public Sources",
                     "source_url": website_url,
-                    "evidence": "No verified public rating profiles found.",
+                    "evidence": item.get("evidence") or "No verified public rating profiles found across Justdial, AmbitionBox, GoodFirms, Sulekha, Clutch, or Trustpilot.",
                     "retrieval_timestamp": get_iso_timestamp(),
                     "verification_status": "NOT_FOUND"
                 }
@@ -1528,7 +2208,11 @@ def enrich_company_with_multi_source_research(
         query = query_terms.get(field, f"{company_name} {root_dom} {field}")
         research_diag["search_queries_executed"].append(query)
 
-        leads = perform_public_web_search(query, max_results=3)
+        try:
+            leads = perform_public_web_search(query, max_results=3)
+        except (SearchEngineUnavailableError, requests.RequestException, Exception) as search_err:
+            logger.debug(f"Public web search unavailable during enrichment for query '{query}': {search_err}")
+            leads = []
         if leads:
             research_diag["sources_searched"].extend([lead["url"] for lead in leads])
 
