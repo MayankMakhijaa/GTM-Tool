@@ -253,3 +253,12 @@ class ConnectAndMessage(Base):
     __table_args__ = (
         UniqueConstraint('user_id', 'global_id', name='uq_connect_and_message_user_global'),
     )
+
+class EmailVerificationOTP(Base):
+    __tablename__ = 'email_verification_otps'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='CASCADE'), nullable=False, index=True)
+    otp_hash = Column(String(64), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    attempts = Column(Integer, default=0, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

@@ -13,3 +13,4 @@ flask-limiter
 flask-wtf
 email-validator
 phonenumbers
+crawl4ai

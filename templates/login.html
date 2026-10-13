@@ -21,7 +21,7 @@
             Sign in to your Fameweb account to access your GTM workspace
           </p>
 </div>
-<form class="mt-space-lg flex flex-col gap-space-md" id="loginForm" onsubmit="event.preventDefault(); handleAuthSubmit();">
+<form class="mt-space-lg flex flex-col gap-space-md" id="loginForm">
 <div class="flex flex-col gap-1.5">
 <label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="identifier">
 <span>Email or phone number</span>
@@ -71,7 +71,7 @@
 <div class="mt-space-lg pt-space-md flex flex-col items-center gap-2 text-center">
 <p class="font-body-sm text-body-sm text-on-surface-variant">
             Don't have an account? 
-            <a class="font-label-md text-label-md text-primary hover:text-secondary transition-colors underline underline-offset-4 decoration-primary/30 hover:decoration-secondary" href="javascript:void(0)">Create account</a>
+            <a class="font-label-md text-label-md text-primary hover:text-secondary transition-colors underline underline-offset-4 decoration-primary/30 hover:decoration-secondary" href="/signup">Create account</a>
 </p>
 </div>
 </div>
@@ -89,17 +89,7 @@
 </div>
 <script>
   (function initLoginPage() {
-    const pwdInput = document.getElementById('password');
-    const toggleBtn = document.getElementById('togglePassword');
-    const pwdIcon = document.getElementById('pwdIcon');
-    
-    if (toggleBtn && pwdInput && pwdIcon) {
-      toggleBtn.addEventListener('click', function() {
-        const isHidden = pwdInput.type === 'password';
-        pwdInput.type = isHidden ? 'text' : 'password';
-        pwdIcon.textContent = isHidden ? 'visibility_off' : 'visibility';
-      });
-    }
+    // Password visibility toggle is handled by static/js/auth/login.js
   })();
 
   function handleAuthSubmit() {

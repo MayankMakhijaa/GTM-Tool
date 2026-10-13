@@ -1,11 +1,21 @@
 import os
+import sys
 from dotenv import load_dotenv
 
 load_dotenv()
+if not os.environ.get('GEMINI_API_KEY') and os.path.exists('.env.example'):
+    load_dotenv('.env.example')
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev_secret_key')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql+psycopg://postgres:root@localhost:5432/fameweb')
+    _is_testing = bool(os.environ.get('FLASK_TESTING')) or 'pytest' in os.environ.get('_', '') or any('pytest' in arg for arg in sys.argv)
+    if _is_testing:
+        _db_uri = os.environ.get('TEST_DATABASE_URL') or os.environ.get('DATABASE_URL')
+        if not _db_uri or _db_uri.split('/')[-1].split('?')[0].lower() == 'fameweb':
+            _db_uri = 'postgresql+psycopg://postgres:postgres@localhost:5432/fameweb_test'
+        SQLALCHEMY_DATABASE_URI = _db_uri
+    else:
+        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql+psycopg://postgres:postgres@localhost:5432/fameweb')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Session configuration
@@ -19,3 +29,25 @@ class Config:
     
     # Other configs
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+    GOOGLE_PLACES_API_KEY = os.environ.get('GOOGLE_PLACES_API_KEY') or os.environ.get('GOOGLE_MAPS_API_KEY')
+    GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_PLACES_API_KEY')
+    GOOGLE_SEARCH_KEY = os.environ.get('GOOGLE_SEARCH_KEY')
+    GOOGLE_SEARCH_CX = os.environ.get('GOOGLE_SEARCH_CX')
+
+    # SMTP Email Configuration
+    SMTP_HOST = None if _is_testing else os.environ.get('SMTP_HOST')
+    SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+    SMTP_USER = os.environ.get('SMTP_USER')
+    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
+    SMTP_FROM_EMAIL = os.environ.get('SMTP_FROM_EMAIL', 'no-reply@fameweb.com')
+    SMTP_USE_TLS = os.environ.get('SMTP_USE_TLS', 'true').lower() in ('true', '1', 'yes')
+
+    # Signup OTP Configuration
+    # Accounts created before this cutoff timestamp are treated as grandfathered legacy accounts
+    OTP_CUTOFF_TIMESTAMP = os.environ.get('OTP_CUTOFF_TIMESTAMP', '2026-10-06T00:00:00Z')
+    # Specific accounts that must ALWAYS require OTP regardless of creation timestamp (e.g. e2e test accounts)
+    OTP_FORCE_VERIFICATION_EMAILS = [
+        email.strip().lower()
+        for email in os.environ.get('OTP_FORCE_VERIFICATION_EMAILS', 'mayank@fameweb.in').split(',')
+        if email.strip()
+    ]
