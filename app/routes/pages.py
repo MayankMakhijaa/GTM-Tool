@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request
 from app.security.session import login_required
 from app.repositories.user_repository import get_user_by_id
+from app.services.otp_service import is_user_email_verified
 
 pages_bp = Blueprint("pages", __name__)
 
@@ -17,18 +18,22 @@ def enforce_onboarding(user, current_endpoint):
     """
     if not user:
         return None
+
+    if not is_user_email_verified(user):
+        if current_endpoint != "pages.verify_email":
+            return redirect(url_for("pages.verify_email"))
+        return None
         
     step = user.onboarding_step
-    if step == "DONE":
-        # Can access anything
+    if step in ("DONE", "DASHBOARD", "OPTIMIZATION"):
+        # Can access any main application page once onboarding has reached OPTIMIZATION, DASHBOARD, or DONE
         return None
         
     # Mapping of state to the correct endpoint
     state_routes = {
         "LINKEDIN": "pages.connect_linkedin",
         "COMPANY": "pages.company",
-        "ICP": "pages.icp",
-        "OPTIMIZATION": "pages.profile_optimization"
+        "ICP": "pages.icp"
     }
     
     target = state_routes.get(step, "pages.dashboard")
@@ -44,15 +49,28 @@ def home():
         return redirect(url_for("pages.dashboard"))
     return render_template("home.html")
 
+@pages_bp.route("/verify-email")
+def verify_email():
+    user = get_current_user()
+    if user and is_user_email_verified(user):
+        return redirect(url_for("pages.dashboard"))
+    return render_template("verify_email.html", user=user)
+
 @pages_bp.route("/login")
 def login():
-    if session.get("user_id"):
+    user = get_current_user()
+    if user:
+        if not is_user_email_verified(user):
+            return redirect(url_for("pages.verify_email"))
         return redirect(url_for("pages.dashboard"))
     return render_template("login.html")
 
 @pages_bp.route("/signup")
 def signup():
-    if session.get("user_id"):
+    user = get_current_user()
+    if user:
+        if not is_user_email_verified(user):
+            return redirect(url_for("pages.verify_email"))
         return redirect(url_for("pages.dashboard"))
     return render_template("signup.html")
 

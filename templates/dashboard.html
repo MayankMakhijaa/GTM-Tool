@@ -10,7 +10,7 @@
 <div class="flex items-center gap-space-xs font-code-sm text-code-sm text-primary uppercase tracking-wider mb-1">
 <span>COHORT-4 // REVENUE INTELLIGENCE</span>
 </div>
-<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Good morning, {{ user.name.split(" ")[0] if user else 'Sarah' }}</h1>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Good morning, {{ user.name.split(" ")[0] if (user and user.name) else 'User' }}</h1>
 <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Your GTM workspace at a glance. 16 high-surge buying accounts require execution today.</p>
 </div>
 <div class="flex items-center gap-space-sm">

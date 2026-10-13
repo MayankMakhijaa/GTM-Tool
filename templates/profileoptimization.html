@@ -4,7 +4,7 @@
 {% set opt = linkedin_profile.optimization_suggestions if linkedin_profile and linkedin_profile.optimization_suggestions else None %}
 <div class="flex flex-col w-full">
   <div class="px-space-xl py-space-lg flex flex-col gap-space-lg">
-    
+
     <!-- HEADER -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-space-md">
       <div class="flex flex-col">
@@ -22,12 +22,12 @@
         </button>
       </div>
     </div>
-    
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
-      
+
       <!-- LEFT COLUMN -->
       <div class="lg:col-span-4 flex flex-col gap-space-lg">
-        
+
         <!-- PROFILE SUMMARY -->
         <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
           <div class="flex items-start gap-space-md">
@@ -86,7 +86,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- SCORE GAUGE -->
         <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
           <div class="flex items-center justify-between">
@@ -125,7 +125,7 @@
           </div>
           {% endif %}
         </div>
-        
+
         <!-- ACTIONS -->
         <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
           <div class="flex flex-col gap-space-sm">
@@ -141,14 +141,14 @@
             </p>
           </div>
         </div>
-        
+
       </div>
-      
+
       <!-- RIGHT COLUMN -->
       <div class="lg:col-span-8 flex flex-col gap-space-lg">
-        
+
         {% if opt %}
-        
+
           <!-- RECOMMENDATIONS SECTION -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md pb-space-xs">
             <div class="flex items-center gap-space-sm">
@@ -156,7 +156,7 @@
               <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-label-sm text-label-sm">{{ opt.recommendations|length }} Priorities</span>
             </div>
           </div>
-          
+
           <div class="flex flex-col gap-space-lg">
             {% for rec in opt.recommendations %}
             <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md">
@@ -171,7 +171,7 @@
                 </div>
                 <span class="px-space-sm py-0.5 rounded-full {% if rec.priority == 'HIGH' %}bg-amber-100 text-amber-900{% elif rec.priority == 'MEDIUM' %}bg-blue-100 text-blue-900{% else %}bg-surface-container-high text-on-surface-variant{% endif %} font-label-sm text-label-sm font-semibold shrink-0">{{ rec.priority }} Priority</span>
               </div>
-              
+
               <div class="flex flex-col gap-space-sm">
                 <div class="flex items-start gap-space-sm bg-surface-container-low p-space-md rounded-lg">
                   <span class="material-symbols-outlined text-[18px] text-amber-700 shrink-0 mt-0.5">report_problem</span>
@@ -184,7 +184,7 @@
                     <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">{{ rec.recommended_action }}</p>
                   </div>
                 </div>
-                
+
                 {% if rec.suggested_content %}
                 <div class="flex flex-col gap-space-xs p-space-md bg-surface-container-lowest rounded-lg border border-surface-container">
                   <div class="flex items-center justify-between">
@@ -196,7 +196,7 @@
                   {% if rec.reason %}
                   <p class="font-body-sm text-body-sm text-on-surface-variant mt-2"><strong>Reason:</strong> {{ rec.reason }}</p>
                   {% endif %}
-                  
+
                   <div class="flex items-center justify-end gap-space-sm pt-space-md">
                     <button class="inline-flex items-center gap-space-xs px-space-md py-2 bg-surface-container text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-highest transition-colors" onclick="copyToClipboard('rec-copy-{{ loop.index }}', this)">
                       <span class="material-symbols-outlined text-[16px]">content_copy</span>
@@ -208,7 +208,7 @@
               </div>
             </div>
             {% endfor %}
-            
+
             {% if opt.recommendations|length == 0 %}
               <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col items-center justify-center gap-space-sm text-center">
                 <span class="material-symbols-outlined text-[32px] text-primary">done_all</span>
@@ -217,14 +217,14 @@
               </div>
             {% endif %}
           </div>
-          
+
           <!-- SECTION ANALYSIS -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md pt-space-xl pb-space-xs">
             <div class="flex items-center gap-space-sm">
               <h2 class="font-headline-md text-headline-md text-on-surface">Section Analysis</h2>
             </div>
           </div>
-          
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
             {% for sec in opt.section_analysis %}
             <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
@@ -233,11 +233,11 @@
                 <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-xs text-label-xs">{{ sec.status | replace('_', ' ') | title }}</span>
               </div>
               <p class="font-body-sm text-body-sm text-on-surface-variant">{{ sec.reason }}</p>
-              
+
               {% if sec.score is not none %}
                 <span class="font-label-sm text-label-sm text-outline">Score: {{ sec.score }}</span>
               {% endif %}
-              
+
               {% if sec.issues and sec.issues|length > 0 %}
                 <ul class="list-disc pl-4 mt-2 font-body-sm text-body-sm text-on-surface-variant">
                   {% for issue in sec.issues %}
@@ -248,9 +248,9 @@
             </div>
             {% endfor %}
           </div>
-          
+
         {% else %}
-          
+
           <!-- EMPTY STATE -->
           <div class="flex flex-col items-center justify-center p-space-2xl bg-surface-container-lowest rounded-xl shadow-sm text-center">
             <span class="material-symbols-outlined text-[48px] text-tertiary mb-space-md">analytics</span>
@@ -259,13 +259,13 @@
               Click the "Generate Analysis" button to evaluate your profile against your Ideal Customer Profile.
             </p>
           </div>
-          
+
         {% endif %}
-        
+
       </div>
-      
+
     </div>
-    
+
     <!-- TOAST NOTIFICATION -->
     <div class="fixed bottom-6 right-6 flex items-center gap-space-sm px-space-lg py-space-md bg-inverse-surface text-inverse-on-surface rounded-xl shadow-xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50" id="toast-notification">
       <span class="material-symbols-outlined text-tertiary-fixed text-[20px]">check_circle</span>

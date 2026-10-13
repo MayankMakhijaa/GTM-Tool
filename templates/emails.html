@@ -205,9 +205,9 @@
 <p>One client added 38% more booked calls in their first month without hiring anyone new.</p>
 <p>Worth a quick look at how this could work for Veloce Security AI?</p>
 <div>
-<p class="font-semibold text-on-surface">Sarah Jenkins</p>
+<p class="font-semibold text-on-surface">{{ user.name if (user and user.name) else 'User' }}</p>
 <p class="text-on-surface-variant font-body-sm">Head of Growth, Fameweb AI</p>
-<p class="text-primary font-body-sm">fameweb.ai/meet-sarah</p>
+<p class="text-primary font-body-sm">fameweb.ai</p>
 </div>
 </div>
 </div>
@@ -267,5 +267,8 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+  window.currentUserName = {{ (user.name if (user and user.name) else 'User') | tojson }};
+</script>
 <script src="/static/js/email-outreach.js"></script>
 {% endblock %}

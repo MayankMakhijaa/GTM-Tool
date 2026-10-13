@@ -2,9 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGenerate = document.getElementById('generate-suggestions-btn');
     const toast = document.getElementById('toast-notification');
     const toastMessage = document.getElementById('toast-message');
-    
+
     const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    
+
     window.showToast = function(message) {
         if (!toast || !toastMessage) return alert(message);
         toastMessage.innerText = message;
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const original = btnGenerate.innerHTML;
             btnGenerate.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Analyzing your profile...</span>';
             btnGenerate.disabled = true;
-            
+
             try {
                 const res = await fetch('/api/optimize-profile', {
                     method: 'POST',
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     body: JSON.stringify({}) // Backend pulls data from DB
                 });
-                
+
                 const data = await res.json();
                 if (data.success) {
                     showToast('Analysis complete');
@@ -60,6 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnGenerate.disabled = false;
                 btnGenerate.innerHTML = original;
             }
+        });
+    }
+
+    const exportBtn = document.getElementById('export-summary-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            showToast('Generating executive brief summary...');
         });
     }
 });

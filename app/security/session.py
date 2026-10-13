@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import session, jsonify, request, current_app
 from app.repositories.user_repository import get_user_by_id
+from app.services.otp_service import is_user_email_verified
 
 def login_required(f):
     @wraps(f)
@@ -22,17 +23,36 @@ def login_required(f):
                 "error": "UNAUTHORIZED",
                 "message": "User inactive or not found."
             }), 401
+
+        if not is_user_email_verified(user):
+            if request.path.startswith('/api/'):
+                if request.endpoint not in ('auth.verify_otp', 'auth.resend_otp', 'auth.logout'):
+                    return jsonify({
+                        "success": False,
+                        "error": "EMAIL_NOT_VERIFIED",
+                        "message": "Email verification required.",
+                        "redirect": "/verify-email"
+                    }), 403
+            else:
+                from flask import redirect, url_for
+                if request.endpoint != "pages.verify_email":
+                    return redirect(url_for("pages.verify_email"))
             
         request.user_id = user_id
         return f(*args, **kwargs)
     return decorated_function
 
 def set_user_session(user_id: int):
-    """Sets the authenticated user in the session. Regenerates session to prevent fixation."""
-    # Flask regenerates the session ID automatically when contents change or session is cleared.
+    """Sets the authenticated user in the session. Preserves CSRF token to prevent token invalidation."""
+    csrf_token = session.get('csrf_token')
     session.clear()
     session['user_id'] = user_id
+    if csrf_token:
+        session['csrf_token'] = csrf_token
 
 def clear_user_session():
-    """Clears the session completely."""
+    """Clears user session attributes while preserving CSRF token."""
+    csrf_token = session.get('csrf_token')
     session.clear()
+    if csrf_token:
+        session['csrf_token'] = csrf_token

@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     const btnSubmit = document.getElementById('btn-submit-icp');
-    const btnProceed = document.getElementById('btn-proceed-from-preview');
+    const btnAccept = document.getElementById('btn-accept-parameters');
+    const btnFinalize = document.getElementById('btn-finalize-parameters') || document.getElementById('btn-proceed-from-preview');
     const btnEdit = document.getElementById('btn-edit-questionnaire');
 
     // Helper to get text from chips
@@ -140,121 +141,278 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    const submitICP = async () => {
-        // 1. Target Customer
-        const targetCustomer = getChipsText('target-customer-container');
-        
-        // 2. Revenue
-        let rev = "";
-        if (revSelect.value === 'custom') {
-            rev = JSON.stringify({
-                label: "Custom",
-                range: customRevInput.value.trim()
-            });
-        } else {
-            rev = revSelect.value;
-        }
-
-        // 3. Headcount (Read existing pills)
-        const sizeContainer = document.getElementById('headcount-container');
-        const activeSizePills = sizeContainer ? Array.from(sizeContainer.querySelectorAll('.size-pill.active')).map(p => p.textContent.trim().replace('check', '').trim()) : [];
-        const size = activeSizePills.join(', ');
-
-        // 4. Industry
-        const ind = getChipsText('industry-container');
-        
-        // 5. Geo
-        const loc = getChipsText('location-container');
-        
-        // 6. Roles
-        const roles = getChipsText('roles-container');
-        
-        // 7. Keywords
-        const keywords = getChipsText('keywords-container');
-        
-        // 8. Exclusions
-        const exclusions = getChipsText('exclusions-container');
-        
-        // 9. Signals
-        const signals = {};
-        const signalItems = document.querySelectorAll('.signal-item');
-        signalItems.forEach(item => {
-            const checkbox = item.querySelector('.signal-checkbox');
-            if (checkbox && checkbox.checked) {
-                const key = item.getAttribute('data-signal-key');
-                const metaEl = item.querySelector('.signal-meta');
-                const metaKey = metaEl ? metaEl.getAttribute('data-meta-key') : 'value';
-                const metaVal = metaEl ? metaEl.textContent.trim() : true;
-                
-                signals[key] = {
-                    enabled: true,
-                    [metaKey]: metaVal
-                };
+    const collectPayload = () => {
+            const targetCustomer = getChipsText('target-customer-container');
+            
+            let rev = "";
+            if (revSelect && revSelect.value === 'custom') {
+                rev = JSON.stringify({
+                    label: "Custom",
+                    range: customRevInput ? customRevInput.value.trim() : ""
+                });
+            } else if (revSelect) {
+                rev = revSelect.value;
             }
-        });
 
-        // 10. Tone
-        const activeTone = document.querySelector('input[name="tone"]:checked');
-        const tone = activeTone ? activeTone.value : 'FORMAL';
+            const sizeContainer = document.getElementById('headcount-container');
+            const activeSizePills = sizeContainer ? Array.from(sizeContainer.querySelectorAll('.size-pill.active')).map(p => p.textContent.trim().replace('check', '').trim()) : [];
+            const size = activeSizePills.join(', ');
 
-        const payload = {
-            target_customer: targetCustomer,
-            company_size: size,
-            revenue_range: rev,
-            target_jobs_roles: roles,
-            industry: ind,
-            location: loc,
-            keywords: keywords,
-            exclusions: exclusions,
-            signals: signals,
-            tone: tone
+            const ind = getChipsText('industry-container');
+            const loc = getChipsText('location-container');
+            const roles = getChipsText('roles-container');
+            const keywords = getChipsText('keywords-container');
+            const exclusions = getChipsText('exclusions-container');
+            
+            const signals = {};
+            const signalItems = document.querySelectorAll('.signal-item');
+            signalItems.forEach(item => {
+                const checkbox = item.querySelector('.signal-checkbox');
+                if (checkbox && checkbox.checked) {
+                    const key = item.getAttribute('data-signal-key');
+                    const metaEl = item.querySelector('.signal-meta');
+                    const metaKey = metaEl ? metaEl.getAttribute('data-meta-key') : 'value';
+                    const metaVal = metaEl ? metaEl.textContent.trim() : true;
+                    
+                    signals[key] = {
+                        enabled: true,
+                        [metaKey]: metaVal
+                    };
+                }
+            });
+
+            const activeTone = document.querySelector('input[name="tone"]:checked');
+            const tone = activeTone ? activeTone.value : 'FORMAL';
+
+            return {
+                target_customer: targetCustomer,
+                company_size: size,
+                revenue_range: rev,
+                target_jobs_roles: roles,
+                industry: ind,
+                location: loc,
+                keywords: keywords,
+                exclusions: exclusions,
+                signals: signals,
+                tone: tone
+            };
         };
-        
-        const originalText = btnSubmit.innerHTML;
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Generating Report...</span>';
-        
-        try {
-            const res = await fetch('/api/onboarding/icp', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfToken()
-                },
-                body: JSON.stringify(payload)
-            });
+
+        const submitICP = async (options = {}) => {
+            const payload = collectPayload();
+            const activeBtn = options.button || btnSubmit;
+            const originalText = activeBtn ? activeBtn.innerHTML : '';
             
-            const data = await res.json();
-            if (!res.ok || !data.success) {
-                throw new Error(data.message || 'Unable to save ICP details.');
+            if (activeBtn) {
+                activeBtn.disabled = true;
+                const loadingText = options.finalize ? 'Finalizing...' : (options.isAccept ? 'Saving...' : 'Generating Report...');
+                activeBtn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>${loadingText}</span>`;
             }
             
-            // Show preview
-            document.getElementById('questionnaire-view')?.classList.add('hidden');
-            document.getElementById('preview-view')?.classList.remove('hidden');
-            
-        } catch (err) {
-            alert(err.message);
-        } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = originalText;
-        }
-    };
+            try {
+                const res = await fetch('/api/onboarding/icp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.message || 'Unable to save ICP details.');
+                }
 
-    if (btnSubmit) {
-        btnSubmit.addEventListener('click', submitICP);
-    }
-    
-    if (btnProceed) {
-        btnProceed.addEventListener('click', () => {
-            window.location.href = '/dashboard';
+                if (options.finalize) {
+                    window.location.href = '/dashboard';
+                    return;
+                }
+                
+                if (options.isAccept) {
+                    if (btnAccept) {
+                        btnAccept.innerHTML = '<span class="material-symbols-outlined text-[18px] text-tertiary">check_circle</span><span>Parameters Accepted</span>';
+                    }
+                    return;
+                }
+                
+                // Show preview
+                document.getElementById('questionnaire-view')?.classList.add('hidden');
+                document.getElementById('preview-view')?.classList.remove('hidden');
+                const btnQuestionnaire = document.getElementById('btn-questionnaire');
+                const btnPreview = document.getElementById('btn-preview');
+                if (btnQuestionnaire && btnPreview) {
+                    btnPreview.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+                    btnPreview.classList.remove('text-on-surface-variant');
+                    btnQuestionnaire.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+                    btnQuestionnaire.classList.add('text-on-surface-variant');
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                if (activeBtn && !options.finalize) {
+                    activeBtn.disabled = false;
+                    if (!options.isAccept) {
+                        activeBtn.innerHTML = originalText;
+                    }
+                }
+            }
+        };
+
+        const saveIcpDraft = async (redirectTarget = null) => {
+            const payload = collectPayload();
+            try {
+                const res = await fetch('/api/onboarding/icp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (redirectTarget) {
+                    window.location.href = redirectTarget;
+                }
+                return data;
+            } catch (err) {
+                console.error('Error saving ICP draft:', err);
+                if (redirectTarget) {
+                    window.location.href = redirectTarget;
+                }
+            }
+        };
+
+        // Load existing ICP data from API
+        const loadICPData = async () => {
+            try {
+                const res = await fetch('/api/onboarding/icp');
+                if (!res.ok) return;
+                const result = await res.json();
+                if (!result.success || !result.data) return;
+
+                const data = result.data;
+                const populateChips = (containerId, textVal, typeClass, iconHtml = '') => {
+                    const container = document.getElementById(containerId);
+                    if (!container || !textVal) return;
+                    const items = String(textVal).split(',').map(s => s.trim()).filter(Boolean);
+                    items.forEach(val => {
+                        const existing = Array.from(container.querySelectorAll('.chip-text')).map(el => el.textContent.trim().toLowerCase());
+                        if (!existing.includes(val.toLowerCase())) {
+                            const newChip = createChipElement(val, typeClass, iconHtml);
+                            const input = container.querySelector('input');
+                            if (input) {
+                                container.insertBefore(newChip, input);
+                            } else {
+                                container.appendChild(newChip);
+                            }
+                        }
+                    });
+                };
+
+                populateChips('target-customer-container', data.target_customer, 'target_customer');
+                populateChips('industry-container', data.industry, 'industry');
+                populateChips('location-container', data.location, 'location', '<span class="material-symbols-outlined text-[14px]">public</span>');
+                populateChips('roles-container', data.target_jobs_roles, 'roles');
+                populateChips('keywords-container', data.keywords, 'keywords');
+                populateChips('exclusions-container', data.exclusions, 'exclusions');
+
+                if (data.company_size) {
+                    const sizeArr = String(data.company_size).split(',').map(s => s.trim());
+                    const sizePills = document.querySelectorAll('.size-pill');
+                    sizePills.forEach(pill => {
+                        const label = pill.textContent.trim().replace('check', '').trim();
+                        if (sizeArr.includes(label)) {
+                            if (!pill.classList.contains('active')) {
+                                pill.click();
+                            }
+                        }
+                    });
+                }
+
+                if (data.revenue_range && revSelect) {
+                    try {
+                        const parsed = JSON.parse(data.revenue_range);
+                        if (parsed && parsed.label === 'Custom') {
+                            revSelect.value = 'custom';
+                            if (customRevContainer) customRevContainer.classList.remove('hidden');
+                            if (customRevInput) customRevInput.value = parsed.range || '';
+                        }
+                    } catch (e) {
+                        revSelect.value = data.revenue_range;
+                    }
+                }
+
+                if (data.tone) {
+                    const targetTone = String(data.tone).toUpperCase();
+                    toneItems.forEach(item => {
+                        const input = item.querySelector('input');
+                        if (input && input.value.toUpperCase() === targetTone) {
+                            item.click();
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('Failed loading ICP data:', err);
+            }
+        };
+
+        loadICPData();
+
+        if (btnSubmit) {
+            btnSubmit.addEventListener('click', (e) => {
+                e.preventDefault();
+                submitICP({ button: btnSubmit });
+            });
+        }
+        
+        if (btnAccept) {
+            btnAccept.addEventListener('click', (e) => {
+                e.preventDefault();
+                submitICP({ button: btnAccept, isAccept: true });
+            });
+        }
+
+        if (btnFinalize) {
+            btnFinalize.addEventListener('click', (e) => {
+                e.preventDefault();
+                submitICP({ button: btnFinalize, finalize: true });
+            });
+        }
+        
+        if (btnEdit) {
+            btnEdit.addEventListener('click', () => {
+                document.getElementById('preview-view')?.classList.add('hidden');
+                document.getElementById('questionnaire-view')?.classList.remove('hidden');
+                const btnQuestionnaire = document.getElementById('btn-questionnaire');
+                const btnPreview = document.getElementById('btn-preview');
+                if (btnQuestionnaire && btnPreview) {
+                    btnQuestionnaire.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+                    btnQuestionnaire.classList.remove('text-on-surface-variant');
+                    btnPreview.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+                    btnPreview.classList.add('text-on-surface-variant');
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // Attach listeners for Exit & Save Draft and Back navigation
+        const dashboardLinks = document.querySelectorAll('a[data-path="dashboard"]');
+        dashboardLinks.forEach(link => {
+            link.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await saveIcpDraft('/dashboard');
+            });
         });
-    }
-    
-    if (btnEdit) {
-        btnEdit.addEventListener('click', () => {
-            document.getElementById('preview-view')?.classList.add('hidden');
-            document.getElementById('questionnaire-view')?.classList.remove('hidden');
+
+        const companyLinks = document.querySelectorAll('a[data-path="company-details"]');
+        companyLinks.forEach(link => {
+            link.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await saveIcpDraft('/company');
+            });
         });
-    }
 });
+

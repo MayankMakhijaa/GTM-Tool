@@ -542,10 +542,14 @@
 </div>
 </div>
 </div>
-<div class="mt-space-xl pt-space-lg border-t border-surface-container flex justify-end">
-<button class="px-space-xl py-space-md rounded-lg bg-primary text-on-primary font-headline-md text-[15px] font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-space-xs" id="btn-proceed-from-preview">
-<span>Accept Parameters &amp; Finalize Profile</span>
-<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+<div class="mt-space-xl pt-space-lg border-t border-surface-container flex items-center justify-end gap-space-md">
+<button class="px-space-lg py-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-headline-md text-[15px] font-medium transition-all flex items-center gap-space-xs" id="btn-accept-parameters" type="button">
+  <span class="material-symbols-outlined text-[18px]">check</span>
+  <span>Accept Parameters</span>
+</button>
+<button class="px-space-xl py-space-md rounded-lg bg-primary hover:bg-secondary text-on-primary font-headline-md text-[15px] font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-space-xs" id="btn-finalize-parameters" data-proceed="true" type="button">
+  <span>Finalize & Launch Dashboard</span>
+  <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
 </button>
 </div>
 </div>
@@ -559,9 +563,7 @@
     const btnPreview = document.getElementById('btn-preview');
     const questionnaireView = document.getElementById('questionnaire-view');
     const previewView = document.getElementById('preview-view');
-    const btnSubmit = document.getElementById('btn-submit-icp');
     const btnEditQuestionnaire = document.getElementById('btn-edit-questionnaire');
-    const btnProceedPreview = document.getElementById('btn-proceed-from-preview');
 
     function showQuestionnaire() {
       questionnaireView.classList.remove('hidden');
@@ -590,25 +592,10 @@
       btnPreview.addEventListener('click', showPreview);
     }
 
-    if (btnSubmit) {
-      btnSubmit.addEventListener('click', () => {
-        showPreview();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    }
-
     if (btnEditQuestionnaire) {
       btnEditQuestionnaire.addEventListener('click', () => {
         showQuestionnaire();
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    }
-
-    if (btnProceedPreview) {
-      btnProceedPreview.addEventListener('click', () => {
-        // Direct to next onboarding step (03 Profile / Ready)
-        const readyPath = document.querySelector('a[data-path="profile"]') || { href: '#' };
-        window.location.hash = '#profile';
       });
     }
 

@@ -11,7 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show/Hide password
     if (togglePasswordBtn && passwordInput && pwdIcon) {
-        togglePasswordBtn.addEventListener('click', () => {
+        togglePasswordBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 pwdIcon.textContent = 'visibility_off';
@@ -57,6 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (res.ok && data.success) {
                     window.location.href = '/dashboard';
+                } else if (data && data.error === 'EMAIL_NOT_VERIFIED') {
+                    const emailForVerify = data.email || (identifier.includes('@') ? identifier.trim().toLowerCase() : '');
+                    if (emailForVerify) {
+                        sessionStorage.setItem('fameweb_pending_verification_email', emailForVerify);
+                    }
+                    alert(data.message || 'Please verify your business email to continue.');
+                    window.location.href = data.redirect ? `${data.redirect}?email=${encodeURIComponent(emailForVerify)}` : '/verify-email';
+                    return;
                 } else {
                     throw new Error(data.message || 'Invalid credentials');
                 }

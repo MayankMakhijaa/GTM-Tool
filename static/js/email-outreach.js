@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             .replace(/\{\{reason\}\}/g, lead.reason || '')
             .replace(/\{\{email\}\}/g, lead.email || '')
             .replace(/\{\{result_metric\}\}/g, '30%')
-            .replace(/\{\{sender_name\}\}/g, 'Sarah Jenkins')
+            .replace(/\{\{sender_name\}\}/g, window.currentUserName || 'User')
             .replace(/\{\{sender_role\}\}/g, 'Head of Growth')
             .replace(/\{\{sender_link\}\}/g, 'fameweb.ai');
     }
