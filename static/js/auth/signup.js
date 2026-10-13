@@ -85,80 +85,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const connectLinkedinBtn = document.getElementById('connect-linkedin-btn');
     const linkedinStatusText = document.getElementById('linkedin-status-text');
-    let isLinkedinConnected = false;
 
-    // Check linkedin status function
-    const checkLinkedinStatus = async () => {
-        try {
-            const res = await fetch('/api/auth/linkedin/status');
-            const data = await res.json();
-            if (data.success && data.connected) {
-                isLinkedinConnected = true;
-                linkedinStatusText.textContent = 'Connected ✓';
-                linkedinStatusText.className = 'font-body-sm text-body-sm text-tertiary font-medium';
-                connectLinkedinBtn.textContent = 'Connected';
-                connectLinkedinBtn.disabled = true;
-                connectLinkedinBtn.className = 'px-3 py-1.5 bg-surface-container-low text-outline font-label-md text-label-md font-medium rounded-md cursor-not-allowed border border-outline-variant';
-                
-                // Enable Create Account button
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.className = 'w-full mt-2 py-3 px-space-md bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md font-semibold rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer';
-                    // Re-add the hover translation class to the arrow
-                    const arrow = submitBtn.querySelector('.material-symbols-outlined');
-                    if (arrow) arrow.classList.add('group-hover:translate-x-0.5', 'transition-transform');
-                }
+    const updateSubmitState = () => {
+        const name = nameInput?.value?.trim() || '';
+        const email = emailInput?.value?.trim() || '';
+        const password = passwordInput?.value || '';
+        const isValid = name.length > 0 && email.length > 0 && password.length >= 8;
+
+        if (submitBtn) {
+            submitBtn.disabled = !isValid;
+            if (isValid) {
+                submitBtn.className = 'w-full mt-2 py-3 px-space-md bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md font-semibold rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer';
             } else {
-                isLinkedinConnected = false;
-                linkedinStatusText.textContent = 'Connection failed. Try again.';
-                linkedinStatusText.className = 'font-body-sm text-body-sm text-error font-medium';
-                connectLinkedinBtn.textContent = 'Connect';
-                connectLinkedinBtn.disabled = false;
-                
-                // Disable Create Account button
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.className = 'w-full mt-2 py-3 px-space-md bg-surface-container-high text-outline font-label-md text-label-md font-semibold rounded-lg transition-all flex items-center justify-center gap-2 cursor-not-allowed';
-                }
+                submitBtn.className = 'w-full mt-2 py-3 px-space-md bg-surface-container-high text-outline font-label-md text-label-md font-semibold rounded-lg transition-all flex items-center justify-center gap-2 cursor-not-allowed';
             }
-        } catch (e) {
-            console.error(e);
-            linkedinStatusText.textContent = 'Connection error';
-            linkedinStatusText.className = 'font-body-sm text-body-sm text-error font-medium';
-            connectLinkedinBtn.textContent = 'Connect';
-            connectLinkedinBtn.disabled = false;
         }
     };
 
+    nameInput?.addEventListener('input', updateSubmitState);
+    emailInput?.addEventListener('input', updateSubmitState);
+    passwordInput?.addEventListener('input', updateSubmitState);
+
     if (connectLinkedinBtn) {
-        connectLinkedinBtn.addEventListener('click', async () => {
-            if (isLinkedinConnected) return;
-            
-            linkedinStatusText.textContent = 'Connecting...';
-            linkedinStatusText.className = 'font-body-sm text-body-sm text-on-surface-variant animate-pulse';
-            connectLinkedinBtn.textContent = 'Waiting...';
-            connectLinkedinBtn.disabled = true;
-            
-            try {
-                // Launch the interactive session
-                const res = await fetch('/api/open-linkedin-session', {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': getCsrfToken() }
-                });
-                
-                // Note: /api/open-linkedin-session blocks until the user logs in or closes the browser.
-                const data = await res.json();
-                
-                // After browser closes or returns, check the actual authenticated status via Voyager validation
-                await checkLinkedinStatus();
-                
-            } catch (err) {
-                console.error("Error opening linkedin session", err);
-                linkedinStatusText.textContent = 'Failed to open browser';
-                linkedinStatusText.className = 'font-body-sm text-body-sm text-error font-medium';
-                connectLinkedinBtn.textContent = 'Connect';
-                connectLinkedinBtn.disabled = false;
-            }
+        connectLinkedinBtn.addEventListener('click', () => {
+            alert('Your LinkedIn account will be securely connected during onboarding right after creating your account.');
         });
     }
 
@@ -172,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const phone = code + phoneVal.replace(/[^0-9]/g, '');
             const password = passwordInput?.value || '';
 
-            if (!name || !email || !password || !isLinkedinConnected) return;
+            if (!name || !email || !password || password.length < 8) return;
 
             // Loading state
             let originalBtnText = 'Create Account';
@@ -203,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 if (res.ok && data.success) {
-                    window.location.href = '/company';
+                    window.location.href = '/connect-linkedin';
                 } else {
                     throw new Error(data.message || 'Error signing up');
                 }

@@ -83,7 +83,7 @@ def save_company(user_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         
     # Advance onboarding state if applicable
     user = db_session.query(UserTable).filter_by(user_id=user_id).first()
-    if user and user.onboarding_step == "COMPANY":
+    if user and user.onboarding_step in ("LINKEDIN", "COMPANY"):
         user.onboarding_step = "ICP"
     
     try:

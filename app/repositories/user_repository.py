@@ -1,5 +1,5 @@
 from app.database import db_session
-from app.models.all_models import UserTable
+from app.models.all_models import UserTable, OnboardingStep
 from sqlalchemy.exc import IntegrityError
 from typing import Optional
 
@@ -18,7 +18,7 @@ def create_user(name: str, email: str, phone: str, password_hash: str) -> Option
         email_id=email,
         phone_no=phone,
         password_hash=password_hash,
-        onboarding_step="COMPANY",
+        onboarding_step=OnboardingStep.LINKEDIN.value,
         optimization_status="NOT_OFFERED",
         is_active=True
     )

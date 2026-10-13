@@ -44,15 +44,21 @@ def run_tests():
         "password": password
     })
     
-    print(res.json())
-    # Note: If we don't have a valid linkedin session on the local browser, this will fail with 400.
-    # That is the EXPECTED BEHAVIOR of the security constraints we just implemented!
-    if res.status_code == 400 and res.json().get("error") == "LINKEDIN_NOT_CONNECTED":
-        print("Success! Security correctly blocked unauthenticated signup.")
-    elif res.status_code == 201:
-        print("Success! User signed up (local browser was authenticated).")
+    if res.status_code == 201:
+        user_id = res.json()["user"]["user_id"]
+        print(f"Success! User signed up with user_id={user_id}")
+        
+        # Now create the persistent browser profile for this user_id
+        profile_dir = os.path.join(os.getcwd(), "browser_profiles", str(user_id))
+        os.makedirs(profile_dir, exist_ok=True)
+        print(f"Created browser profile directory at: {profile_dir}")
+        
+        # We simulate a UI calling reconnect which will extract from the directory
+        res2 = session.post(f"{BASE_URL}/api/auth/linkedin/reconnect")
+        print("Reconnect response:", res2.json())
     else:
         print("Unexpected status:", res.status_code)
+        print(res.text)
 
 if __name__ == "__main__":
     run_tests()

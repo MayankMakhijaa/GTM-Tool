@@ -25,7 +25,7 @@ def enforce_onboarding(user, current_endpoint):
         
     # Mapping of state to the correct endpoint
     state_routes = {
-        "LINKEDIN": "pages.company",
+        "LINKEDIN": "pages.connect_linkedin",
         "COMPANY": "pages.company",
         "ICP": "pages.icp",
         "OPTIMIZATION": "pages.profile_optimization"
@@ -55,6 +55,25 @@ def signup():
     if session.get("user_id"):
         return redirect(url_for("pages.dashboard"))
     return render_template("signup.html")
+
+@pages_bp.route("/connect-linkedin")
+@login_required
+def connect_linkedin():
+    user = get_current_user()
+    if redir := enforce_onboarding(user, "pages.connect_linkedin"):
+        return redir
+    from app.integrations.linkedin.voyager_client import validate_user_session
+    from app.models.all_models import UsersLinkedinDetails
+    from app.database import db_session
+
+    linkedin_details = db_session.query(UsersLinkedinDetails).filter_by(user_id=user.user_id).first()
+    val = validate_user_session(user.user_id) if (linkedin_details and linkedin_details.auth_data_encrypted) else {"valid": False, "category": "disconnected"}
+    return render_template("connect_linkedin.html", user=user, linkedin_details=linkedin_details, validation=val)
+
+@pages_bp.route("/onboarding/linkedin")
+@login_required
+def onboarding_linkedin_alias():
+    return redirect(url_for("pages.connect_linkedin"))
 
 @pages_bp.route("/company")
 @login_required

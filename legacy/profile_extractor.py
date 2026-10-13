@@ -4,8 +4,7 @@ import time
 from typing import Dict, Any, List, Optional, cast
 from playwright.sync_api import sync_playwright, Page
 
-BROWSER_PROFILE_DIR = os.path.join(os.getcwd(), "browser_profile")
-
+from app.integrations.linkedin.voyager_client import get_browser_profile_dir
 NAV_BLACKLIST = {
     "home", "my network", "jobs", "messaging", "notifications", "me", "for business",
     "work", "try premium", "search", "accessibility", "talent solutions",
@@ -97,175 +96,102 @@ def _find_section_by_keywords(page: Page, keywords: List[str]):
     return None
 
 
-def check_linkedin_session() -> Dict[str, Any]:
+def check_linkedin_session(user_id: Optional[int] = None) -> Dict[str, Any]:
     """
-    Checks if the persistent Playwright browser profile is logged into LinkedIn.
-    Returns status: 'Connected' (True) or 'Not Connected' (False), along with
-    the authenticated profile's name and photo URL if available.
+    Checks if the user has an authenticated LinkedIn session using the canonical DB record.
+    Never launches Chromium for ordinary status checks.
     """
-    os.makedirs(BROWSER_PROFILE_DIR, exist_ok=True)
-    with sync_playwright() as p:
-        context = None
-        try:
-            context = p.chromium.launch_persistent_context(
-                user_data_dir=BROWSER_PROFILE_DIR,
-                headless=True,
-                viewport={"width": 1280, "height": 800},
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-                args=["--disable-blink-features=AutomationControlled"]
-            )
-            page = context.pages[0] if context.pages else context.new_page()
-            page.goto("https://www.linkedin.com/feed/", timeout=15000, wait_until="domcontentloaded")
-            page.wait_for_timeout(2000)
+    if not user_id:
+        return {
+            "authenticated": False,
+            "status": "Not Connected",
+            "linkedin_id": None,
+            "name": None,
+            "profile_photo_url": None,
+            "profile_url": None
+        }
 
-            final_url = page.url.lower()
-            page_title = page.title().lower()
+    from app.integrations.linkedin.voyager_client import validate_user_session
+    from app.database import db_session
+    from app.models.all_models import UsersLinkedinDetails
 
-            is_unauth = (
-                any(k in final_url for k in ["authwall", "login", "signup", "uas/login"]) or 
-                any(k in page_title for k in ["sign up", "log in", "sign in", "authwall"])
-            )
-
-            authenticated = not is_unauth
-            res_url = page.url
-            res_title = page.title()
-
-            user_name = None
-            user_photo = None
-            user_profile_url = None
-
-            linkedin_id = None
-            if authenticated:
-                try:
-                    content = page.content()
-                    member_match = re.search(r'urn:li:(?:member|fsd_profile|profile):([A-Za-z0-9_\-]+)', content)
-                    if member_match:
-                        linkedin_id = member_match.group(0)
-                    else:
-                        data_id_match = re.search(r'data-member-id=["\']([A-Za-z0-9_\-]+)["\']', content)
-                        if data_id_match:
-                            linkedin_id = f"urn:li:member:{data_id_match.group(1)}"
-                        else:
-                            json_id_match = re.search(r'"memberId"\s*:\s*["\']?([A-Za-z0-9_\-]+)["\']?', content)
-                            if json_id_match:
-                                linkedin_id = f"urn:li:member:{json_id_match.group(1)}"
-                except Exception:
-                    linkedin_id = None
-
-                if not linkedin_id:
-                    print("[Auth] Stable LinkedIn member identity extraction was unavailable in page DOM/script data.")
-
-                # Extract authenticated profile URL from feed links
-                links = page.query_selector_all("a[href*='/in/']")
-                for a in links:
-                    href = (a.get_attribute("href") or "").strip()
-                    if "/in/" in href and not any(k in href for k in ["/edit/", "/details/", "/overlay/"]):
-                        if href.startswith("/"):
-                            href = "https://www.linkedin.com" + href
-                        if not href.endswith("/in/me/"):
-                            user_profile_url = href.split("?")[0]
-                            break
-
-                # 1. Try extracting name & photo from feed DOM
-                imgs = page.query_selector_all("img")
-                for img in imgs:
-                    alt = (img.get_attribute("alt") or "").strip()
-                    src = (img.get_attribute("src") or "").strip()
-
-                    if alt and src.startswith("http"):
-                        alt_lower = alt.lower()
-                        if alt_lower.startswith("photo of "):
-                            user_name = alt[9:].strip()
-                            user_photo = src
-                            break
-                        elif not any(alt_lower.startswith(prefix) for prefix in ["view ", "linkedin", "image", "logo", "icon", "company", "ad"]):
-                            if len(alt) <= 60 and " " in alt and not any(c in alt for c in ["\n", "\r", "\t", "•"]):
-                                user_name = alt
-                                user_photo = src
-                                break
-
-                # 2. If name or profile_url is still missing, navigate to /in/me/
-                if not user_name or not user_profile_url or not linkedin_id:
-                    try:
-                        page.goto("https://www.linkedin.com/in/me/", timeout=12000, wait_until="domcontentloaded")
-                        page.wait_for_timeout(1500)
-                        if not user_profile_url and "/in/" in page.url:
-                            user_profile_url = page.url.split("?")[0]
-
-                        p_title = page.title()
-                        if p_title and " | " in p_title and not any(k in p_title.lower() for k in ["login", "sign in", "authwall", "linkedin"]):
-                            user_name = p_title.split(" | ")[0].strip()
-                        if not user_photo:
-                            p_img = page.query_selector("img.pv-top-card-profile-picture__image, img.pv-top-card__photo, img[alt*='profile picture']")
-                            if p_img:
-                                user_photo = p_img.get_attribute("src")
-
-                        if not linkedin_id:
-                            p_content = page.content()
-                            p_match = re.search(r'urn:li:(?:member|fsd_profile|profile):([A-Za-z0-9_\-]+)', p_content)
-                            if p_match:
-                                linkedin_id = p_match.group(0)
-                            else:
-                                p_data_id = re.search(r'data-member-id=["\']([A-Za-z0-9_\-]+)["\']', p_content)
-                                if p_data_id:
-                                    linkedin_id = f"urn:li:member:{p_data_id.group(1)}"
-                                else:
-                                    p_json_id = re.search(r'"memberId"\s*:\s*["\']?([A-Za-z0-9_\-]+)["\']?', p_content)
-                                    if p_json_id:
-                                        linkedin_id = f"urn:li:member:{p_json_id.group(1)}"
-                    except Exception:
-                        pass
-
-            context.close()
-            return {
-                "authenticated": authenticated,
-                "status": "Connected" if authenticated else "Not Connected",
-                "linkedin_id": linkedin_id,
-                "name": user_name,
-                "profile_photo_url": user_photo,
-                "profile_url": user_profile_url,
-                "url": res_url,
-                "title": res_title
-            }
-        except Exception as e:
-            if context:
-                context.close()
+    try:
+        details = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+        if not details or not details.auth_data_encrypted:
             return {
                 "authenticated": False,
                 "status": "Not Connected",
+                "linkedin_id": None,
                 "name": None,
                 "profile_photo_url": None,
-                "error": str(e)
+                "profile_url": None
             }
 
+        validation = validate_user_session(user_id)
+        is_auth = validation.get("valid", False)
+        photo_url = details.profile_data.get("profile_photo_url") if details.profile_data else None
 
-def logout_linkedin_session() -> Dict[str, Any]:
+        return {
+            "authenticated": is_auth,
+            "status": "Connected" if is_auth else "Not Connected",
+            "category": validation.get("category", "unknown"),
+            "linkedin_id": details.linkedin_id,
+            "name": details.name,
+            "profile_photo_url": photo_url,
+            "profile_url": details.profile_url
+        }
+    except Exception as e:
+        return {
+            "authenticated": False,
+            "status": "Not Connected",
+            "error": str(e)
+        }
+
+
+def logout_linkedin_session(user_id: Optional[int] = None) -> Dict[str, Any]:
     """
-    Invalidates / clears the persistent Playwright browser profile.
+    Clears the persistent browser profile directory and marks connection status DISCONNECTED.
+    Preserves encrypted credentials non-destructively unless explicitly deleted.
     """
+    if not user_id:
+        return {"success": False, "error": "No user ID provided."}
+
     import shutil
     try:
-        if os.path.exists(BROWSER_PROFILE_DIR):
-            shutil.rmtree(BROWSER_PROFILE_DIR, ignore_errors=True)
+        profile_dir = get_browser_profile_dir(user_id)
+        if os.path.exists(profile_dir):
+            shutil.rmtree(profile_dir, ignore_errors=True)
+
+        from app.database import db_session
+        from app.models.all_models import UsersLinkedinDetails
+        record = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+        if record:
+            record.connection_status = "DISCONNECTED"
+            db_session.commit()
+
         return {"success": True, "message": "Session logged out successfully."}
     except Exception as e:
         return {"success": False, "error": str(e)}
 
 
-def launch_interactive_linkedin_login() -> Dict[str, Any]:
+def launch_interactive_linkedin_login(user_id: int) -> Dict[str, Any]:
     """
     Launches Playwright Chromium with persistent context in non-headless mode (headless=False)
     navigating to LinkedIn login, allowing the user to interactively log into LinkedIn.
-    Saves session data permanently in browser_profile/ directory.
+    Saves session data permanently in browser_profiles/{user_id}/ directory and encrypts
+    cookies into UsersLinkedinDetails in PostgreSQL.
     """
-    os.makedirs(BROWSER_PROFILE_DIR, exist_ok=True)
+    if not user_id:
+        return {"success": False, "message": "Authenticated user_id is required.", "error": "NO_USER_ID"}
+
+    profile_dir = get_browser_profile_dir(user_id)
+    os.makedirs(profile_dir, exist_ok=True)
     with sync_playwright() as p:
         context = None
         try:
-            print("[LinkedIn Connect] Starting browser")
-            print("[LinkedIn Connect] Context created")
+            print(f"[LinkedIn Connect] Starting browser for user {user_id}")
             context = p.chromium.launch_persistent_context(
-                user_data_dir=BROWSER_PROFILE_DIR,
+                user_data_dir=profile_dir,
                 headless=False,
                 viewport={"width": 1280, "height": 800},
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -273,52 +199,40 @@ def launch_interactive_linkedin_login() -> Dict[str, Any]:
             )
             page = context.pages[0] if context.pages else context.new_page()
             page.goto("https://www.linkedin.com/feed/", timeout=45000, wait_until="domcontentloaded")
-            print("[LinkedIn Connect] Checking authentication state...")
+            print(f"[LinkedIn Connect] Checking authentication state for user {user_id}...")
             page.wait_for_timeout(2000)
-            
+
             # Check if already authenticated on feed
             current_url = page.url.lower()
             page_title = page.title().lower()
-            
+
             is_unauth = (
                 any(k in current_url for k in ["authwall", "login", "signup", "uas/login"]) or 
                 any(k in page_title for k in ["sign up", "log in", "sign in", "authwall"])
             )
-            
+
             if is_unauth:
-                print(f"[LinkedIn Connect] Redirect detected: {current_url}")
-                print("[LinkedIn Connect] Authenticated: false")
-            elif "feed" in current_url or "in/" in current_url:
-                print(f"[LinkedIn Connect] Persistent session is already logged into LinkedIn! URL matched: {current_url}")
-                print("[LinkedIn Connect] Authenticated: true")
-                print("[LinkedIn Connect] Browser cleanup (already authenticated)")
-                context.close()
-                time.sleep(0.5)
-                return {"success": True, "message": "Already authenticated."}
+                print(f"[LinkedIn Connect] Redirect detected: {current_url}. Navigating to login...")
+                page.goto("https://www.linkedin.com/login", timeout=45000)
+                print("[LinkedIn Connect] Waiting for user authentication (up to 5 minutes for 2FA / verification)...")
+                for _ in range(300):
+                    if page.is_closed():
+                        break
+                    url = page.url.lower()
+                    title = page.title().lower()
 
-            # If not logged in, redirect to login page for manual authentication
-            print(f"[LinkedIn Connect] Navigating to login page from {current_url}...")
-            page.goto("https://www.linkedin.com/login", timeout=45000)
-            print("[LinkedIn Connect] Waiting for user authentication")
-            for _ in range(120):
-                if page.is_closed():
-                    break
-                url = page.url.lower()
-                title = page.title().lower()
-                
-                is_unauth = (
-                    any(k in url for k in ["authwall", "login", "signup", "uas/login"]) or 
-                    any(k in title for k in ["sign up", "log in", "sign in", "authwall"])
-                )
-                
-                if not is_unauth and ("feed" in url or "in/" in url):
-                    print("[LinkedIn Connect] Authentication detected")
+                    is_unauth = (
+                        any(k in url for k in ["authwall", "login", "signup", "uas/login"]) or 
+                        any(k in title for k in ["sign up", "log in", "sign in", "authwall"])
+                    )
+
+                    if not is_unauth and ("feed" in url or "in/" in url):
+                        print("[LinkedIn Connect] Authentication detected on feed/profile.")
+                        page.wait_for_timeout(1000)
+                        break
                     page.wait_for_timeout(1000)
-                    break
-                page.wait_for_timeout(1000)
 
-            print(f"[LinkedIn Connect] Loop finished. is_closed={page.is_closed()}")
-            
+            # Check final auth state
             final_auth = False
             if not page.is_closed():
                 final_url = page.url.lower()
@@ -328,23 +242,47 @@ def launch_interactive_linkedin_login() -> Dict[str, Any]:
                     any(k in final_title for k in ["sign up", "log in", "sign in", "authwall"])
                 )
                 final_auth = not final_is_unauth and ("feed" in final_url or "in/" in final_url)
-                print(f"[LinkedIn Connect] Final state - Authenticated: {final_auth} (URL: {final_url})")
 
-            print("[LinkedIn Connect] Browser cleanup")
+            capture_success = False
+            error_msg = None
+            if final_auth and context:
+                cookies = context.cookies()
+                li_at = None
+                jsessionid = None
+                for c in cookies:
+                    if c.get("name") == "li_at" and c.get("value"):
+                        li_at = c["value"].strip()
+                    elif c.get("name") == "JSESSIONID" and c.get("value"):
+                        c_val = c["value"].strip().strip('"')
+                        if c_val and not c_val.startswith("ajax:0000000000000000000"):
+                            jsessionid = c_val
+
+                if li_at and jsessionid:
+                    import json
+                    session_cookie = json.dumps({"li_at": li_at, "JSESSIONID": jsessionid})
+                    from app.services.onboarding_service import save_linkedin_connection
+                    save_linkedin_connection(user_id, session_cookie)
+                    capture_success = True
+                    print(f"[LinkedIn Connect] Successfully extracted, encrypted, and saved cookies for user {user_id}")
+                else:
+                    error_msg = "Required cookies (li_at / JSESSIONID) could not be extracted from browser."
+                    print(f"[LinkedIn Connect] {error_msg}")
+
             context.close()
             time.sleep(0.5)
-            
-            if final_auth:
+
+            if capture_success:
                 return {
                     "success": True,
-                    "message": "LinkedIn session updated."
+                    "message": "LinkedIn session connected and saved successfully."
                 }
             else:
                 return {
                     "success": False,
-                    "message": "LinkedIn session was not authenticated.",
+                    "message": error_msg or "LinkedIn session was not authenticated.",
                     "error": "NOT_AUTHENTICATED"
                 }
+
         except Exception as e:
             print(f"[LinkedIn Connect] Exception occurred: {type(e).__name__} - {str(e)}")
             import traceback
@@ -358,6 +296,7 @@ def launch_interactive_linkedin_login() -> Dict[str, Any]:
                 time.sleep(0.5)
             return {
                 "success": False,
+                "message": f"Error during LinkedIn login: {str(e)}",
                 "error": str(e)
             }
 

@@ -53,7 +53,7 @@ def main():
         db_session.rollback()
         print(f"Error truncating tables: {e}")
 
-    profile_dir = os.path.join(os.getcwd(), 'browser_profile')
+    profile_dir = os.path.join(os.getcwd(), 'browser_profiles')
     output_dir = os.path.join(os.getcwd(), 'output')
     
     clear_directory(profile_dir)
@@ -64,7 +64,7 @@ def main():
         count = get_row_count(table)
         print(f"{table}: {count} rows")
         
-    print(f"browser_profile/ is empty: {len(os.listdir(profile_dir)) == 0}")
+    print(f"browser_profiles/ is empty: {len(os.listdir(profile_dir)) == 0}")
     print(f"output/ is empty: {len(os.listdir(output_dir)) == 0}")
 
 if __name__ == "__main__":

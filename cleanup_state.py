@@ -48,11 +48,11 @@ def cleanup():
 
     # 3. Clear Filesystem
     print("\nClearing filesystem storage...")
-    browser_profile_path = os.path.join(os.getcwd(), 'browser_profile')
+    browser_profile_path = os.path.join(os.getcwd(), 'browser_profiles')
     output_path = os.path.join(os.getcwd(), 'output')
     
     bp_cleared = clear_directory(browser_profile_path)
-    print(f"browser_profile directory cleared and recreated. Empty: {bp_cleared}")
+    print(f"browser_profiles directory cleared and recreated. Empty: {bp_cleared}")
     
     out_cleared = clear_directory(output_path)
     print(f"output directory cleared and recreated. Empty: {out_cleared}")

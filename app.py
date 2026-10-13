@@ -92,7 +92,19 @@ def api_linkedin_session_status():
             }
         })
 
-    status_data = check_linkedin_session()
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({
+            "success": True,
+            "data": {
+                "authenticated": False,
+                "user": None,
+                "gtm_context": None,
+                "onboarding_completed": False
+            }
+        })
+
+    status_data = check_linkedin_session(user_id)
     is_auth = status_data.get("authenticated", False)
     linkedin_id = status_data.get("linkedin_id")
 
@@ -117,10 +129,6 @@ def api_linkedin_session_status():
             gtm_ctx = get_user_gtm_context(user_id)
             if gtm_ctx and gtm_ctx.get("onboarding_completed") == 1:
                 onboarding_completed = True
-
-    else:
-        session.pop("user_id", None)
-        session.pop("linkedin_id", None)
 
     status_data["user"] = user_info
     status_data["gtm_context"] = gtm_ctx
@@ -168,17 +176,26 @@ def api_save_gtm_context():
 @app.route("/api/open-linkedin-session", methods=["POST"])
 def api_open_linkedin_session():
     session.pop("app_logged_out", None)
-    status = check_linkedin_session()
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({
+            "success": False,
+            "error": "UNAUTHORIZED",
+            "message": "Please log in to your account before connecting LinkedIn."
+        }), 401
+
+    status = check_linkedin_session(user_id)
     if status.get("authenticated"):
         return jsonify({"success": True, "already_authenticated": True, "message": "LinkedIn session already active."})
 
-    result = launch_interactive_linkedin_login()
+    result = launch_interactive_linkedin_login(user_id)
     session.pop("app_logged_out", None)
     return jsonify(result)
 
 @app.route("/api/logout-linkedin-session", methods=["POST"])
 def api_logout_linkedin_session():
-    result = logout_linkedin_session()
+    user_id = session.get("user_id")
+    result = logout_linkedin_session(user_id)
     session.clear()
     return jsonify(result)
 
