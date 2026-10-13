@@ -1,3 +1,4 @@
+import socket
 import pytest
 from unittest.mock import patch, MagicMock
 from app_module import app as flask_app
@@ -79,12 +80,70 @@ def test_ssrf_ip_guard_public_ips():
     assert is_safe_ip("93.184.216.34") is True
 
 
+def test_ssrf_ip_guard_nat64_public():
+    # RFC 6052 well-known prefix with public embedded IPv4 addresses
+    assert is_safe_ip("64:ff9b::b9e6:3f6b") is True  # Embedded 185.230.63.107 (Wix)
+    assert is_safe_ip("64:ff9b::1f2b:a006") is True  # Embedded 31.43.160.6 (Hostinger)
+
+
+def test_ssrf_ip_guard_nat64_prohibited():
+    # RFC 6052 well-known prefix with unsafe embedded IPv4 destinations
+    assert is_safe_ip("64:ff9b::7f00:0001") is False  # Loopback 127.0.0.1
+    assert is_safe_ip("64:ff9b::a9fe:a9fe") is False  # Cloud metadata 169.254.169.254
+    assert is_safe_ip("64:ff9b::0a00:0001") is False  # RFC 1918 Private 10.0.0.1
+    assert is_safe_ip("64:ff9b::c0a8:0101") is False  # RFC 1918 Private 192.168.1.1
+    assert is_safe_ip("64:ff9b::") is False           # Unspecified 0.0.0.0
+    # Unsupported translation prefixes (RFC 8215 local-use /48) must remain blocked
+    assert is_safe_ip("64:ff9b:1::b9e6:3f6b") is False
+
+
+def test_ssrf_ip_guard_native_ipv6():
+    # Public native IPv6 destinations
+    assert is_safe_ip("2606:4700:4700::1111") is True  # Cloudflare
+    assert is_safe_ip("2001:4860:4860::8888") is True  # Google
+    # Prohibited native IPv6 destinations
+    assert is_safe_ip("::1") is False                  # Loopback
+    assert is_safe_ip("::") is False                   # Unspecified
+    assert is_safe_ip("fe80::1") is False              # Link-local
+    assert is_safe_ip("fc00::1") is False              # Unique local (ULA / private)
+
+
+def test_ssrf_ip_guard_ipv4_mapped():
+    # IPv4-mapped IPv6 (::ffff:0:0/96)
+    assert is_safe_ip("::ffff:93.184.216.34") is True
+    assert is_safe_ip("::ffff:127.0.0.1") is False
+    assert is_safe_ip("::ffff:169.254.169.254") is False
+    assert is_safe_ip("::ffff:10.0.0.1") is False
+
+
 @patch("socket.getaddrinfo")
 def test_resolve_and_validate_hostname_ssrf(mock_getaddrinfo):
     mock_getaddrinfo.return_value = [
         (2, 1, 6, '', ('127.0.0.1', 80))
     ]
     safe, ip = resolve_and_validate_hostname("localhost")
+    assert safe is False
+    assert ip == "127.0.0.1"
+
+
+@patch("socket.getaddrinfo")
+def test_resolve_and_validate_hostname_nat64_public(mock_getaddrinfo):
+    mock_getaddrinfo.return_value = [
+        (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('64:ff9b::b9e6:3f6b', 443, 0, 0))
+    ]
+    safe, ip = resolve_and_validate_hostname("amceducation.in")
+    assert safe is True
+    assert ip == "64:ff9b::b9e6:3f6b"
+
+
+@patch("socket.getaddrinfo")
+def test_resolve_and_validate_hostname_mixed_dns_rejects(mock_getaddrinfo):
+    # Hostname resolves to both a permitted NAT64 IP and a prohibited loopback IP
+    mock_getaddrinfo.return_value = [
+        (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('64:ff9b::b9e6:3f6b', 443, 0, 0)),
+        (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', 443))
+    ]
+    safe, ip = resolve_and_validate_hostname("mixed-domain.example")
     assert safe is False
     assert ip == "127.0.0.1"
 

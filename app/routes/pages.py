@@ -33,8 +33,7 @@ def enforce_onboarding(user, current_endpoint):
     state_routes = {
         "LINKEDIN": "pages.connect_linkedin",
         "COMPANY": "pages.company",
-        "ICP": "pages.icp",
-        "OPTIMIZATION": "pages.profile_optimization"
+        "ICP": "pages.icp"
     }
     
     target = state_routes.get(step, "pages.dashboard")

@@ -122,7 +122,7 @@ def verify_otp():
     return jsonify({
         "success": True,
         "message": message,
-        "redirect": "/company",
+        "redirect": "/connect-linkedin",
         "user": {
             "user_id": user.user_id,
             "name": user.name,

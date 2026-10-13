@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showBanner('Email verified! Redirecting to setup...', 'success');
                     sessionStorage.removeItem('fameweb_pending_verification_email');
                     setTimeout(() => {
-                        window.location.href = data.redirect || '/company';
+                        window.location.href = data.redirect || '/connect-linkedin';
                     }, 800);
                 } else {
                     showBanner(data.message || 'Invalid or expired verification code.', 'error');

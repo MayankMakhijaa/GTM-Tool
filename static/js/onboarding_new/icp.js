@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 if (options.finalize) {
-                    window.location.href = '/profile-optimization';
+                    window.location.href = '/dashboard';
                     return;
                 }
                 

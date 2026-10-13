@@ -27,7 +27,7 @@ def validate_company_data(data: Dict[str, Any], is_draft: bool = False) -> Dict[
     is_draft_flag = is_draft or bool(data.get('is_draft', False))
     if not is_draft_flag and not url:
         raise ValueError("website_url is required")
-    
+
     ps_raw = data.get("products_services")
     if isinstance(ps_raw, list):
         products_services_val = ", ".join(str(item).strip() for item in ps_raw if item)
@@ -73,35 +73,35 @@ def get_company(user_id: int) -> Optional[Dict[str, Any]]:
 def save_company(user_id: int, data: Dict[str, Any], is_draft: bool = False) -> Dict[str, Any]:
     is_draft_flag = is_draft or bool(data.get("is_draft", False))
     valid_data = validate_company_data(data, is_draft=is_draft_flag)
-    
+
     company = db_session.query(UsersCompanyDetails).filter_by(user_id=user_id).first()
     is_new = False
     if not company:
         company = UsersCompanyDetails(user_id=user_id, scrape_status="MANUAL")
         db_session.add(company)
         is_new = True
-    
+
     # Track edited fields if updating
     edited = set(company.edited_fields or [])
     for key, value in valid_data.items():
         if not is_new and getattr(company, key) != value:
             edited.add(key)
         setattr(company, key, value)
-    
+
     if not is_new:
         company.edited_fields = list(edited)
-        
+
     # Advance onboarding state if not draft and required fields are set
     user = db_session.query(UserTable).filter_by(user_id=user_id).first()
     if user and user.onboarding_step in ["LINKEDIN", "COMPANY"] and not is_draft_flag and valid_data.get("website_url"):
         user.onboarding_step = "ICP"
-    
+
     try:
         db_session.commit()
     except Exception as e:
         db_session.rollback()
         raise e
-        
+
     return get_company(user_id)
 
 
@@ -111,7 +111,7 @@ def validate_icp_data(data: Dict[str, Any]) -> Dict[str, Any]:
         tone = Tone(tone_str).value
     except ValueError:
         tone = Tone.FORMAL.value
-        
+
     return {
         "target_customer": data.get("target_customer", "").strip(),
         "company_size": data.get("company_size", "").strip(),
@@ -146,49 +146,84 @@ def get_icp(user_id: int) -> Optional[Dict[str, Any]]:
 
 def save_icp(user_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
     valid_data = validate_icp_data(data)
-    
+
     icp = db_session.query(UsersICP).filter_by(user_id=user_id).first()
     is_new = False
     if not icp:
         icp = UsersICP(user_id=user_id, version=1)
         db_session.add(icp)
         is_new = True
-    
+
     qualification_fields = [
-        'target_customer', 'company_size', 'revenue_range', 
-        'target_jobs_roles', 'industry', 'location', 
+        'target_customer', 'company_size', 'revenue_range',
+        'target_jobs_roles', 'industry', 'location',
         'keywords', 'exclusions', 'signals'
     ]
-    
+
     requires_version_bump = False
-    
+
     for key, value in valid_data.items():
         if not is_new and key in qualification_fields:
             if getattr(icp, key) != value:
                 requires_version_bump = True
         setattr(icp, key, value)
-        
+
     if requires_version_bump:
         icp.version += 1
-        
-    # Advance onboarding state if applicable
+
+    # Advance onboarding state to DONE upon ICP setup completion
     user = db_session.query(UserTable).filter_by(user_id=user_id).first()
-    if user and user.onboarding_step == "ICP":
-        user.onboarding_step = "OPTIMIZATION"
-        
+    if user and user.onboarding_step in ("LINKEDIN", "COMPANY", "ICP"):
+        user.onboarding_step = "DONE"
+
     try:
         db_session.commit()
     except Exception as e:
         db_session.rollback()
         raise e
-        
+
     return get_icp(user_id)
+
+from app.integrations.linkedin.voyager_client import encrypt_credential, decrypt_credential
+
+def get_linkedin_connection_status(user_id: int) -> Dict[str, Any]:
+    linkedin = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+    return {
+        "connected": linkedin is not None and linkedin.connection_status == ConnectionStatus.CONNECTED.value,
+        "status": linkedin.connection_status if linkedin else ConnectionStatus.DISCONNECTED.value
+    }
+
+def save_linkedin_connection(user_id: int, session_cookie: str) -> Dict[str, Any]:
+    if not session_cookie:
+        raise ValueError("Session credential is required")
+
+    linkedin = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+    if not linkedin:
+        linkedin = UsersLinkedinDetails(user_id=user_id)
+        db_session.add(linkedin)
+
+    linkedin.auth_data_encrypted = encrypt_credential(session_cookie)
+    linkedin.connection_status = ConnectionStatus.CONNECTED.value
+    linkedin.consent_at = datetime.utcnow()
+
+    # Advance onboarding state to COMPANY if at LINKEDIN
+    user = db_session.query(UserTable).filter_by(user_id=user_id).first()
+    if user and user.onboarding_step == "LINKEDIN":
+        user.onboarding_step = "COMPANY"
+
+    try:
+        db_session.commit()
+    except Exception as e:
+        db_session.rollback()
+        raise e
+
+    return get_linkedin_connection_status(user_id)
 
 def get_onboarding_status(user_id: int) -> Dict[str, Any]:
     user = db_session.query(UserTable).filter_by(user_id=user_id).first()
     company = db_session.query(UsersCompanyDetails).filter_by(user_id=user_id).first()
     icp = db_session.query(UsersICP).filter_by(user_id=user_id).first()
-    
+
     return {
         "success": True,
         "onboarding_step": user.onboarding_step if user else "LINKEDIN",
@@ -200,7 +235,7 @@ def get_onboarding_status(user_id: int) -> Dict[str, Any]:
 def get_optimization_settings(user_id: int) -> Dict[str, Any]:
     user = db_session.query(UserTable).filter_by(user_id=user_id).first()
     icp = db_session.query(UsersICP).filter_by(user_id=user_id).first()
-    
+
     summary = (icp.summary_report or {}) if icp and icp.summary_report else {}
     applied_suggestions = summary.get("applied_suggestions", [])
     settings = summary.get("settings", {
@@ -208,7 +243,7 @@ def get_optimization_settings(user_id: int) -> Dict[str, Any]:
         "skill_ordering": ["Pipeline Velocity", "RevOps Architecture", "Outbound Intelligence"],
         "auto_save": True
     })
-    
+
     return {
         "success": True,
         "optimization_status": user.optimization_status if user else "NOT_OFFERED",
@@ -225,16 +260,16 @@ def save_optimization_settings(user_id: int, data: Dict[str, Any]) -> Dict[str, 
         db_session.add(icp)
 
     summary = dict(icp.summary_report or {}) if icp.summary_report else {}
-    
+
     if "optimization_status" in data:
         status_val = str(data["optimization_status"]).upper()
         if user:
             user.optimization_status = status_val
-            
+
     if data.get("mark_completed") or data.get("optimization_status") in ["COMPLETED", "ACCEPTED"]:
         if user:
             user.onboarding_step = "DONE"
-            
+
     if "applied_suggestion" in data:
         applied = list(summary.get("applied_suggestions", []))
         item = data["applied_suggestion"]
@@ -246,9 +281,9 @@ def save_optimization_settings(user_id: int, data: Dict[str, Any]) -> Dict[str, 
         curr_settings = dict(summary.get("settings", {}))
         curr_settings.update(data["settings"])
         summary["settings"] = curr_settings
-        
+
     icp.summary_report = summary
-    
+
     try:
         db_session.commit()
     except Exception as e:

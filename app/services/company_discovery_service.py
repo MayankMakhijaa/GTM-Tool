@@ -57,22 +57,90 @@ def extract_and_normalize_domain(email: str) -> Tuple[Optional[str], bool, Optio
     return domain, False, None
 
 
+# RFC 6052 Well-Known Prefix for IPv4/IPv6 Translation (NAT64 / DNS64)
+NAT64_WELL_KNOWN_PREFIX = ipaddress.IPv6Network("64:ff9b::/96")
+
+
+def _is_safe_ipv4_destination(ip: ipaddress.IPv4Address) -> bool:
+    """
+    Centralized strict security policy for IPv4 destinations (native, NAT64-embedded, or IPv4-mapped).
+    Rejects private (RFC 1918), loopback (127.0.0.0/8), link-local (169.254.0.0/16),
+    multicast (224.0.0.0/4), reserved, unspecified (0.0.0.0), cloud metadata (169.254.169.254),
+    and non-globally routable destinations.
+    """
+    if (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_multicast
+        or ip.is_reserved
+        or ip.is_unspecified
+    ):
+        return False
+
+    str_val = str(ip)
+    if str_val in ("169.254.169.254", "0.0.0.0"):
+        return False
+
+    if not ip.is_global:
+        return False
+
+    return True
+
+
 def is_safe_ip(ip_str: str) -> bool:
     """
-    Checks if an IP address is safe to connect to (not private, loopback, link-local, or metadata endpoint).
+    Checks if an IP address is safe to connect to (not private, loopback, link-local,
+    metadata endpoint, or prohibited destination).
+
+    Supports:
+    - Native IPv4: evaluated against strict IPv4 safety policy.
+    - RFC 6052 Well-Known NAT64 Prefix (64:ff9b::/96): extracts the embedded IPv4
+      destination and validates it against the strict IPv4 safety policy.
+    - IPv4-mapped IPv6 (::ffff:0:0/96): extracts mapped IPv4 and validates it against
+      the strict IPv4 safety policy.
+    - Native IPv6: evaluated against strict IPv6 safety policy, requiring globally reachable.
+    - Other/unsupported translation prefixes (e.g. 64:ff9b:1::/48): remain blocked.
     """
     try:
         ip = ipaddress.ip_address(ip_str)
 
-        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_reserved or ip.is_unspecified:
-            return False
+        # 1. Native IPv4 address
+        if isinstance(ip, ipaddress.IPv4Address):
+            return _is_safe_ipv4_destination(ip)
 
-        # Additional explicit checks for Cloud Metadata (169.254.169.254) and 0.0.0.0
-        str_val = str(ip)
-        if str_val in ("169.254.169.254", "0.0.0.0"):
-            return False
+        # 2. IPv6 address handling
+        if isinstance(ip, ipaddress.IPv6Address):
+            # 2a. IPv4-mapped IPv6 (::ffff:x.x.x.x)
+            if ip.ipv4_mapped is not None:
+                return _is_safe_ipv4_destination(ip.ipv4_mapped)
 
-        return True
+            # 2b. RFC 6052 Well-Known NAT64 Prefix (64:ff9b::/96)
+            if ip in NAT64_WELL_KNOWN_PREFIX:
+                # Extract embedded 32-bit IPv4 address from trailing 4 bytes (RFC 6052 /96 layout)
+                embedded_v4 = ipaddress.IPv4Address(ip.packed[12:16])
+                return _is_safe_ipv4_destination(embedded_v4)
+
+            # 2c. Native IPv6 address - standard strict policy
+            if (
+                ip.is_private
+                or ip.is_loopback
+                or ip.is_link_local
+                or ip.is_multicast
+                or ip.is_reserved
+                or ip.is_unspecified
+            ):
+                return False
+
+            if not ip.is_global:
+                return False
+
+            if str(ip) in ("::", "::1"):
+                return False
+
+            return True
+
+        return False
     except ValueError:
         return False
 
@@ -92,7 +160,7 @@ def resolve_and_validate_hostname(hostname: str) -> Tuple[bool, Optional[str]]:
 
         primary_ip = None
         for item in addr_info:
-            ip_str = item[4][0]
+            ip_str = str(item[4][0])
             if not is_safe_ip(ip_str):
                 logger.warning(f"SSRF block: Hostname {hostname} resolved to unsafe IP {ip_str}")
                 return False, ip_str
