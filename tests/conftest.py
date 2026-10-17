@@ -43,6 +43,9 @@ os.environ["FLASK_TESTING"] = "1"
 os.environ["SMTP_HOST"] = ""
 os.environ["GOOGLE_MAPS_API_KEY"] = ""
 os.environ["GOOGLE_PLACES_API_KEY"] = ""
+if not os.environ.get("LINKEDIN_SESSION_ENCRYPTION_KEY"):
+    from cryptography.fernet import Fernet
+    os.environ["LINKEDIN_SESSION_ENCRYPTION_KEY"] = Fernet.generate_key().decode()
 
 # Load root app.py as sys.modules["app_module"] if not present
 if "app_module" not in sys.modules:
@@ -55,7 +58,7 @@ if "app_module" not in sys.modules:
 from app_module import app as flask_app
 import app.database as app_db
 from app.database import Base, engine, db_session
-from app.models.all_models import UserTable, UsersCompanyDetails, UsersICP, EmailVerificationOTP
+from app.models.all_models import UserTable, UsersCompanyDetails, UsersICP, EmailVerificationOTP, UsersLinkedinDetails
 from app.security.session import login_required
 
 if '/api/protected_test' not in [rule.rule for rule in flask_app.url_map.iter_rules()]:
@@ -79,12 +82,20 @@ def print_effective_test_db():
 def clean_db():
     assert_safe_test_db(str(engine.url))
     # Clean up test database before test
+    db_session.rollback()
     db_session.query(EmailVerificationOTP).delete(synchronize_session=False)
+    db_session.query(UsersLinkedinDetails).delete(synchronize_session=False)
     db_session.query(UsersICP).delete(synchronize_session=False)
     db_session.query(UsersCompanyDetails).delete(synchronize_session=False)
     db_session.query(UserTable).delete(synchronize_session=False)
     db_session.commit()
+    try:
+        from app.services.scraping_service import RATING_CACHE
+        RATING_CACHE.clear()
+    except Exception:
+        pass
     yield
+    db_session.rollback()
     db_session.remove()
 
 @pytest.fixture

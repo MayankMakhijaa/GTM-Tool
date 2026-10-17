@@ -106,18 +106,26 @@ def save_company(user_id: int, data: Dict[str, Any], is_draft: bool = False) -> 
 
 
 def validate_icp_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    from app.services.country_service import validate_country_string
+
     tone_str = data.get("tone", "FORMAL").strip().upper()
     try:
         tone = Tone(tone_str).value
     except ValueError:
         tone = Tone.FORMAL.value
 
+    raw_location = data.get("location")
+    if raw_location is not None and str(raw_location).strip():
+        validated_location = validate_country_string(str(raw_location).strip())
+    else:
+        validated_location = ""
+
     return {
         "target_customer": data.get("target_customer", "").strip(),
         "company_size": data.get("company_size", "").strip(),
         "revenue_range": data.get("revenue_range", "").strip(),
         "industry": data.get("industry", "").strip(),
-        "location": data.get("location", "").strip(),
+        "location": validated_location,
         "tone": tone,
         "target_jobs_roles": data.get("target_jobs_roles", ""),
         "keywords": data.get("keywords", ""),
@@ -126,10 +134,12 @@ def validate_icp_data(data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 def get_icp(user_id: int) -> Optional[Dict[str, Any]]:
+    from app.services.spelling_service import get_icp_field_advisories
+
     icp = db_session.query(UsersICP).filter_by(user_id=user_id).first()
     if not icp:
         return None
-    return {
+    res = {
         "target_customer": icp.target_customer,
         "company_size": icp.company_size,
         "revenue_range": icp.revenue_range,
@@ -143,6 +153,8 @@ def get_icp(user_id: int) -> Optional[Dict[str, Any]]:
         "version": icp.version,
         "summary_report": icp.summary_report
     }
+    res["advisories"] = get_icp_field_advisories(res)
+    return res
 
 def save_icp(user_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
     valid_data = validate_icp_data(data)

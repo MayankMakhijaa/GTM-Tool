@@ -221,14 +221,130 @@ def api_extract_profile_stream():
 
 
 
+def persist_extracted_linkedin_profile(user_id: int, extraction_data: dict):
+    """
+    Normalizes and persists extracted LinkedIn profile data to UsersLinkedinDetails for the given user_id.
+    - Preserves existing non-empty values when incoming fields are empty/omitted (non-destructive).
+    - Merges rich fields into profile_data JSONB.
+    - Guarantees 1 record per user_id without creating duplicate rows.
+    """
+    from app.models.all_models import UsersLinkedinDetails
+    from app.database import db_session
+    import re
+
+    if not user_id:
+        raise ValueError("user_id is required to persist LinkedIn profile.")
+
+    li_details = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+    if not li_details:
+        li_details = UsersLinkedinDetails(user_id=user_id)
+        db_session.add(li_details)
+
+    if not extraction_data or not isinstance(extraction_data, dict):
+        db_session.commit()
+        return li_details
+
+    prof = extraction_data.get("profile") if isinstance(extraction_data.get("profile"), dict) else extraction_data
+
+    # Canonical scalar string fields
+    string_fields = ["name", "headline", "about", "current_position", "location"]
+    for field in string_fields:
+        val = prof.get(field)
+        if isinstance(val, str) and val.strip():
+            setattr(li_details, field, val.strip())
+
+    # Canonical list fields (JSONB)
+    list_fields = ["experience", "education", "skills"]
+    for field in list_fields:
+        val = prof.get(field)
+        if isinstance(val, list) and len(val) > 0:
+            setattr(li_details, field, val)
+
+    # Profile URL
+    extracted_url = extraction_data.get("source_url") or prof.get("profile_url")
+    if isinstance(extracted_url, str) and extracted_url.strip() and "linkedin.com" in extracted_url:
+        li_details.profile_url = extracted_url.strip()
+
+    # LinkedIn ID
+    raw_linkedin_id = prof.get("linkedin_id")
+    if not raw_linkedin_id and li_details.profile_url:
+        match = re.search(r"linkedin\.com/in/([^/?#]+)", li_details.profile_url)
+        if match:
+            raw_linkedin_id = match.group(1).strip()
+    if raw_linkedin_id and isinstance(raw_linkedin_id, str) and raw_linkedin_id.strip():
+        existing_owner = db_session.query(UsersLinkedinDetails).filter(
+            UsersLinkedinDetails.linkedin_id == raw_linkedin_id.strip(),
+            UsersLinkedinDetails.user_id != user_id
+        ).first()
+        if not existing_owner:
+            li_details.linkedin_id = raw_linkedin_id.strip()
+
+    # Rich fields mapped into profile_data JSONB
+    existing_profile_data = dict(li_details.profile_data or {})
+    rich_fields = [
+        "profile_photo_url", "top_skills", "certifications", "licenses",
+        "projects", "featured", "honors_awards", "publications",
+        "courses", "volunteer_experience", "languages",
+        "organizations", "recommendations", "other_sections"
+    ]
+    for key in rich_fields:
+        val = prof.get(key)
+        if val is not None:
+            if isinstance(val, (list, dict)) and len(val) > 0:
+                existing_profile_data[key] = val
+            elif isinstance(val, str) and val.strip():
+                existing_profile_data[key] = val.strip()
+
+    # Also capture other arbitrary non-empty keys in prof that aren't top-level columns
+    top_level_cols = set(string_fields + list_fields + ["profile_url", "linkedin_id", "source_url"])
+    for key, val in prof.items():
+        if key not in top_level_cols and key not in rich_fields:
+            if isinstance(val, (list, dict)) and len(val) > 0:
+                existing_profile_data[key] = val
+            elif isinstance(val, str) and val.strip():
+                existing_profile_data[key] = val.strip()
+
+    li_details.profile_data = existing_profile_data
+    db_session.commit()
+    return li_details
+
+
+def has_usable_profile_data(li_details) -> bool:
+    """
+    Validates whether UsersLinkedinDetails contains real, usable profile data for optimization.
+    Must have identity (name or headline) and substantive profile content.
+    """
+    if not li_details:
+        return False
+
+    has_name = bool(li_details.name and str(li_details.name).strip())
+    has_headline = bool(li_details.headline and str(li_details.headline).strip())
+    has_identity = has_name or has_headline
+
+    has_about = bool(li_details.about and str(li_details.about).strip())
+    has_experience = bool(isinstance(li_details.experience, list) and len(li_details.experience) > 0)
+    has_skills = bool(isinstance(li_details.skills, list) and len(li_details.skills) > 0)
+    has_position = bool(li_details.current_position and str(li_details.current_position).strip())
+    has_education = bool(isinstance(li_details.education, list) and len(li_details.education) > 0)
+
+    pdata = li_details.profile_data if isinstance(li_details.profile_data, dict) else {}
+    has_rich_content = any(
+        isinstance(pdata.get(k), list) and len(pdata[k]) > 0
+        for k in ["certifications", "projects", "featured", "top_skills"]
+    )
+
+    has_substantive = has_about or has_experience or has_skills or has_position or has_education or has_rich_content
+    return has_identity and has_substantive
+
+
 @app.route("/api/extract-profile", methods=["POST"])
 def api_extract_profile():
-    data = request.get_json()
+    data = request.get_json(silent=True)
     if not data or not isinstance(data, dict):
         return jsonify({"success": False, "error": "Please provide a valid JSON payload."}), 400
 
     profile_url = (data.get("profile_url") or data.get("linkedin_url") or "").strip()
-    user_id = session.get("user_id")
+    user_id = getattr(request, "user_id", None) or session.get("user_id")
     
     li_details = None
     if user_id:
@@ -242,59 +358,20 @@ def api_extract_profile():
         return jsonify({"success": False, "error": "Please enter a valid LinkedIn profile URL."}), 400
 
     try:
+        from legacy.profile_extractor import extract_linkedin_profile
         extraction_data = extract_linkedin_profile(profile_url, linkedin_details=li_details)
         
-        # --- PHASE 2: PERSISTENCE START ---
-        if user_id and extraction_data and "profile" in extraction_data:
-            from app.models.all_models import UsersLinkedinDetails
-            from app.database import db_session
-            
-            li_details = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
-            if li_details:
-                prof = extraction_data.get("profile", {})
-                
-                if prof.get("name"):
-                    li_details.name = prof["name"]
-                if prof.get("headline"):
-                    li_details.headline = prof["headline"]
-                if prof.get("about"):
-                    li_details.about = prof["about"]
-                if prof.get("current_position"):
-                    li_details.current_position = prof["current_position"]
-                if prof.get("location"):
-                    li_details.location = prof["location"]
-                    
-                if prof.get("experience"):
-                    li_details.experience = prof["experience"]
-                if prof.get("education"):
-                    li_details.education = prof["education"]
-                if prof.get("skills"):
-                    li_details.skills = prof["skills"]
-                    
-                extracted_url = extraction_data.get("source_url")
-                if extracted_url and "linkedin.com" in extracted_url:
-                    li_details.profile_url = extracted_url
-                
-                # Map additional rich fields into profile_data
-                existing_profile_data = li_details.profile_data or {}
-                rich_fields = [
-                    "profile_photo_url", "top_skills", "certifications", "licenses", 
-                    "projects", "featured", "honors_awards", "publications", 
-                    "courses", "volunteer_experience", "languages", 
-                    "organizations", "recommendations", "other_sections"
-                ]
-                for key in rich_fields:
-                    val = prof.get(key)
-                    # For lists/dicts, check truthiness; for strings check if non-empty
-                    if val:
-                        existing_profile_data[key] = val
-                        
-                li_details.profile_data = existing_profile_data
-                db_session.commit()
-        # --- PHASE 2: PERSISTENCE END ---
-        
-        return jsonify({"success": True, "profile": extraction_data.get("profile")})
+        if user_id and extraction_data:
+            li_details = persist_extracted_linkedin_profile(user_id, extraction_data)
+
+        returned_profile = extraction_data.get("profile") if isinstance(extraction_data, dict) and "profile" in extraction_data else extraction_data
+        return jsonify({"success": True, "profile": returned_profile})
     except Exception as e:
+        try:
+            from app.database import db_session
+            db_session.rollback()
+        except Exception:
+            pass
         import traceback
         traceback.print_exc()
         return jsonify({
@@ -302,39 +379,139 @@ def api_extract_profile():
             "error": f"Profile extraction failed: {str(e)}. Please verify your LinkedIn session and try again."
         }), 500
 
+
 @app.route("/api/optimize-profile", methods=["POST"])
 def api_optimize_profile():
     from app.models.all_models import UsersLinkedinDetails, UsersICP
+    from app.database import db_session
     import logging
+
     user_id = getattr(request, "user_id", None) or session.get("user_id")
     if not user_id:
-        return jsonify({"success": False, "error": "Unauthorized"}), 401
-        
+        return jsonify({"success": False, "error": "UNAUTHORIZED", "message": "Authentication required."}), 401
+
     logging.info(f"[Profile Analysis] User ID: {user_id}")
-    
+
     linkedin_profile = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
-    icp_profile = db_session.query(UsersICP).filter_by(user_id=user_id).first()
-    
-    logging.info(f"[Profile Analysis] Profile loaded: {'YES' if linkedin_profile else 'NO'}")
-    logging.info(f"[Profile Analysis] ICP loaded: {'YES' if icp_profile else 'NO'}")
-    logging.info(f"[Profile Analysis] LinkedIn scraping: NOT USED")
-    
+
+    # If no LinkedIn record exists
     if not linkedin_profile:
-        return jsonify({"success": False, "error": "LinkedIn profile not found in DB."}), 404
-        
+        return jsonify({
+            "success": False,
+            "error": "NO_LINKEDIN_CONNECTION",
+            "message": "LinkedIn profile is not connected. Please connect your LinkedIn account first."
+        }), 404
+
+    # Check whether profile has usable data; if not, attempt on-demand extraction
+    if not has_usable_profile_data(linkedin_profile):
+        logging.info(f"[Profile Analysis] No usable profile data in DB for user {user_id}. Attempting automatic extraction.")
+
+        if not linkedin_profile.auth_data_encrypted:
+            return jsonify({
+                "success": False,
+                "error": "NO_LINKEDIN_CREDENTIALS",
+                "message": "LinkedIn credentials not found. Please connect your LinkedIn account before optimizing."
+            }), 400
+
+        # Validate stored session before attempting extraction
+        from app.integrations.linkedin.voyager_client import validate_user_session
+        session_val = validate_user_session(user_id)
+        if not session_val.get("valid", False):
+            category = session_val.get("category", "unknown")
+            if category in ("expired", "revoked"):
+                return jsonify({
+                    "success": False,
+                    "error": "SESSION_EXPIRED",
+                    "message": "LinkedIn session has expired or was revoked. Please reconnect your LinkedIn account."
+                }), 401
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": "SESSION_INVALID",
+                    "message": f"LinkedIn session is not active ({session_val.get('message', 'invalid session')}). Please reconnect."
+                }), 400
+
+        # Determine target profile URL
+        req_data = request.get_json(silent=True) or {}
+        profile_url = (req_data.get("profile_url") or req_data.get("linkedin_url") or "").strip()
+        if not profile_url and linkedin_profile.profile_url:
+            profile_url = linkedin_profile.profile_url
+        if not profile_url and linkedin_profile.linkedin_id:
+            profile_url = f"https://www.linkedin.com/in/{linkedin_profile.linkedin_id}"
+
+        # If profile_url still unknown, try Voyager /me lookup
+        if not profile_url:
+            try:
+                from app.integrations.linkedin.voyager_client import create_voyager_client_from_db
+                voyager = create_voyager_client_from_db(user_id)
+                if voyager:
+                    user_prof = voyager.get_user_profile()
+                    mini = user_prof.get("miniProfile") or {}
+                    public_id = mini.get("publicIdentifier")
+                    if public_id:
+                        profile_url = f"https://www.linkedin.com/in/{public_id}"
+            except Exception as voyager_err:
+                logging.warning(f"[Profile Analysis] Voyager /me profile resolution failed: {voyager_err}")
+
+        if not profile_url:
+            return jsonify({
+                "success": False,
+                "error": "PROFILE_URL_REQUIRED",
+                "message": "LinkedIn profile URL is required to retrieve profile data before optimization."
+            }), 400
+
+        # Perform extraction
+        try:
+            from legacy.profile_extractor import extract_linkedin_profile
+            extraction_data = extract_linkedin_profile(profile_url, linkedin_details=linkedin_profile)
+            linkedin_profile = persist_extracted_linkedin_profile(user_id, extraction_data)
+        except Exception as extract_err:
+            try:
+                db_session.rollback()
+            except Exception:
+                pass
+            logging.error(f"[Profile Analysis] Extraction failed for user {user_id}: {extract_err}")
+            err_msg = str(extract_err)
+            if any(k in err_msg.lower() for k in ["session is not authenticated", "authwall", "login"]):
+                return jsonify({
+                    "success": False,
+                    "error": "SESSION_EXPIRED",
+                    "message": "LinkedIn session is not authenticated. Please reconnect your LinkedIn account."
+                }), 401
+            return jsonify({
+                "success": False,
+                "error": "EXTRACTION_FAILED",
+                "message": f"Failed to retrieve LinkedIn profile data: {err_msg}"
+            }), 400
+
+        # Re-verify profile is usable after extraction
+        if not has_usable_profile_data(linkedin_profile):
+            return jsonify({
+                "success": False,
+                "error": "EXTRACTION_FAILED",
+                "message": "Retrieved LinkedIn profile contains insufficient data. Cannot optimize an empty profile."
+            }), 400
+
+    # Build normalized profile payload for optimizer
     extracted_profile = {
         "name": linkedin_profile.name,
         "headline": linkedin_profile.headline,
         "location": linkedin_profile.location,
         "current_position": linkedin_profile.current_position,
         "about": linkedin_profile.about,
-        "experience": linkedin_profile.experience,
-        "education": linkedin_profile.education,
-        "skills": linkedin_profile.skills
+        "experience": linkedin_profile.experience or [],
+        "education": linkedin_profile.education or [],
+        "skills": linkedin_profile.skills or []
     }
-    if linkedin_profile.profile_data:
-        extracted_profile.update(linkedin_profile.profile_data)
-        
+    if linkedin_profile.profile_data and isinstance(linkedin_profile.profile_data, dict):
+        for k, v in linkedin_profile.profile_data.items():
+            if k not in extracted_profile or not extracted_profile[k]:
+                extracted_profile[k] = v
+
+    icp_profile = db_session.query(UsersICP).filter_by(user_id=user_id).first()
+    logging.info(f"[Profile Analysis] Profile loaded: YES")
+    logging.info(f"[Profile Analysis] ICP loaded: {'YES' if icp_profile else 'NO'}")
+
     gtm_context = None
     if icp_profile:
         gtm_context = {
@@ -349,26 +526,29 @@ def api_optimize_profile():
         }
 
     try:
+        import profile_optimizer
         logging.info("[Profile Analysis] Gemini analysis: STARTED")
-        optimization_data = optimize_linkedin_profile(extracted_profile, gtm_context)
-        
+        optimization_data = profile_optimizer.optimize_linkedin_profile(extracted_profile, gtm_context)
+
         num_sections = len(optimization_data.get("section_analysis", []))
         score = optimization_data.get("overall_score", 0)
         logging.info(f"[Profile Analysis] Sections analyzed: {num_sections}")
         logging.info(f"[Profile Analysis] Overall score: {score}")
         logging.info("[Profile Analysis] Analysis completed")
-        
+
         # Cache to DB
         linkedin_profile.optimization_suggestions = optimization_data
         db_session.commit()
-        
-        return jsonify({"success": True, "data": optimization_data})
+
+        return jsonify({"success": True, "data": optimization_data}), 200
     except Exception as e:
+        db_session.rollback()
         import traceback
         traceback.print_exc()
         return jsonify({
             "success": False,
-            "error": f"Profile optimization failed: {str(e)}"
+            "error": "OPTIMIZATION_FAILED",
+            "message": f"Profile optimization failed: {str(e)}"
         }), 500
 
 @app.route("/generate", methods=["POST"])

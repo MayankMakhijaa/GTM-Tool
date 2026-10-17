@@ -642,11 +642,11 @@ def test_location_hq_distinction_and_provenance_structure():
         assert prov[field]["source_url"] == "https://acmesoftware.com"
 
 
-# 8. Multi-Source Research & Firmographic Enrichment Unit Tests (Step 3.6)
-
+@patch("app.services.scraping_service.perform_public_web_search", return_value=[])
 @patch("app.services.scraping_service.fetch_url_safely")
-def test_research_public_company_ratings_success(mock_fetch):
-    from app.services.scraping_service import research_public_company_ratings
+def test_research_public_company_ratings_success(mock_fetch, mock_search):
+    from app.services.scraping_service import research_public_company_ratings, RATING_CACHE
+    RATING_CACHE.clear()
     mock_html = """
     <html>
       <script type="application/ld+json">
@@ -659,7 +659,11 @@ def test_research_public_company_ratings_success(mock_fetch):
       </script>
     </html>
     """
-    mock_fetch.return_value = {"success": True, "html": mock_html}
+    def mock_fetch_impl(url, *args, **kwargs):
+        if "trustpilot.com" in url:
+            return {"success": True, "html": mock_html}
+        return {"success": False, "html": ""}
+    mock_fetch.side_effect = mock_fetch_impl
 
     res_map, diag = research_public_company_ratings("Stark Industries", "https://starkindustries.com")
     assert diag["status"] == "SUCCESS_TRUSTPILOT"

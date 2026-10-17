@@ -122,7 +122,7 @@
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-space-xl">
 <!-- Target Customer Archetypes -->
-<div class="space-y-space-xs">
+<div class="space-y-space-xs relative" id="target-customer-wrapper">
 <label class="font-label-md text-label-md text-on-surface block font-medium">
                 Target Customer Segment
               </label>
@@ -135,9 +135,10 @@
                   <span class="chip-text">Mid-Market Growth Teams</span>
                   <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
 </span>
-<input id="target-customer-input" class="bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="+ Add custom tag..." type="text"/>
+<input id="target-customer-input" class="bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="+ Add segment or custom tag..." type="text" autocomplete="off"/>
 </div>
-<p class="font-body-sm text-body-sm text-outline">Press Enter to inject semantic attributes.</p>
+<div id="target-customer-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-surface-container-lowest rounded-lg shadow-lg border border-surface-container py-1 z-50 text-sm"></div>
+<p class="font-body-sm text-body-sm text-outline">Press Enter to add, or select from suggestions. Custom segments supported.</p>
 </div>
 <!-- Revenue Range Selector -->
 <div class="space-y-space-xs">
@@ -157,7 +158,7 @@
 <div id="custom-revenue-container" class="hidden mt-2 flex items-center gap-2">
   <input type="text" id="custom-revenue-input" class="flex-1 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-lg p-space-sm border border-outline focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="e.g. $5M - $10M ARR" />
 </div>
-<p class="font-body-sm text-body-sm text-outline mt-1">Derived from verified secondary filings &amp; hiring proxies.</p>
+<p class="font-body-sm text-body-sm text-outline mt-1">Select ARR scale or enter custom range. Derived from secondary filings &amp; hiring proxies.</p>
 </div>
 <!-- Company Size Multi-Select Pills -->
 <div class="md:col-span-2 space-y-space-xs">
@@ -183,9 +184,10 @@
                   500+ Employees
                 </button>
 </div>
+<p class="font-body-sm text-body-sm text-outline mt-1">Select one or more employee count bands representing target account sizes.</p>
 </div>
 <!-- Industry Taxonomy Multi-Select -->
-<div class="space-y-space-xs">
+<div class="space-y-space-xs relative" id="industry-wrapper">
 <label class="font-label-md text-label-md text-on-surface block font-medium">
                 Primary Industry Verticals
               </label>
@@ -202,32 +204,40 @@
                   <span class="chip-text">B2B SaaS</span>
                   <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
 </span>
-<input id="industry-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type sector & Enter..." type="text"/>
+<input id="industry-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type sector & Enter..." type="text" autocomplete="off"/>
 <button id="add-industry-btn" class="font-label-sm text-label-sm text-primary hover:underline px-2" type="button">+ Add Sector</button>
+</div>
+<div id="industry-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-surface-container-lowest rounded-lg shadow-lg border border-surface-container py-1 z-50 text-sm"></div>
+<p class="font-body-sm text-body-sm text-outline">Select recognized industry verticals or type custom sectors.</p>
 </div>
 </div>
 <!-- Geographic Scope -->
-<div class="space-y-space-xs">
+<div class="space-y-space-xs relative" id="location-wrapper">
 <label class="font-label-md text-label-md text-on-surface block font-medium">
-                Geographic Presence
+                Target Countries &amp; Regional Markets
               </label>
 <div id="location-container" class="flex flex-wrap gap-space-xs p-space-sm bg-surface-container-low rounded-lg min-h-[48px] items-center">
 <span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
 <span class="material-symbols-outlined text-[14px]">public</span>
-                  <span class="chip-text">North America (US &amp; Canada)</span>
+                  <span class="chip-text">United States</span>
                   <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
 </span>
 <span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
-                  <span class="chip-text">Western Europe</span>
+<span class="material-symbols-outlined text-[14px]">public</span>
+                  <span class="chip-text">United Kingdom</span>
                   <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
 </span>
 <span class="chip-item inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-lowest text-primary rounded font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px]">public</span>
                   <span class="chip-text">Singapore</span>
                   <button class="remove-chip material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
 </span>
-<input id="location-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type region & Enter..." type="text"/>
-<button id="add-location-btn" class="font-label-sm text-label-sm text-primary hover:underline px-2" type="button">+ Add Region</button>
+<input id="location-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[140px]" placeholder="Type country or regional market..." type="text" autocomplete="off"/>
+<button id="add-location-btn" class="font-label-sm text-label-sm text-primary hover:underline px-2" type="button">+ Add Market / Country</button>
 </div>
+<div id="location-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-surface-container-lowest rounded-lg shadow-lg border border-surface-container py-1 z-50 text-sm"></div>
+<div id="location-validation-msg" class="hidden text-xs text-error mt-1"></div>
+<p class="font-body-sm text-body-sm text-outline mt-1">Specify recognized target countries or legitimate regional target markets (e.g. India, United States, North America (US &amp; Canada), Western Europe, EMEA, APAC).</p>
 </div>
 </div>
 </div>
@@ -242,7 +252,7 @@
 </div>
 <div class="space-y-space-lg">
 <!-- Target Roles Tag Input -->
-<div class="space-y-space-xs">
+<div class="space-y-space-xs relative" id="roles-wrapper">
 <div class="flex items-center justify-between">
 <label class="font-label-md text-label-md text-on-surface block font-medium">
                   Priority Stakeholder Titles &amp; Functions
@@ -270,16 +280,18 @@
                   <span class="chip-text">Growth Lead</span>
                   <button class="remove-chip material-symbols-outlined text-[16px] text-outline hover:text-error" type="button">close</button>
 </span>
-<input id="roles-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1.5 flex-1 min-w-[120px]" placeholder="Type role & Enter..." type="text"/>
+<input id="roles-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1.5 flex-1 min-w-[120px]" placeholder="Type role & Enter..." type="text" autocomplete="off"/>
 <button id="add-role-btn" class="inline-flex items-center gap-1 px-space-md py-1.5 bg-primary-fixed text-on-primary-fixed hover:bg-primary-fixed-dim rounded font-label-md text-label-md transition-colors" type="button">
 <span class="material-symbols-outlined text-[16px]">add</span>
                   Add Role
                 </button>
 </div>
+<div id="roles-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-surface-container-lowest rounded-lg shadow-lg border border-surface-container py-1 z-50 text-sm"></div>
+<p class="font-body-sm text-body-sm text-outline">Select target executive titles or type custom functions.</p>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-space-xl">
 <!-- Semantic Keyword Signals -->
-<div class="space-y-space-xs">
+<div class="space-y-space-xs relative" id="keywords-wrapper">
 <label class="font-label-md text-label-md text-on-surface block font-medium flex items-center justify-between">
 <span>Positive Keywords &amp; Tech Signals</span>
 <span class="font-code-sm text-code-sm text-tertiary">Boolean AND</span>
@@ -301,13 +313,14 @@
                     <span class="chip-text">inbound response time</span>
                     <button class="remove-chip material-symbols-outlined text-[14px]" type="button">close</button>
 </span>
-<input id="keywords-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type keyword & Enter..." type="text"/>
+<input id="keywords-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type keyword & Enter..." type="text" autocomplete="off"/>
 <button id="add-keyword-btn" class="font-label-sm text-label-sm text-tertiary hover:underline px-2" type="button">+ Add keyword</button>
 </div>
+<div id="keywords-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-surface-container-lowest rounded-lg shadow-lg border border-surface-container py-1 z-50 text-sm"></div>
 <p class="font-body-sm text-body-sm text-outline">Synthesized from company job listings and tech stack telemetry.</p>
 </div>
 <!-- Negative Exclusion Chips -->
-<div class="space-y-space-xs">
+<div class="space-y-space-xs relative" id="exclusions-wrapper">
 <label class="font-label-md text-label-md text-on-surface block font-medium flex items-center justify-between">
 <span>Strict Exclusions &amp; Disqualifiers</span>
 <span class="font-code-sm text-code-sm text-error">Filtered Out</span>
@@ -328,11 +341,11 @@
                     <span class="chip-text">&lt; $1M ARR</span>
                     <button class="remove-chip material-symbols-outlined text-[14px]" type="button">close</button>
 </span>
-<input id="exclusions-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type exclusion & Enter..." type="text"/>
+<input id="exclusions-input" class="hidden bg-transparent text-on-surface font-body-sm text-body-sm outline-none px-space-xs py-1 flex-1 min-w-[120px]" placeholder="Type exclusion & Enter..." type="text" autocomplete="off"/>
 <button id="add-exclusion-btn" class="font-label-sm text-label-sm text-error hover:underline px-2" type="button">+ Add exclusion</button>
 </div>
+<div id="exclusions-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-surface-container-lowest rounded-lg shadow-lg border border-surface-container py-1 z-50 text-sm"></div>
 <p class="font-body-sm text-body-sm text-outline">Fameweb automatically excludes these leads from generated pipeline.</p>
-</div>
 </div>
 </div>
 </div>
@@ -346,7 +359,7 @@
 <p class="font-body-sm text-body-sm text-on-surface-variant">Prioritize accounts showing real-world timing signals.</p>
 </div>
 </div>
-<span class="font-label-sm text-label-sm px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded font-semibold uppercase">3 Active Triggers</span>
+<span id="signals-active-count" class="font-label-sm text-label-sm px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded font-semibold uppercase">3 Active Triggers</span>
 </div>
 <div id="signals-container" class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
 <!-- Signal Item 1 -->
@@ -459,6 +472,10 @@
 <button class="hidden sm:inline-flex px-space-lg py-space-md rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface bg-surface-container-low hover:bg-surface-container transition-colors" type="button">
               Save Segment as Template
             </button>
+<button class="hidden px-space-lg py-space-md rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-primary font-headline-md text-[15px] font-medium transition-all flex items-center gap-space-xs" id="btn-save-return-direct" type="button">
+  <span class="material-symbols-outlined text-[18px]">check</span>
+  <span>Save &amp; Return to Profile</span>
+</button>
 <button class="px-space-xl py-space-md rounded-lg bg-primary hover:bg-secondary text-on-primary font-headline-md text-[15px] font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-space-xs" id="btn-submit-icp" type="button">
 <span>Generate ICP Report</span>
 <span class="material-symbols-outlined text-[18px]">arrow_forward</span>

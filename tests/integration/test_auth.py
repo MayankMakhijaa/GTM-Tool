@@ -1,15 +1,18 @@
+from datetime import datetime
 import pytest
 from app_module import app
 from app.database import db_session, Base, engine
 from app.models.all_models import UserTable, UsersCompanyDetails, UsersICP
 from app.security.password import hash_password, verify_password
 from app.security.session import login_required
+from app.services.email_service import get_last_test_otp, clear_test_captured_otps
 
-# Define protected route before first request
-@app.route('/api/protected_test', methods=['GET'])
-@login_required
-def protected_test():
-    return "OK"
+# Define protected route before first request if not already defined
+if '/api/protected_test' not in [rule.rule for rule in app.url_map.iter_rules()]:
+    @app.route('/api/protected_test', methods=['GET'])
+    @login_required
+    def protected_test():
+        return "OK"
 
 # Inherits `client` fixture from tests/conftest.py with DB isolation and safety guards
 
@@ -30,9 +33,10 @@ def test_signup_success(client):
     assert res.status_code == 201, res.get_json()
     data = res.get_json()
     assert data["success"] is True
-    assert data["user"]["email_id"] == "test@acmecorp.com"
-    assert "password_hash" not in data["user"]
-    assert "password" not in data["user"]
+    assert data["email"] == "test@acmecorp.com"
+    assert data["requires_verification"] is True
+    assert "password_hash" not in data
+    assert "password" not in data
     
     # Confirm stored value in database is a hash, not plaintext
     user = db_session.query(UserTable).filter_by(email_id="test@acmecorp.com").first()
@@ -127,21 +131,21 @@ def test_email_valid_company_domain_accepted(client):
         "name": "User", "email": "employee@innovatecorp.com", "phone": "+14155552671", "password": "StrongP@ssword123!"
     })
     assert res.status_code == 201
-    assert res.get_json()["user"]["email_id"] == "employee@innovatecorp.com"
+    assert res.get_json()["email"] == "employee@innovatecorp.com"
 
 def test_email_uppercase_normalized(client):
     res = client.post('/api/auth/signup', json={
         "name": "User", "email": "ALEX@BIGTECH.ORG", "phone": "+14155552671", "password": "StrongP@ssword123!"
     })
     assert res.status_code == 201
-    assert res.get_json()["user"]["email_id"] == "alex@bigtech.org"
+    assert res.get_json()["email"] == "alex@bigtech.org"
 
 def test_email_whitespace_handled(client):
     res = client.post('/api/auth/signup', json={
         "name": "User", "email": "  user@spacex.io  ", "phone": "+14155552671", "password": "StrongP@ssword123!"
     })
     assert res.status_code == 201
-    assert res.get_json()["user"]["email_id"] == "user@spacex.io"
+    assert res.get_json()["email"] == "user@spacex.io"
 
 def test_email_malformed_rejected(client):
     res = client.post('/api/auth/signup', json={
@@ -155,7 +159,7 @@ def test_email_uncommon_business_domain_accepted(client):
         "name": "User", "email": "founder@quantum-ai.tech", "phone": "+14155552671", "password": "StrongP@ssword123!"
     })
     assert res.status_code == 201
-    assert res.get_json()["user"]["email_id"] == "founder@quantum-ai.tech"
+    assert res.get_json()["email"] == "founder@quantum-ai.tech"
 
 # --- COMBINED SIGNUP TESTS ---
 
@@ -190,7 +194,7 @@ def test_combined_weak_pwd_and_personal_email_fails(client):
 # --- EXISTING ACCOUNT COMPATIBILITY TESTS ---
 
 def test_existing_account_simple_password_login_succeeds(client):
-    # Create legacy user in database with simple 8-char password hash
+    # Create legacy user in database with simple 8-char password hash and verified email
     legacy_pwd = "simple8char"
     hashed = hash_password(legacy_pwd)
     legacy_user = UserTable(
@@ -198,7 +202,8 @@ def test_existing_account_simple_password_login_succeeds(client):
         email_id="legacy@acmecorp.com",
         phone_no="+14155557711",
         password_hash=hashed,
-        is_active=True
+        is_active=True,
+        email_verified_at=datetime.utcnow()
     )
     db_session.add(legacy_user)
     db_session.commit()
@@ -223,7 +228,8 @@ def test_existing_account_wrong_password_rejected(client):
         email_id="legacy2@acmecorp.com",
         phone_no="+14155557722",
         password_hash=hashed,
-        is_active=True
+        is_active=True,
+        email_verified_at=datetime.utcnow()
     )
     db_session.add(legacy_user)
     db_session.commit()
@@ -239,6 +245,9 @@ def test_login_email(client):
     client.post('/api/auth/signup', json={
         "name": "User", "email": "login@acmecorp.com", "phone": "+14155552671", "password": "StrongP@ssword123!"
     })
+    otp = get_last_test_otp("login@acmecorp.com")
+    client.post('/api/auth/verify-otp', json={"email": "login@acmecorp.com", "otp": otp})
+
     res = client.post('/api/auth/login', json={
         "identifier": "login@acmecorp.com", "password": "StrongP@ssword123!"
     })
@@ -251,6 +260,9 @@ def test_login_phone(client):
     client.post('/api/auth/signup', json={
         "name": "User", "email": "phone@acmecorp.com", "phone": "+14155552672", "password": "StrongP@ssword123!"
     })
+    otp = get_last_test_otp("phone@acmecorp.com")
+    client.post('/api/auth/verify-otp', json={"email": "phone@acmecorp.com", "otp": otp})
+
     res = client.post('/api/auth/login', json={
         "identifier": "+14155552672", "password": "StrongP@ssword123!"
     })
@@ -284,6 +296,9 @@ def test_auth_me_authenticated(client):
     client.post('/api/auth/signup', json={
         "name": "User", "email": "me@acmecorp.com", "phone": "+14155552675", "password": "StrongP@ssword123!"
     })
+    otp = get_last_test_otp("me@acmecorp.com")
+    client.post('/api/auth/verify-otp', json={"email": "me@acmecorp.com", "otp": otp})
+
     client.post('/api/auth/login', json={
         "identifier": "me@acmecorp.com", "password": "StrongP@ssword123!"
     })
@@ -303,6 +318,9 @@ def test_logout(client):
     client.post('/api/auth/signup', json={
         "name": "User", "email": "logout@acmecorp.com", "phone": "+14155552676", "password": "StrongP@ssword123!"
     })
+    otp = get_last_test_otp("logout@acmecorp.com")
+    client.post('/api/auth/verify-otp', json={"email": "logout@acmecorp.com", "otp": otp})
+
     client.post('/api/auth/login', json={
         "identifier": "logout@acmecorp.com", "password": "StrongP@ssword123!"
     })

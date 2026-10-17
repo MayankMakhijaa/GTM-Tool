@@ -111,16 +111,37 @@ OUTPUT SCHEMA:
         )
     )
 
-    result_text = response.text
-    if not result_text:
+    result_text = getattr(response, "text", "") or ""
+    if not result_text.strip():
         raise ValueError("Gemini returned an empty response.")
 
-    result_data = json.loads(result_text)
-    
+    cleaned_text = result_text.strip()
+    if cleaned_text.startswith("```json"):
+        cleaned_text = cleaned_text[7:]
+    elif cleaned_text.startswith("```"):
+        cleaned_text = cleaned_text[3:]
+    if cleaned_text.endswith("```"):
+        cleaned_text = cleaned_text[:-3]
+    cleaned_text = cleaned_text.strip()
+
+    try:
+        result_data = json.loads(cleaned_text)
+    except json.JSONDecodeError as err:
+        raise ValueError(f"Gemini output could not be parsed as JSON: {err}")
+
+    if not isinstance(result_data, dict):
+        raise ValueError("Gemini response is not a valid JSON object.")
+
+    overall_score = result_data.get("overall_score", 0)
+    try:
+        overall_score = int(overall_score)
+    except (ValueError, TypeError):
+        overall_score = 0
+
     return {
         "analyzed_at": datetime.now().isoformat(),
-        "overall_score": result_data.get("overall_score", 0),
-        "score_rationale": result_data.get("score_rationale", ""),
-        "section_analysis": result_data.get("section_analysis", []),
-        "recommendations": result_data.get("recommendations", [])
+        "overall_score": max(0, min(100, overall_score)),
+        "score_rationale": str(result_data.get("score_rationale") or ""),
+        "section_analysis": result_data.get("section_analysis") if isinstance(result_data.get("section_analysis"), list) else [],
+        "recommendations": result_data.get("recommendations") if isinstance(result_data.get("recommendations"), list) else []
     }
