@@ -203,72 +203,142 @@ def launch_interactive_linkedin_login(user_id: int) -> Dict[str, Any]:
             page.wait_for_timeout(2000)
 
             # Check if already authenticated on feed
-            current_url = page.url.lower()
-            page_title = page.title().lower()
+            current_url = page.url.lower() if not page.is_closed() else ""
+            page_title = page.title().lower() if not page.is_closed() else ""
 
             is_unauth = (
                 any(k in current_url for k in ["authwall", "login", "signup", "uas/login"]) or 
                 any(k in page_title for k in ["sign up", "log in", "sign in", "authwall"])
             )
 
-            if is_unauth:
-                print(f"[LinkedIn Connect] Redirect detected: {current_url}. Navigating to login...")
+            if is_unauth and not page.is_closed():
+                print(f"[LinkedIn Connect] Redirect detected: {current_url}. Clearing stale cookies and navigating to login...")
+                try:
+                    context.clear_cookies()
+                except Exception:
+                    pass
                 page.goto("https://www.linkedin.com/login", timeout=45000)
                 print("[LinkedIn Connect] Waiting for user authentication (up to 5 minutes for 2FA / verification)...")
-                for _ in range(300):
-                    if page.is_closed():
-                        break
-                    url = page.url.lower()
-                    title = page.title().lower()
 
-                    is_unauth = (
-                        any(k in url for k in ["authwall", "login", "signup", "uas/login"]) or 
-                        any(k in title for k in ["sign up", "log in", "sign in", "authwall"])
-                    )
+            li_at = None
+            jsessionid = None
+            window_closed = False
 
-                    if not is_unauth and ("feed" in url or "in/" in url):
-                        print("[LinkedIn Connect] Authentication detected on feed/profile.")
-                        page.wait_for_timeout(1000)
-                        break
-                    page.wait_for_timeout(1000)
+            # Wait loop: poll context cookies and page status up to 300 seconds
+            for _ in range(300):
+                if page.is_closed():
+                    window_closed = True
+                    break
 
-            # Check final auth state
-            final_auth = False
-            if not page.is_closed():
-                final_url = page.url.lower()
-                final_title = page.title().lower()
-                final_is_unauth = (
-                    any(k in final_url for k in ["authwall", "login", "signup", "uas/login"]) or 
-                    any(k in final_title for k in ["sign up", "log in", "sign in", "authwall"])
+                url = page.url.lower()
+                title = page.title().lower()
+
+                # Guard: Must be on an authenticated destination page, not on root or intermediate redirect screens
+                is_on_authenticated_destination = (
+                    any(k in url for k in ["feed", "in/", "mynetwork", "messaging", "jobs"]) and
+                    not any(k in url for k in ["authwall", "login", "signup", "uas/login", "checkpoint", "challenge"]) and
+                    not any(k in title for k in ["sign up", "log in", "sign in", "authwall", "checkpoint", "security verification"])
                 )
-                final_auth = not final_is_unauth and ("feed" in final_url or "in/" in final_url)
+
+                if not is_on_authenticated_destination:
+                    time.sleep(1)
+                    continue
+
+                # Verify that LinkedIn's authenticated DOM (navigation bar or feed container) is loaded
+                try:
+                    has_authenticated_dom = page.locator("nav, .global-nav, #global-nav, .feed-identity-module, header").count() > 0
+                except Exception:
+                    has_authenticated_dom = False
+
+                if not has_authenticated_dom:
+                    time.sleep(1)
+                    continue
+
+                # Once authenticated destination and DOM are confirmed:
+                try:
+                    cookies = context.cookies()
+                except Exception:
+                    cookies = []
+
+                cur_li_at = None
+                cur_jsessionid = None
+                for c in cookies:
+                    c_name = c.get("name")
+                    c_val = (c.get("value") or "").strip()
+                    if c_name == "li_at" and c_val:
+                        cur_li_at = c_val
+                    elif c_name == "JSESSIONID" and c_val:
+                        cleaned = c_val.strip('"')
+                        if cleaned and not cleaned.startswith("ajax:0000000000000000000"):
+                            cur_jsessionid = cleaned
+
+                if cur_li_at and cur_jsessionid:
+                    li_at = cur_li_at
+                    jsessionid = cur_jsessionid
+                    print(f"[LinkedIn Connect] Fresh authentication confirmed on {url}. Both li_at and JSESSIONID captured.")
+                    # Allow final cookies to flush to disk before exiting
+                    page.wait_for_timeout(2000)
+                    break
+
+                if cur_li_at and not cur_jsessionid:
+                    # User reached feed, but JSESSIONID hasn't updated from dummy yet. Nudge Voyager endpoint.
+                    try:
+                        page.evaluate("fetch('/voyager/api/me').catch(e => {})")
+                    except Exception:
+                        pass
+                    time.sleep(1)
+                    continue
+
+                time.sleep(1)
+
+            # Final cookie extraction check from context if page was authenticated before closing
+            if not (li_at and jsessionid) and context and not window_closed:
+                try:
+                    cookies = context.cookies()
+                    for c in cookies:
+                        c_name = c.get("name")
+                        c_val = (c.get("value") or "").strip()
+                        if c_name == "li_at" and c_val:
+                            li_at = c_val
+                        elif c_name == "JSESSIONID" and c_val:
+                            cleaned = c_val.strip('"')
+                            if cleaned and not cleaned.startswith("ajax:0000000000000000000"):
+                                jsessionid = cleaned
+                except Exception as e:
+                    print(f"[LinkedIn Connect] Error reading final cookies from context: {e}")
 
             capture_success = False
+            error_code = None
             error_msg = None
-            if final_auth and context:
-                cookies = context.cookies()
-                li_at = None
-                jsessionid = None
-                for c in cookies:
-                    if c.get("name") == "li_at" and c.get("value"):
-                        li_at = c["value"].strip()
-                    elif c.get("name") == "JSESSIONID" and c.get("value"):
-                        c_val = c["value"].strip().strip('"')
-                        if c_val and not c_val.startswith("ajax:0000000000000000000"):
-                            jsessionid = c_val
 
-                if li_at and jsessionid:
+            if li_at and jsessionid:
+                try:
                     import json
                     session_cookie = json.dumps({"li_at": li_at, "JSESSIONID": jsessionid})
                     from app.services.onboarding_service import save_linkedin_connection
                     save_linkedin_connection(user_id, session_cookie)
                     capture_success = True
                     print(f"[LinkedIn Connect] Successfully extracted, encrypted, and saved cookies for user {user_id}")
-                else:
-                    error_msg = "Required cookies (li_at / JSESSIONID) could not be extracted from browser."
+                except Exception as e:
+                    capture_success = False
+                    error_code = "PERSISTENCE_FAILED"
+                    error_msg = f"Failed to persist LinkedIn connection: {str(e)}"
                     print(f"[LinkedIn Connect] {error_msg}")
+            else:
+                if window_closed:
+                    error_code = "WINDOW_CLOSED"
+                    error_msg = "Browser window was closed before LinkedIn authentication completed."
+                elif li_at and not jsessionid:
+                    error_code = "EXTRACTION_FAILED"
+                    error_msg = "Authentication succeeded, but the required security token (JSESSIONID) was not captured."
+                else:
+                    error_code = "NOT_AUTHENTICATED"
+                    error_msg = "LinkedIn session was not authenticated. Please log in and reach your home feed."
 
-            context.close()
+            try:
+                context.close()
+            except Exception:
+                pass
             time.sleep(0.5)
 
             if capture_success:
@@ -280,7 +350,7 @@ def launch_interactive_linkedin_login(user_id: int) -> Dict[str, Any]:
                 return {
                     "success": False,
                     "message": error_msg or "LinkedIn session was not authenticated.",
-                    "error": "NOT_AUTHENTICATED"
+                    "error": error_code or "NOT_AUTHENTICATED"
                 }
 
         except Exception as e:

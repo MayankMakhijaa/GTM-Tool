@@ -106,18 +106,26 @@ def save_company(user_id: int, data: Dict[str, Any], is_draft: bool = False) -> 
 
 
 def validate_icp_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    from app.services.country_service import validate_country_string
+
     tone_str = data.get("tone", "FORMAL").strip().upper()
     try:
         tone = Tone(tone_str).value
     except ValueError:
         tone = Tone.FORMAL.value
 
+    raw_location = data.get("location")
+    if raw_location is not None and str(raw_location).strip():
+        validated_location = validate_country_string(str(raw_location).strip())
+    else:
+        validated_location = ""
+
     return {
         "target_customer": data.get("target_customer", "").strip(),
         "company_size": data.get("company_size", "").strip(),
         "revenue_range": data.get("revenue_range", "").strip(),
         "industry": data.get("industry", "").strip(),
-        "location": data.get("location", "").strip(),
+        "location": validated_location,
         "tone": tone,
         "target_jobs_roles": data.get("target_jobs_roles", ""),
         "keywords": data.get("keywords", ""),
@@ -126,10 +134,12 @@ def validate_icp_data(data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 def get_icp(user_id: int) -> Optional[Dict[str, Any]]:
+    from app.services.spelling_service import get_icp_field_advisories
+
     icp = db_session.query(UsersICP).filter_by(user_id=user_id).first()
     if not icp:
         return None
-    return {
+    res = {
         "target_customer": icp.target_customer,
         "company_size": icp.company_size,
         "revenue_range": icp.revenue_range,
@@ -143,6 +153,8 @@ def get_icp(user_id: int) -> Optional[Dict[str, Any]]:
         "version": icp.version,
         "summary_report": icp.summary_report
     }
+    res["advisories"] = get_icp_field_advisories(res)
+    return res
 
 def save_icp(user_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
     valid_data = validate_icp_data(data)
@@ -197,12 +209,28 @@ def save_linkedin_connection(user_id: int, session_cookie: str) -> Dict[str, Any
     if not session_cookie:
         raise ValueError("Session credential is required")
 
+    import json
+    try:
+        data = json.loads(session_cookie) if isinstance(session_cookie, str) else session_cookie
+        if not isinstance(data, dict):
+            raise ValueError("Session cookie payload must be a JSON object")
+    except Exception as e:
+        raise ValueError(f"Invalid session credentials: {e}")
+
+    li_at = (data.get("li_at") or "").strip()
+    jsessionid = (data.get("JSESSIONID") or "").strip().strip('"')
+
+    if not li_at or not jsessionid or jsessionid.startswith("ajax:0000000000000000000"):
+        raise ValueError("Invalid session credentials: both 'li_at' and valid 'JSESSIONID' are required.")
+
+    normalized_payload = json.dumps({"li_at": li_at, "JSESSIONID": jsessionid})
+
     linkedin = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
     if not linkedin:
         linkedin = UsersLinkedinDetails(user_id=user_id)
         db_session.add(linkedin)
 
-    linkedin.auth_data_encrypted = encrypt_credential(session_cookie)
+    linkedin.auth_data_encrypted = encrypt_credential(normalized_payload)
     linkedin.connection_status = ConnectionStatus.CONNECTED.value
     linkedin.consent_at = datetime.utcnow()
 
@@ -216,6 +244,22 @@ def save_linkedin_connection(user_id: int, session_cookie: str) -> Dict[str, Any
     except Exception as e:
         db_session.rollback()
         raise e
+
+    # Re-read through application database access layer and verify decryption
+    saved_record = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+    if not saved_record or not saved_record.auth_data_encrypted:
+        raise RuntimeError("Post-save verification failed: Record not found in database.")
+
+    decrypted_str = decrypt_credential(saved_record.auth_data_encrypted)
+    decrypted_json = json.loads(decrypted_str)
+    verified_li_at = (decrypted_json.get("li_at") or "").strip()
+    verified_jsessionid = (decrypted_json.get("JSESSIONID") or "").strip().strip('"')
+
+    if not verified_li_at or not verified_jsessionid or verified_jsessionid.startswith("ajax:0000000000000000000"):
+        raise RuntimeError("Post-save verification failed: Decrypted credentials invalid or missing required tokens.")
+
+    if saved_record.connection_status != ConnectionStatus.CONNECTED.value:
+        raise RuntimeError(f"Post-save verification failed: Expected connection status CONNECTED, found {saved_record.connection_status}.")
 
     return get_linkedin_connection_status(user_id)
 

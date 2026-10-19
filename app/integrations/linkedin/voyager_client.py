@@ -187,9 +187,24 @@ def validate_user_session(user_id: int) -> Dict[str, Any]:
 
         elif res.status_code in (301, 302, 303, 307, 308):
             location = res.headers.get("Location", "").lower()
-            if any(k in location for k in ["/uas/login", "/authwall", "login", "checkpoint"]):
+            clear_site_data = res.headers.get("Clear-Site-Data", "").lower()
+            set_cookie_raw = res.headers.get("Set-Cookie", "")
+
+            is_self_redirect = any(
+                p in location for p in ["/voyager/api/me", "voyager/api/me"]
+            )
+            is_authwall = any(
+                k in location for k in ["/uas/login", "/authwall", "login", "checkpoint", "challenge"]
+            )
+            is_cookie_cleared = (
+                "clear-site-data" in res.headers or 
+                "storage" in clear_site_data or 
+                ("li_at" in set_cookie_raw and ("max-age=0" in set_cookie_raw.lower() or "1970" in set_cookie_raw))
+            )
+
+            if is_authwall or is_self_redirect or is_cookie_cleared:
                 _update_connection_status(user_id, "EXPIRED")
-                return {"valid": False, "category": "expired", "message": "LinkedIn session redirected to login."}
+                return {"valid": False, "category": "expired", "message": "LinkedIn session has expired or was revoked. Please reconnect your account."}
             else:
                 # Ambiguous redirect: preserve credentials and status
                 return {"valid": False, "category": "unknown_error", "message": f"Unexpected redirect encountered: {location}"}

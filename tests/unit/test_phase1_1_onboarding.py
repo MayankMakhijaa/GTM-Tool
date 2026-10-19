@@ -18,6 +18,8 @@ from app.integrations.linkedin.voyager_client import (
 from legacy.profile_extractor import launch_interactive_linkedin_login
 from app.services.onboarding_service import save_linkedin_connection
 
+from app.services.email_service import get_last_test_otp
+
 @pytest.fixture(autouse=True)
 def setup_test_db():
     Base.metadata.create_all(bind=engine)
@@ -40,34 +42,45 @@ def _random_phone():
     _phone_counter += 1
     return f"+1415555{_phone_counter:04d}"
 
+def _signup_and_verify(test_client, name, email, phone, password="Password123!"):
+    res = test_client.post('/api/auth/signup', json={
+        "name": name,
+        "email": email,
+        "phone": phone,
+        "password": password
+    })
+    otp = get_last_test_otp(email)
+    if otp:
+        test_client.post('/api/auth/verify-otp', json={"email": email, "otp": otp})
+    user = db_session.query(UserTable).filter_by(email_id=email).first()
+    return user
+
 def test_1_signup_succeeds_without_linkedin_connection(test_client):
     """1. User creates account without requiring prior LinkedIn connection."""
     uid = uuid.uuid4().hex[:8]
+    email = f"newuser_{uid}@example.com"
     res = test_client.post('/api/auth/signup', json={
         "name": f"New User {uid}",
-        "email": f"newuser_{uid}@example.com",
+        "email": email,
         "phone": _random_phone(),
         "password": "Password123!"
     })
     assert res.status_code == 201
     data = res.get_json()
     assert data["success"] is True
-    assert data["user"]["onboarding_step"] == "LINKEDIN"
+    assert data["requires_verification"] is True
 
-    # Verify no LinkedIn connection exists yet
-    user_id = data["user"]["user_id"]
-    linkedin_record = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+    # Verify user created with LINKEDIN step and no connection exists yet
+    user = db_session.query(UserTable).filter_by(email_id=email).first()
+    assert user is not None
+    assert user.onboarding_step == "LINKEDIN"
+    linkedin_record = db_session.query(UsersLinkedinDetails).filter_by(user_id=user.user_id).first()
     assert linkedin_record is None
 
 def test_2_and_3_linkedin_onboarding_page_renders_connect_button(test_client):
     """2 & 3. User visits /connect-linkedin and sees the genuine Connect LinkedIn button."""
     uid = uuid.uuid4().hex[:8]
-    test_client.post('/api/auth/signup', json={
-        "name": f"User {uid}",
-        "email": f"u_{uid}@example.com",
-        "phone": _random_phone(),
-        "password": "Password123!"
-    })
+    _signup_and_verify(test_client, f"User {uid}", f"u_{uid}@example.com", _random_phone())
 
     res = test_client.get('/connect-linkedin')
     assert res.status_code == 200
@@ -81,14 +94,8 @@ def test_2_and_3_linkedin_onboarding_page_renders_connect_button(test_client):
 def test_4_and_5_successful_connection_persists_credentials_and_advances_onboarding(test_client):
     """4 & 5. Authenticated connect endpoint succeeds, persists encrypted credentials and advances step to COMPANY."""
     uid = uuid.uuid4().hex[:8]
-    signup_res = test_client.post('/api/auth/signup', json={
-        "name": f"User {uid}",
-        "email": f"connect_{uid}@example.com",
-        "phone": _random_phone(),
-        "password": "Password123!"
-    })
-    assert signup_res.status_code == 201
-    user_id = signup_res.get_json()["user"]["user_id"]
+    user = _signup_and_verify(test_client, f"User {uid}", f"connect_{uid}@example.com", _random_phone())
+    user_id = user.user_id
 
     # Mock Playwright session capture
     with patch("legacy.profile_extractor.sync_playwright") as mock_pw:
@@ -133,14 +140,8 @@ def test_4_and_5_successful_connection_persists_credentials_and_advances_onboard
 def test_6_failed_and_cancelled_connection_does_not_advance_onboarding(test_client):
     """6. When user cancels or login fails, onboarding does NOT advance and remains at LINKEDIN."""
     uid = uuid.uuid4().hex[:8]
-    signup_res = test_client.post('/api/auth/signup', json={
-        "name": f"User {uid}",
-        "email": f"fail_{uid}@example.com",
-        "phone": _random_phone(),
-        "password": "Password123!"
-    })
-    assert signup_res.status_code == 201
-    user_id = signup_res.get_json()["user"]["user_id"]
+    user = _signup_and_verify(test_client, f"User {uid}", f"fail_{uid}@example.com", _random_phone())
+    user_id = user.user_id
 
     # Mock Playwright session where page was closed before feed navigation
     with patch("legacy.profile_extractor.sync_playwright") as mock_pw:
@@ -169,14 +170,8 @@ def test_6_failed_and_cancelled_connection_does_not_advance_onboarding(test_clie
 def test_7_expired_session_preserves_encrypted_credentials(test_client):
     """7. Expired session marks status EXPIRED non-destructively while preserving ciphertext."""
     uid = uuid.uuid4().hex[:8]
-    signup_res = test_client.post('/api/auth/signup', json={
-        "name": f"User {uid}",
-        "email": f"exp_{uid}@example.com",
-        "phone": _random_phone(),
-        "password": "Password123!"
-    })
-    assert signup_res.status_code == 201
-    user_id = signup_res.get_json()["user"]["user_id"]
+    user = _signup_and_verify(test_client, f"User {uid}", f"exp_{uid}@example.com", _random_phone())
+    user_id = user.user_id
 
     raw_cookie = json.dumps({"li_at": f"exp_cookie_{uid}", "JSESSIONID": f"ajax:{uid}"})
     save_linkedin_connection(user_id, raw_cookie)
@@ -202,14 +197,8 @@ def test_7_expired_session_preserves_encrypted_credentials(test_client):
 def test_8_reloading_page_restores_connection_state_from_backend(test_client):
     """8. Page status endpoint reconstructs connected state from the database on reload."""
     uid = uuid.uuid4().hex[:8]
-    signup_res = test_client.post('/api/auth/signup', json={
-        "name": f"User {uid}",
-        "email": f"reload_{uid}@example.com",
-        "phone": _random_phone(),
-        "password": "Password123!"
-    })
-    assert signup_res.status_code == 201
-    user_id = signup_res.get_json()["user"]["user_id"]
+    user = _signup_and_verify(test_client, f"User {uid}", f"reload_{uid}@example.com", _random_phone())
+    user_id = user.user_id
 
     # Initially disconnected
     res1 = test_client.get('/api/auth/linkedin/status')
@@ -230,13 +219,7 @@ def test_8_reloading_page_restores_connection_state_from_backend(test_client):
 def test_9_protected_routes_cannot_bypass_onboarding(test_client):
     """9. A user with onboarding_step='LINKEDIN' attempting to access protected routes is redirected to /connect-linkedin."""
     uid = uuid.uuid4().hex[:8]
-    res_signup = test_client.post('/api/auth/signup', json={
-        "name": f"User {uid}",
-        "email": f"guard_{uid}@example.com",
-        "phone": _random_phone(),
-        "password": "Password123!"
-    })
-    assert res_signup.status_code == 201
+    _signup_and_verify(test_client, f"User {uid}", f"guard_{uid}@example.com", _random_phone())
 
     # Cannot bypass to company
     r_company = test_client.get('/company', follow_redirects=False)
@@ -263,19 +246,13 @@ def test_10_multi_user_connection_isolation(test_client):
     uid = uuid.uuid4().hex[:8]
 
     # User A
-    res_a = test_client.post('/api/auth/signup', json={
-        "name": f"Alice {uid}", "email": f"alice_{uid}@example.com", "phone": _random_phone(), "password": "Password123!"
-    })
-    assert res_a.status_code == 201
-    user_a_id = res_a.get_json()["user"]["user_id"]
+    user_a = _signup_and_verify(test_client, f"Alice {uid}", f"alice_{uid}@example.com", _random_phone())
+    user_a_id = user_a.user_id
     test_client.post('/api/auth/logout')
 
     # User B
-    res_b = test_client.post('/api/auth/signup', json={
-        "name": f"Bob {uid}", "email": f"bob_{uid}@example.com", "phone": _random_phone(), "password": "Password123!"
-    })
-    assert res_b.status_code == 201
-    user_b_id = res_b.get_json()["user"]["user_id"]
+    user_b = _signup_and_verify(test_client, f"Bob {uid}", f"bob_{uid}@example.com", _random_phone())
+    user_b_id = user_b.user_id
 
     # Bob connects
     raw_b = json.dumps({"li_at": f"bob_cookie_{uid}", "JSESSIONID": f"ajax:bob_{uid}"})

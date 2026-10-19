@@ -72,7 +72,7 @@ def test_correct_otp_verifies_successfully_and_creates_session(client):
     assert verify_res.status_code == 200
     vdata = verify_res.get_json()
     assert vdata["success"] is True
-    assert vdata["redirect"] == "/company"
+    assert vdata["redirect"] == "/connect-linkedin"
     
     # User is now verified in DB
     user = db_session.query(UserTable).filter_by(email_id=email).first()

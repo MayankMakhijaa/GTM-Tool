@@ -12,7 +12,7 @@ from time import sleep
 from urllib.parse import urlencode, quote
 from typing import Dict, Union, Optional, List, Literal
 
-from open_linkedin_api.client import Client
+from open_linkedin_api.client import Client, UnauthorizedException, ChallengeException
 from open_linkedin_api.utils.helpers import (
     get_id_from_urn,
     get_urn_from_raw_update,
@@ -86,7 +86,47 @@ class Linkedin(object):
         evade()
 
         url = f"{self.client.API_BASE_URL if not base_request else self.client.LINKEDIN_BASE_URL}{uri}"
-        return self.client.session.get(url, **kwargs)
+        if "allow_redirects" not in kwargs:
+            kwargs["allow_redirects"] = False
+
+        res = self.client.session.get(url, **kwargs)
+
+        if res.status_code in (301, 302, 303, 307, 308):
+            location = res.headers.get("Location", "")
+            set_cookie_raw = res.headers.get("Set-Cookie", "")
+            clear_site_data = res.headers.get("Clear-Site-Data", "").lower()
+
+            # Categorize redirect path cleanly without sensitive parameters
+            loc_lower = location.lower()
+            if any(k in loc_lower for k in ["/uas/login", "login"]):
+                category = "login"
+            elif any(k in loc_lower for k in ["checkpoint", "challenge"]):
+                category = "checkpoint_challenge"
+            elif "authwall" in loc_lower:
+                category = "authwall"
+            elif any(p in loc_lower for p in ["/voyager/api/me", "voyager/api/me", "api/graphql"]):
+                category = "session_revoked_self_redirect"
+            else:
+                category = "redirect"
+
+            is_cookie_cleared = (
+                "storage" in clear_site_data
+                or ("li_at" in set_cookie_raw and ("max-age=0" in set_cookie_raw.lower() or "1970" in set_cookie_raw))
+            )
+            if is_cookie_cleared:
+                category = f"{category}_cookie_invalidated"
+
+            raise UnauthorizedException(
+                f"LinkedIn session redirected ({res.status_code}) to category '{category}'. Session expired or challenged."
+            )
+
+        if res.status_code in (401, 403):
+            raise UnauthorizedException(f"LinkedIn session unauthorized (status {res.status_code}).")
+
+        if res.status_code == 429:
+            raise Exception("LinkedIn API rate limit exceeded (status 429).")
+
+        return res
 
     def _cookies(self):
         """Return client cookies"""
@@ -247,7 +287,8 @@ class Linkedin(object):
                 f"flagshipSearchIntent:SEARCH_SRP,"
                 f"queryParameters:{default_params['filters']},"
                 f"includeFiltersInResponse:false))&queryId=voyagerSearchDashClusters"
-                f".b0928897b71bd00a5a7291755dcd64f0"
+                f".b0928897b71bd00a5a7291755dcd64f0",
+                headers={"accept": "application/vnd.linkedin.normalized+json+2.1"},
             )
             data = res.json()
 

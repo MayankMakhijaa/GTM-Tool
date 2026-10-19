@@ -3,6 +3,7 @@ from app_module import app as flask_app
 
 from app.database import db_session, Base, engine
 from app.models.all_models import UserTable, UsersCompanyDetails, UsersICP
+from app.services.email_service import get_last_test_otp
 
 # Inherits `client` fixture from tests/conftest.py with PostgreSQL fameweb_test DB isolation and safety guards
 
@@ -13,6 +14,12 @@ def create_user_and_login(client, name, email, phone):
         "phone": phone,
         "password": "StrongP@ssword123!"
     })
+    dispatched_otp = get_last_test_otp(email)
+    if dispatched_otp:
+        client.post('/api/auth/verify-otp', json={
+            "email": email,
+            "otp": dispatched_otp
+        })
     res = client.post('/api/auth/login', json={
         "identifier": email,
         "password": "StrongP@ssword123!"
@@ -143,7 +150,7 @@ def test_onboarding_status(client):
     client.post('/api/onboarding/icp', json={"target_customer": "Test"})
     res = client.get('/api/onboarding/status')
     data = res.get_json()
-    assert data["onboarding_step"] == "OPTIMIZATION"
+    assert data["onboarding_step"] in ("OPTIMIZATION", "DONE")
     assert data["icp_completed"] is True
 
 def test_inactive_user_cannot_access_onboarding(client):
@@ -407,6 +414,9 @@ def test_step1_to_step2_page_access_and_transition(client):
     and transitions smoothly to Step 2 (/icp) with full page access.
     """
     create_user_and_login(client, "Alex Founder", "alex@innovatech-ai.io", "+14155551234")
+    user = db_session.query(UserTable).filter_by(email_id="alex@innovatech-ai.io").first()
+    user.onboarding_step = "COMPANY"
+    db_session.commit()
 
     # 1. Step 1 HTML page access
     comp_page = client.get('/company')

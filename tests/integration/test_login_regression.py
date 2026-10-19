@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 import pytest
 from app.models.all_models import UserTable
@@ -21,6 +22,7 @@ def existing_user():
             phone="+14155559000",
             password="ValidPassword123!"
         )
+    user.email_verified_at = datetime.utcnow()
     user.onboarding_step = "OPTIMIZATION"
     db_session.commit()
     return {"user_id": user.user_id, "email": email, "password": "ValidPassword123!"}

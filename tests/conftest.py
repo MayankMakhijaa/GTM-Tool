@@ -34,7 +34,17 @@ def assert_safe_test_db(db_url: str):
 # Configure environment variables BEFORE importing any app modules
 TEST_DB_URL = os.environ.get("TEST_DATABASE_URL")
 if not TEST_DB_URL:
-    TEST_DB_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/fameweb_test"
+    db_env = os.environ.get("DATABASE_URL")
+    if not db_env and os.path.exists(os.path.join(project_root, ".env")):
+        with open(os.path.join(project_root, ".env")) as f:
+            for line in f:
+                if line.startswith("DATABASE_URL="):
+                    db_env = line.split("=", 1)[1].strip()
+                    break
+    if db_env:
+        TEST_DB_URL = db_env.rsplit("/", 1)[0] + "/fameweb_test"
+    else:
+        TEST_DB_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/fameweb_test"
 
 assert_safe_test_db(TEST_DB_URL)
 
@@ -43,6 +53,9 @@ os.environ["FLASK_TESTING"] = "1"
 os.environ["SMTP_HOST"] = ""
 os.environ["GOOGLE_MAPS_API_KEY"] = ""
 os.environ["GOOGLE_PLACES_API_KEY"] = ""
+if not os.environ.get("LINKEDIN_SESSION_ENCRYPTION_KEY"):
+    from cryptography.fernet import Fernet
+    os.environ["LINKEDIN_SESSION_ENCRYPTION_KEY"] = Fernet.generate_key().decode()
 
 # Load root app.py as sys.modules["app_module"] if not present
 if "app_module" not in sys.modules:
@@ -55,7 +68,7 @@ if "app_module" not in sys.modules:
 from app_module import app as flask_app
 import app.database as app_db
 from app.database import Base, engine, db_session
-from app.models.all_models import UserTable, UsersCompanyDetails, UsersICP, EmailVerificationOTP
+from app.models.all_models import UserTable, UsersCompanyDetails, UsersICP, EmailVerificationOTP, UsersLinkedinDetails
 from app.security.session import login_required
 
 if '/api/protected_test' not in [rule.rule for rule in flask_app.url_map.iter_rules()]:
@@ -79,12 +92,25 @@ def print_effective_test_db():
 def clean_db():
     assert_safe_test_db(str(engine.url))
     # Clean up test database before test
+    db_session.rollback()
+    from app.models.all_models import UsersProfiles, GlobalProfiles, ResearchJobs, ConnectAndMessage
+    db_session.query(ConnectAndMessage).delete(synchronize_session=False)
+    db_session.query(UsersProfiles).delete(synchronize_session=False)
+    db_session.query(ResearchJobs).delete(synchronize_session=False)
+    db_session.query(GlobalProfiles).delete(synchronize_session=False)
     db_session.query(EmailVerificationOTP).delete(synchronize_session=False)
+    db_session.query(UsersLinkedinDetails).delete(synchronize_session=False)
     db_session.query(UsersICP).delete(synchronize_session=False)
     db_session.query(UsersCompanyDetails).delete(synchronize_session=False)
     db_session.query(UserTable).delete(synchronize_session=False)
     db_session.commit()
+    try:
+        from app.services.scraping_service import RATING_CACHE
+        RATING_CACHE.clear()
+    except Exception:
+        pass
     yield
+    db_session.rollback()
     db_session.remove()
 
 @pytest.fixture

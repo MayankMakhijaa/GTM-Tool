@@ -1,4 +1,4 @@
-        import re
+import re
 import json
 import asyncio
 import logging
@@ -1843,9 +1843,53 @@ def research_public_company_ratings(
 
 
 
+def is_google_search_configured() -> bool:
+    """Checks whether Google Custom Search API credentials are fully configured."""
+    key = getattr(Config, "GOOGLE_SEARCH_KEY", None)
+    cx = getattr(Config, "GOOGLE_SEARCH_CX", None)
+    return bool(key and str(key).strip() and cx and str(cx).strip())
+
+
+def validate_google_search_config() -> Dict[str, Any]:
+    """
+    Validates Google Custom Search configuration without exposing sensitive secrets.
+    Returns structured configuration status and setup instructions if missing.
+    """
+    key = getattr(Config, "GOOGLE_SEARCH_KEY", None)
+    cx = getattr(Config, "GOOGLE_SEARCH_CX", None)
+    has_key = bool(key and str(key).strip())
+    has_cx = bool(cx and str(cx).strip())
+
+    if has_key and has_cx:
+        return {
+            "configured": True,
+            "status": "CONFIGURED",
+            "message": "Google Custom Search API credentials are fully configured."
+        }
+
+    missing = []
+    if not has_key:
+        missing.append("GOOGLE_SEARCH_KEY")
+    if not has_cx:
+        missing.append("GOOGLE_SEARCH_CX")
+
+    return {
+        "configured": False,
+        "status": "NOT_CONFIGURED",
+        "missing": missing,
+        "message": f"Google Custom Search is not configured. Missing environment variables: {', '.join(missing)}.",
+        "setup_instructions": (
+            "To enable Google Custom Search as a discovery provider:\n"
+            "1. Obtain a Google Cloud Custom Search API Key (GOOGLE_SEARCH_KEY) from Google Cloud Console.\n"
+            "2. Create a Programmable Search Engine at https://programmablesearchengine.google.com with 'Search the entire web' enabled to get a Search Engine ID (GOOGLE_SEARCH_CX).\n"
+            "3. Add GOOGLE_SEARCH_KEY and GOOGLE_SEARCH_CX to your .env file."
+        )
+    }
+
+
 def perform_public_web_search(query: str, max_results: int = 3) -> List[Dict[str, str]]:
     """
-    Performs a permitted public web search using DuckDuckGo (or Google Custom Search API if configured).
+    Performs a permitted public web search using Google Custom Search API (if configured) or DuckDuckGo.
     Returns list of dicts: [{"title": ..., "snippet": ..., "url": ...}].
     Applies SSRF guards on lead URLs.
     Fast execution: strict 2.5s timeout, no headless browser spawns, fails fast with SearchEngineUnavailableError.
@@ -1858,7 +1902,7 @@ def perform_public_web_search(query: str, max_results: int = 3) -> List[Dict[str
     search_succeeded: bool = False
 
     # Option A: Google Custom Search API if configured
-    if Config.GOOGLE_SEARCH_KEY and Config.GOOGLE_SEARCH_CX:
+    if is_google_search_configured():
         try:
             res = requests.get(
                 "https://www.googleapis.com/customsearch/v1",
@@ -1882,6 +1926,11 @@ def perform_public_web_search(query: str, max_results: int = 3) -> List[Dict[str
                             })
                 if leads:
                     return leads[:max_results]
+                return []
+            elif res.status_code == 429:
+                engine_errors.append("Google Custom Search quota exceeded (HTTP 429)")
+            elif res.status_code in (400, 403):
+                engine_errors.append(f"Google Custom Search authentication or permission error (HTTP {res.status_code})")
             else:
                 engine_errors.append(f"Google HTTP {res.status_code}")
         except Exception as e:

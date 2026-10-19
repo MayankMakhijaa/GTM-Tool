@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 from app.models.all_models import UserTable
 from app.database import db_session
@@ -15,10 +16,15 @@ def sample_user():
             email_id="ui_test_user@fameweb.ai",
             phone_no="+1555987654",
             password_hash="pbkdf2:sha256:1000$test$test",
+            email_verified_at=datetime.utcnow(),
             onboarding_step="OPTIMIZATION",
             is_active=True
         )
         db_session.add(user)
+        db_session.commit()
+    else:
+        user.email_verified_at = datetime.utcnow()
+        user.onboarding_step = "OPTIMIZATION"
         db_session.commit()
     return {"user_id": user.user_id, "name": user.name}
 

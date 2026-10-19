@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+from datetime import datetime
 import pytest
 from unittest.mock import MagicMock, patch
 from requests.exceptions import Timeout, ConnectionError
@@ -119,6 +120,7 @@ def test_multi_user_reconnection_isolation():
         mock_page.is_closed.return_value = False
         mock_page.url = "https://www.linkedin.com/feed/"
         mock_page.title.return_value = "LinkedIn Feed"
+        mock_page.locator.return_value.count.return_value = 1
         mock_ctx.pages = [mock_page]
         mock_ctx.cookies.return_value = [
             {"name": "li_at", "value": "alice_new_cookie", "domain": ".linkedin.com", "path": "/"},
@@ -126,7 +128,8 @@ def test_multi_user_reconnection_isolation():
         ]
         mock_pw.return_value.__enter__.return_value.chromium.launch_persistent_context.return_value = mock_ctx
 
-        res = launch_interactive_linkedin_login(user_a.user_id)
+        with patch("time.sleep", return_value=None):
+            res = launch_interactive_linkedin_login(user_a.user_id)
         assert res["success"] is True
 
     # Alice updated
@@ -261,3 +264,78 @@ def test_signup_onboarding_state_consistency():
     save_company(user.user_id, {"website_url": "https://eve.com", "company_name": "Eve Corp"})
     db_session.refresh(user)
     assert user.onboarding_step == "ICP"
+
+def test_session_validation_detects_self_redirect_as_expired():
+    uid = uuid.uuid4().hex[:8]
+    user = UserTable(name="SelfRedir", email_id=f"redir_{uid}@example.com", password_hash="hash")
+    db_session.add(user)
+    db_session.commit()
+
+    raw_cookie = json.dumps({"li_at": "cookie_redir", "JSESSIONID": "ajax:redir"})
+    save_linkedin_connection(user.user_id, raw_cookie)
+    record = db_session.query(UsersLinkedinDetails).filter_by(user_id=user.user_id).first()
+    saved_ciphertext = record.auth_data_encrypted
+
+    mock_resp = Response()
+    mock_resp.status_code = 302
+    mock_resp.headers["Location"] = "https://www.linkedin.com/voyager/api/me"
+
+    with patch("requests.Session.get", return_value=mock_resp):
+        res = validate_user_session(user.user_id)
+        assert res["valid"] is False
+        assert res["category"] == "expired"
+
+    db_session.refresh(record)
+    assert record.connection_status == "EXPIRED"
+    assert record.auth_data_encrypted == saved_ciphertext
+
+def test_session_validation_detects_clear_site_data_header_as_expired():
+    uid = uuid.uuid4().hex[:8]
+    user = UserTable(name="ClearData", email_id=f"cleardata_{uid}@example.com", password_hash="hash")
+    db_session.add(user)
+    db_session.commit()
+
+    raw_cookie = json.dumps({"li_at": "cookie_clear", "JSESSIONID": "ajax:clear"})
+    save_linkedin_connection(user.user_id, raw_cookie)
+    record = db_session.query(UsersLinkedinDetails).filter_by(user_id=user.user_id).first()
+
+    mock_resp = Response()
+    mock_resp.status_code = 302
+    mock_resp.headers["Location"] = "https://www.linkedin.com/some/path"
+    mock_resp.headers["Clear-Site-Data"] = '"storage"'
+
+    with patch("requests.Session.get", return_value=mock_resp):
+        res = validate_user_session(user.user_id)
+        assert res["valid"] is False
+        assert res["category"] == "expired"
+
+    db_session.refresh(record)
+    assert record.connection_status == "EXPIRED"
+
+def test_reconnect_route_fails_when_validation_fails():
+    uid = uuid.uuid4().hex[:8]
+    user = UserTable(
+        name="ReconFail",
+        email_id=f"reconfail_{uid}@example.com",
+        password_hash="hash",
+        email_verified_at=datetime.utcnow()
+    )
+    db_session.add(user)
+    db_session.commit()
+    user_id = user.user_id
+
+    app.config["TESTING"] = True
+    app.config["WTF_CSRF_ENABLED"] = False
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess["user_id"] = user_id
+
+        # Mock interactive login returning success, but validate_user_session reporting invalid/expired
+        with patch("legacy.profile_extractor.launch_interactive_linkedin_login", return_value={"success": True}), \
+             patch("app.integrations.linkedin.voyager_client.validate_user_session", return_value={"valid": False, "category": "expired", "message": "Session expired"}):
+            res = client.post('/api/auth/linkedin/reconnect')
+            assert res.status_code == 400
+            data = res.get_json()
+            assert data["success"] is False
+            assert data["connected"] is False
+            assert data["error"] == "VALIDATION_FAILED"

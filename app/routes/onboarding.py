@@ -171,6 +171,21 @@ def update_icp_details():
         return jsonify({"success": False, "message": "Unable to save ICP details. Please try again."}), 500
 
 
+@onboarding_bp.route('/countries', methods=['GET'])
+def get_countries():
+    """
+    Returns canonical countries, optionally filtered by search query.
+    Used for location autocomplete suggestions.
+    """
+    from app.services.country_service import CANONICAL_COUNTRIES, search_countries
+    query = (request.args.get('query') or request.args.get('q') or '').strip()
+    if query:
+        results = search_countries(query)
+    else:
+        results = CANONICAL_COUNTRIES
+    return jsonify({"success": True, "countries": results}), 200
+
+
 @onboarding_bp.route('/status', methods=['GET'])
 @login_required
 def get_status():

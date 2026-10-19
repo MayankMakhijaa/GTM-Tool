@@ -2,6 +2,7 @@ import pytest
 from app_module import app as flask_app
 from app.database import db_session
 from app.models.all_models import UserTable, UsersCompanyDetails, UsersICP
+from app.services.email_service import get_last_test_otp
 
 def create_user_and_login(client, name, email, phone):
     client.post('/api/auth/signup', json={
@@ -10,6 +11,9 @@ def create_user_and_login(client, name, email, phone):
         "phone": phone,
         "password": "StrongP@ssword123!"
     })
+    otp = get_last_test_otp(email)
+    if otp:
+        client.post('/api/auth/verify-otp', json={"email": email, "otp": otp})
     res = client.post('/api/auth/login', json={
         "identifier": email,
         "password": "StrongP@ssword123!"

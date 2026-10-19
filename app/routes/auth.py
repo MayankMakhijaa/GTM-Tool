@@ -234,15 +234,25 @@ def reconnect_linkedin():
     if not result.get("success"):
         return jsonify({
             "success": False,
+            "connected": False,
             "message": result.get("message", "Failed to connect LinkedIn session."),
             "error": result.get("error", "RECONNECT_FAILED")
         }), 400
 
     validation = validate_user_session(user_id)
+    if not validation.get("valid"):
+        return jsonify({
+            "success": False,
+            "connected": False,
+            "status": validation.get("category", "unknown"),
+            "message": validation.get("message", "LinkedIn session connected but validation failed. Please try reconnecting."),
+            "error": "VALIDATION_FAILED"
+        }), 400
+
     return jsonify({
         "success": True,
-        "connected": validation.get("valid", False),
-        "status": validation.get("category", "unknown"),
+        "connected": True,
+        "status": validation.get("category", "authenticated"),
         "message": "LinkedIn session reconnected successfully."
     }), 200
 

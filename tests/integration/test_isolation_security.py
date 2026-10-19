@@ -68,7 +68,19 @@ def test_development_db_remains_unmodified_by_test_run(client):
     assert test_user is not None
 
     # 3. Read-only check against fameweb (development DB) to verify it was NOT modified
-    dev_conn = psycopg.connect('postgresql://postgres:postgres@localhost:5432/fameweb')
+    dev_db_url = os.environ.get("DATABASE_URL", "")
+    if "fameweb_test" in dev_db_url:
+        dev_db_url = dev_db_url.replace("fameweb_test", "fameweb")
+    elif not dev_db_url and os.path.exists(".env"):
+        with open(".env") as f:
+            for line in f:
+                if line.startswith("DATABASE_URL="):
+                    dev_db_url = line.split("=", 1)[1].strip()
+                    break
+    if not dev_db_url:
+        dev_db_url = "postgresql://postgres:postgres@localhost:5432/fameweb"
+    dev_conn_str = dev_db_url.replace("postgresql+psycopg://", "postgresql://")
+    dev_conn = psycopg.connect(dev_conn_str)
     cur = dev_conn.cursor()
     cur.execute("SELECT COUNT(*) FROM user_table WHERE email_id = 'isolation_test@company.com'")
     count = cur.fetchone()[0]
