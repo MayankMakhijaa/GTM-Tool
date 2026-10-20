@@ -1,6 +1,21 @@
+# Environment secrets
 .env
+.env.*
+!.env.example
+
+# Local browser profiles and persistent sessions
+browser_profiles/
+browser_profile/
+
+# Local collections and debug data
+collections.json
+output/
+
+# Python virtual environment and bytecode
 venv/
 __pycache__/
-browser_profile/
-output/
-*.pyc
+*.py[cod]
+
+# Local logs and test dumps
+*.log
+*.dump
