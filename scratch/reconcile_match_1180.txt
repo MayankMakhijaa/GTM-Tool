@@ -1,0 +1,89 @@
+Created At: 2026-11-10T15:34:34+05:30
+Completed At: 2026-11-10T15:34:35+05:30
+Command exited with code 0.
+
+Command output:
+Created At: 2026-11-09T20:05:47+05:30
+Completed At: 2026-11-09T20:05:47+05:30
+Showing lines 1860-1940 of 2431
+1860:                     fail_job.completed_at = datetime.utcnow()
+1861:                     fail_job.heartbeat_at = datetime.utcnow()
+1862:                     db_session.commit()
+1863:             except Exception as commit_err:
+1864:                 logger.error(f"[GTM Worker] Failed to persist failure status for job {job_id}: {commit_err}")
+1865:                 db_session.rollback()
+1866:         finally:
+1867:             db_session.remove()
+1868: 
+1869: 
+1870: # ====================================================================
+1871: # STALE JOB RECONCILIATION & RECOVERY
+1872: # ====================================================================
+1873: 
+1874: DEFAULT_STALE_THRESHOLD_MINUTES = 15
+1875: 
+1876: 
+1877: def reconcile_stale_research_jobs(
+1878:     max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,
+1879:     session: Optional[Any] = None
+1880: ) -> Dict[str, Any]:
+1881:     """
+1882:     Detects and safely reconciles abandoned/stale QUEUED or RUNNING research jobs.
+1883:     Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to guarantee
+1884:     safe concurrent execution across multiple worker/app processes.
+1885: 
+1886:     Reconciliation rules:
+1887:     1. Selects candidate jobs in QUEUED or RUNNING whose heartbeat_at (or created_at if heartbeat_at is NULL)
+1888:        is strictly older than max_stale_minutes.
+1889:     2. Re-validates job status and timestamp under exclusive lock.
+1890:     3. Counts durably persisted, qualified leads attributable to that exact job.
+1891:     4. If reservation is RESERVED:
+1892:        - If durable count > 0, settles Q leads using captured pricing snapshot via stable key gtm_job_settle_{job_id}.
+1893:        - If durable count == 0, releases reservation via stable key gtm_job_rel_{job_id}.
+1894:     5. If reservation is already SETTLED or RELEASED:
+1895:        - Preserves the existing settlement/release outcome without duplicate charge or conflicting mutation.
+1896:     6. If reservation is missing/unexpected:
+1897:        - Records a clear diagnostic and marks the job failed without fabricating ledger entries.
+1898:     7. Sets terminal status FAILED with truthful diagnostic explanation.
+1899:     """
+1900:     s = session or db_session
+1901:     now = datetime.utcnow()
+1902:     cutoff = now - timedelta(minutes=max_stale_minutes)
+1903: 
+1904:     stats = {
+1905:         "examined": 0,
+1906:         "recovered": 0,
+1907:         "skipped": 0,
+1908:         "failed_to_reconcile": 0,
+1909:         "details": []
+1910:     }
+1911: 
+1912:     # Query candidate job IDs first
+1913:     candidate_ids = [
+1914:         row[0] for row in s.query(ResearchJobs.id).filter(
+1915:             ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value]),
+1916:             or_(
+1917:                 and_(ResearchJobs.heartbeat_at.isnot(None), ResearchJobs.heartbeat_at < cutoff),
+1918:                 and_(ResearchJobs.heartbeat_at.is_(None), ResearchJobs.created_at < cutoff)
+1919:             )
+1920:         ).all()
+1921:     ]
+1922: 
+1923:     stats["examined"] = len(candidate_ids)
+1924:     if not candidate_ids:
+1925:         return stats
+1926: 
+1927:     for candidate_id in candidate_ids:
+1928:         try:
+1929:             # Acquire row lock with skip_locked=True for safe concurrency
+1930:             job = s.query(ResearchJobs).filter_by(id=candidate_id).with_for_update(skip_locked=True).first()
+1931:             if not job:
+1932:                 # Locked by another process or no longer exists
+1933:                 stats["skipped"] += 1
+1934:                 continue
+1935: 
+1936:             # Re-verify staleness and status under lock
+1937:             if job.status not in (ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value):
+1938:                 stats["skipped"] += 1
+1939:                 continue
+1940: 

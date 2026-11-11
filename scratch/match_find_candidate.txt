@@ -1,0 +1,43 @@
+Created At: 2026-11-09T22:13:37+05:30
+Completed At: 2026-11-09T22:13:38+05:30
+Command exited with code 0.
+
+Command output:
+Created At: 2026-11-09T19:34:08+05:30
+Completed At: 2026-11-09T19:34:09+05:30
+Command exited with code 0.
+
+Command output:
+
+> app\services\gtm_pipeline_service.py:1103:def find_existing_global_candidates(
+  app\services\gtm_pipeline_service.py:1104:    user_id: int,
+  app\services\gtm_pipeline_service.py:1105:    user_context: Dict[str, Any],
+  app\services\gtm_pipeline_service.py:1106:    limit: int = 25
+  app\services\gtm_pipeline_service.py:1107:) -> List[Dict[str, Any]]:
+  app\services\gtm_pipeline_service.py:1108:    """
+  app\services\gtm_pipeline_service.py:1109:    Finds existing GlobalProfiles matching user's ICP that do NOT already 
+have
+  app\services\gtm_pipeline_service.py:1110:    an association in UsersProfiles for this user.
+  app\services\gtm_pipeline_service.py:1111:    Adheres to:
+  app\services\gtm_pipeline_service.py:1112:    - Reuse existing global profile records without creating duplicates.
+  app\services\gtm_pipeline_service.py:1113:    - Exclude (user_id, global_id) associations that already exist.
+  app\services\gtm_pipeline_service.py:1114:    - Query based on ICP target roles, keywords, and industry.
+  app\services\gtm_pipeline_service.py:1115:    """
+  app\services\gtm_pipeline_service.py:1116:    if limit <= 0:
+  app\services\gtm_pipeline_service.py:1117:        return []
+  app\services\gtm_pipeline_service.py:1118:
+  app\services\gtm_pipeline_service.py:1119:    # Get all global_ids already associated with this user
+  app\services\gtm_pipeline_service.py:1120:    existing_assoc_ids = [
+  app\services\gtm_pipeline_service.py:1121:        row[0] for row in 
+db_session.query(UsersProfiles.global_id).filter_by(user_id=user_id).all()
+  app\services\gtm_pipeline_service.py:1122:    ]
+  app\services\gtm_pipeline_service.py:1123:
+  app\services\gtm_pipeline_service.py:1124:    query = db_session.query(GlobalProfiles)
+  app\services\gtm_pipeline_service.py:1125:    if existing_assoc_ids:
+  app\services\gtm_pipeline_service.py:1126:        query = 
+query.filter(~GlobalProfiles.global_id.in_(existing_assoc_ids))
+  app\services\gtm_pipeline_service.py:1127:
+  app\services\gtm_pipeline_service.py:1128:    icp_raw = user_context.get("icp_raw", {})
+
+
+

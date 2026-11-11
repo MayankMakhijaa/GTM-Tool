@@ -1,0 +1,74 @@
+Created At: 2026-11-05T00:06:51+05:30
+Completed At: 2026-11-05T00:06:51+05:30
+Showing lines 1730-1800 of 2056
+1730:         finally:
+1731:             db_session.remove()
+1732: 
+1733: 
+1734: # ====================================================================
+1735: # STALE JOB RECONCILIATION & RECOVERY
+1736: # ====================================================================
+1737: 
+1738: DEFAULT_STALE_THRESHOLD_MINUTES = 15
+1739: 
+1740: 
+1741: def reconcile_stale_research_jobs(
+1742:     max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,
+1743:     session: Optional[Any] = None
+1744: ) -> Dict[str, Any]:
+1745:     """
+1746:     Detects and safely reconciles abandoned/stale QUEUED or RUNNING research jobs.
+1747:     Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to guarantee
+1748:     safe concurrent execution across multiple worker/app processes.
+1749: 
+1750:     Reconciliation rules:
+1751:     1. Selects candidate jobs in QUEUED or RUNNING whose heartbeat_at (or created_at if heartbeat_at is NULL)
+1752:        is strictly older than max_stale_minutes.
+1753:     2. Re-validates job status and timestamp under exclusive lock.
+1754:     3. Counts durably persisted, qualified leads attributable to that exact job.
+1755:     4. If reservation is RESERVED:
+1756:        - If durable count > 0, settles Q leads using captured pricing snapshot via stable key gtm_job_settle_{job_id}.
+1757:        - If durable count == 0, releases reservation via stable key gtm_job_rel_{job_id}.
+1758:     5. If reservation is already SETTLED or RELEASED:
+1759:        - Preserves the existing settlement/release outcome without duplicate charge or conflicting mutation.
+1760:     6. If reservation is missing/unexpected:
+1761:        - Records a clear diagnostic and marks the job failed without fabricating ledger entries.
+1762:     7. Sets terminal status FAILED with truthful diagnostic explanation.
+1763:     """
+1764:     s = session or db_session
+1765:     now = datetime.utcnow()
+1766:     cutoff = now - timedelta(minutes=max_stale_minutes)
+1767: 
+1768:     stats = {
+1769:         "examined": 0,
+1770:         "recovered": 0,
+1771:         "skipped": 0,
+1772:         "failed_to_reconcile": 0,
+1773:         "details": []
+1774:     }
+1775: 
+1776:     # Query candidate job IDs first
+1777:     candidate_ids = [
+1778:         row[0] for row in s.query(ResearchJobs.id).filter(
+1779:             ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value]),
+1780:             or_(
+1781:                 and_(ResearchJobs.heartbeat_at.isnot(None), ResearchJobs.heartbeat_at < cutoff),
+1782:                 and_(ResearchJobs.heartbeat_at.is_(None), ResearchJobs.created_at < cutoff)
+1783:             )
+1784:         ).all()
+1785:     ]
+1786: 
+1787:     stats["examined"] = len(candidate_ids)
+1788:     if not candidate_ids:
+1789:         return stats
+1790: 
+1791:     for candidate_id in candidate_ids:
+1792:         try:
+1793:             # Acquire row lock with skip_locked=True for safe concurrency
+1794:             job = s.query(ResearchJobs).filter_by(id=candidate_id).with_for_update(skip_locked=True).first()
+1795:             if not job:
+1796:                 # Locked by another process or no longer exists
+1797:                 stats["skipped"] += 1
+1798:                 continue
+1799: 
+1800:             # Re-verify staleness and status under lock

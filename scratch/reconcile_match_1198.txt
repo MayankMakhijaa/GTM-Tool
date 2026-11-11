@@ -1,0 +1,9 @@
+Created At: 2026-11-10T15:35:21+05:30
+Completed At: 2026-11-10T15:35:22+05:30
+Command exited with code 1.
+
+Command output:
+  File "<string>", line 11
+    if 'def reconcile_stale_research_jobs' in cnt and 'stats[" examined\]'
+                                                                          ^
+SyntaxError: expected ':'

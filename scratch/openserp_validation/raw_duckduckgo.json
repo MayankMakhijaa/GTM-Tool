@@ -1,0 +1,22 @@
+{
+  "engine": "duckduckgo",
+  "endpoint": "duck",
+  "query": "site:linkedin.com/in \"VP Sales\" \"B2B SaaS\" India",
+  "url": "http://127.0.0.1:7000/duck/search?text=site%3Alinkedin.com%2Fin+%22VP+Sales%22+%22B2B+SaaS%22+India&limit=5",
+  "http_status": 429,
+  "took_seconds": 7.38,
+  "raw_response": {
+    "error": "captcha_detected",
+    "code": 429,
+    "request_id": "01a1bbec-dc44-7556-ae8b-9f09ddc23cf4",
+    "message": "captcha detected",
+    "meta": {
+      "engine": "duckduckgo",
+      "proxy_used": "direct"
+    }
+  },
+  "status_category": "RATE_LIMITED_OR_BLOCKED",
+  "results_count": 0,
+  "candidates": [],
+  "error_message": "HTTP Error 429: Too Many Requests"
+}

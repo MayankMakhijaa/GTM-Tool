@@ -1,0 +1,143 @@
+{
+  "engine": "bing",
+  "endpoint": "bing",
+  "query": "site:linkedin.com/in \"VP Sales\" \"B2B SaaS\" India",
+  "url": "http://127.0.0.1:7000/bing/search?text=site%3Alinkedin.com%2Fin+%22VP+Sales%22+%22B2B+SaaS%22+India&limit=5",
+  "http_status": 200,
+  "took_seconds": 3.81,
+  "raw_response": {
+    "query": {
+      "text": "site:linkedin.com/in \"VP Sales\" \"B2B SaaS\" India",
+      "engines_requested": [
+        "bing"
+      ]
+    },
+    "meta": {
+      "request_id": "01a1bbed-0101-7a52-bf90-ad115b158986",
+      "requested_at": "2026-11-08T16:10:34Z",
+      "took_ms": 3790,
+      "engines_failed": [],
+      "version": "2.1"
+    },
+    "results": [
+      {
+        "id": "s_1549bfbac65eacc8",
+        "rank": 1,
+        "type": "organic",
+        "title": "The best VPN for speed and security",
+        "url": "https://protonvpn.com/",
+        "display_url": "protonvpn.com",
+        "snippet": "Proton VPN protects your online privacy by hiding your real IP address. With your virtual location hidden, it's much harder for your \u2026",
+        "domain": "protonvpn.com",
+        "favicon": "https://protonvpn.com/favicon.ico",
+        "position": {
+          "absolute": 1
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "protonvpn",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_bcca0bc4f116d28f",
+        "rank": 2,
+        "type": "organic",
+        "title": "Homepage | Vice President of India | India",
+        "url": "https://vicepresidentofindia.nic.in/",
+        "display_url": "vicepresidentofindia.nic.in",
+        "snippet": "5 days ago \u00b7 Vice President Shri C. P. Radhakrishnan inaugurates GKNM college of Nursing in Coimbatore, TN. Vice President \u2026",
+        "domain": "vicepresidentofindia.nic.in",
+        "favicon": "https://vicepresidentofindia.nic.in/favicon.ico",
+        "position": {
+          "absolute": 2
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "nic.in",
+          "sld": "vicepresidentofindia",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_99386e2d13bdf9dc",
+        "rank": 3,
+        "type": "organic",
+        "title": "Vice President of India - Wikipedia",
+        "url": "https://en.m.wikipedia.org/wiki/Vice_President_of_India",
+        "display_url": "en.m.wikipedia.org \u203a wiki \u203a Vice_President_of_India",
+        "snippet": "The Vice President of India (ISO: Bh\u0101rata Ke Upar\u0101\u1e63\u1e6drapati) is the deputy head of state of the Republic of India, i.e. next to the \u2026",
+        "domain": "en.m.wikipedia.org",
+        "favicon": "https://en.m.wikipedia.org/favicon.ico",
+        "position": {
+          "absolute": 3
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "org",
+          "sld": "wikipedia",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "article",
+          "source_hint": "encyclopedia"
+        }
+      },
+      {
+        "id": "s_fd08ff841f2d1889",
+        "rank": 4,
+        "type": "organic",
+        "title": "Turbo VPN - Secure VPN Proxy - Apps on Google Play",
+        "url": "https://play.google.com/store/apps/details?hl=en&id=free.vpn.unblock.proxy.turbovpn",
+        "display_url": "play.google.com \u203a store \u203a apps \u203a details",
+        "snippet": "Download Turbo VPN now to enjoy fast, private and safe internet. The best unlimited free VPN proxy for android. You can enjoy \u2026",
+        "domain": "play.google.com",
+        "favicon": "https://play.google.com/favicon.ico",
+        "position": {
+          "absolute": 4
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "google",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_f400f6323efb63dc",
+        "rank": 5,
+        "type": "organic",
+        "title": "Vice president - Wikipedia",
+        "url": "https://en.m.wikipedia.org/wiki/Vice_President",
+        "display_url": "en.m.wikipedia.org \u203a wiki \u203a Vice_President",
+        "snippet": "In everyday speech, the abbreviation VP is used. In government, a vice president is a person whose primary responsibility is to act in \u2026",
+        "domain": "en.m.wikipedia.org",
+        "favicon": "https://en.m.wikipedia.org/favicon.ico",
+        "position": {
+          "absolute": 5
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "org",
+          "sld": "wikipedia",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "article",
+          "source_hint": "encyclopedia"
+        }
+      }
+    ],
+    "serp_features": [],
+    "pagination": {
+      "page": 1,
+      "has_more": true,
+      "next_start": 5
+    }
+  },
+  "status_category": "RESULTS_RETURNED",
+  "results_count": 5,
+  "candidates": [],
+  "error_message": null
+}

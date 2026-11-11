@@ -39,6 +39,113 @@ def login_required(f):
                     return redirect(url_for("pages.verify_email"))
             
         request.user_id = user_id
+        request.user = user
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_id = session.get('user_id')
+        if not user_id:
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "success": False,
+                    "error": "UNAUTHORIZED",
+                    "message": "Authentication required."
+                }), 401
+            from flask import redirect, url_for
+            return redirect(url_for('pages.login'))
+
+        user = get_user_by_id(user_id)
+        if not user or not user.is_active:
+            session.clear()
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "success": False,
+                    "error": "UNAUTHORIZED",
+                    "message": "User inactive or not found."
+                }), 401
+            from flask import redirect, url_for
+            return redirect(url_for('pages.login'))
+
+        if not is_user_email_verified(user):
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "success": False,
+                    "error": "EMAIL_NOT_VERIFIED",
+                    "message": "Email verification required.",
+                    "redirect": "/verify-email"
+                }), 403
+            from flask import redirect, url_for
+            return redirect(url_for('pages.verify_email'))
+
+        from app.models.all_models import UserRole
+        if user.role not in (UserRole.ADMIN.value, UserRole.SUPER_ADMIN.value):
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "success": False,
+                    "error": "FORBIDDEN",
+                    "message": "Administrator privileges required."
+                }), 403
+            from flask import redirect, url_for
+            return redirect(url_for('pages.dashboard'))
+
+        request.user_id = user_id
+        request.user = user
+        return f(*args, **kwargs)
+    return decorated_function
+
+def super_admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_id = session.get('user_id')
+        if not user_id:
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "success": False,
+                    "error": "UNAUTHORIZED",
+                    "message": "Authentication required."
+                }), 401
+            from flask import redirect, url_for
+            return redirect(url_for('pages.login'))
+
+        user = get_user_by_id(user_id)
+        if not user or not user.is_active:
+            session.clear()
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "success": False,
+                    "error": "UNAUTHORIZED",
+                    "message": "User inactive or not found."
+                }), 401
+            from flask import redirect, url_for
+            return redirect(url_for('pages.login'))
+
+        if not is_user_email_verified(user):
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "success": False,
+                    "error": "EMAIL_NOT_VERIFIED",
+                    "message": "Email verification required.",
+                    "redirect": "/verify-email"
+                }), 403
+            from flask import redirect, url_for
+            return redirect(url_for('pages.verify_email'))
+
+        from app.models.all_models import UserRole
+        if user.role != UserRole.SUPER_ADMIN.value:
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "success": False,
+                    "error": "FORBIDDEN",
+                    "message": "Super Administrator privileges required."
+                }), 403
+            from flask import redirect, url_for
+            return redirect(url_for('pages.dashboard'))
+
+        request.user_id = user_id
+        request.user = user
         return f(*args, **kwargs)
     return decorated_function
 

@@ -1,274 +1,552 @@
 {% extends "base.html" %}
-{% block title %}Fameweb{% endblock %}
+{% block title %}Bulk Email Outreach — Fameweb{% endblock %}
 {% block content %}
-<div class="flex flex-col w-full">
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const navLinks = document.querySelectorAll("aside nav a");
-      navLinks.forEach((link) => {
-        const text = link.textContent.trim();
-        if (text.includes("Emails")) {
-          link.className = "flex items-center gap-space-md px-space-md py-space-sm rounded-lg bg-primary-container text-on-primary font-label-md text-label-md shadow-sm";
-          const icon = link.querySelector(".material-symbols-outlined");
-          if (icon) icon.className = "material-symbols-outlined text-[20px] text-on-primary";
-        } else {
-          link.className = "flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors";
-        }
-      });
-    });
-  </script>
 <div class="w-full px-space-xl py-space-lg flex flex-col gap-space-lg">
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
-<div class="flex flex-col">
-<div class="flex items-center gap-space-xs">
-<span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Email Outreach</span>
-<span class="inline-flex items-center gap-1 ml-space-sm px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
-            AI Personalized Sequence
-          </span>
-</div>
-<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Create personalized outreach for your selected leads.</p>
-</div>
-<div class="flex items-center gap-space-sm self-start md:self-auto">
-<div class="inline-flex p-1 bg-surface-container rounded-lg">
-<button class="px-space-md py-1.5 rounded-lg font-label-md text-label-md text-on-surface-variant transition-colors hover:text-on-surface" id="mode-single-btn" onclick="setMode('single')" type="button">
-            Single Lead Preview (Shivam Dubey)
-          </button>
-<button class="px-space-md py-1.5 rounded-lg font-label-md text-label-md bg-surface-container-lowest text-primary shadow-sm font-semibold transition-all" id="mode-template-btn" onclick="setMode('template')" type="button">
-            Template Mode (<span id="btn-selected-count">4</span> selected)
-          </button>
-</div>
-</div>
-</div>
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
-<section class="xl:col-span-5 flex flex-col gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
-<div class="flex items-center justify-between pb-space-sm bg-surface-container-lowest">
-<div class="flex flex-col">
-<h2 class="font-headline-md text-headline-md text-on-surface">Target Recipients</h2>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Prioritize key stakeholders &amp; account fits</span>
-</div>
-<span class="px-space-sm py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm" id="selected-pill">
-            4 recipients selected
-          </span>
-</div>
-<div class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-low">
-<label class="flex items-center gap-space-sm cursor-pointer select-none">
-<input checked="" class="w-4 h-4 rounded text-primary focus:ring-primary accent-primary cursor-pointer" id="select-all-checkbox" onchange="toggleSelectAll(this)" type="checkbox"/>
-<span class="font-label-md text-label-md text-on-surface font-semibold">Select All</span>
-</label>
-<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-[16px]">filter_list</span>
-<span>Sorted by Fit Score</span>
-</div>
-</div>
-<div class="flex flex-col gap-space-xs" id="lead-list-container">
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+    <div class="flex flex-col">
+      <div class="flex items-center gap-space-xs">
+        <span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Bulk Email Campaigns</span>
+        <span class="inline-flex items-center gap-1 ml-space-sm px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
+          <span class="material-symbols-outlined text-[14px]">send</span>
+          User-Owned SMTP
+        </span>
+      </div>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Upload recipient CSVs, detect custom headers, compose personalized or identical emails, and dispatch via your connected sender account.</p>
+    </div>
+    <div class="flex items-center gap-space-sm">
+      <a href="/email-settings" class="inline-flex items-center gap-1 px-space-md py-space-sm rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors">
+        <span class="material-symbols-outlined text-[18px]">tune</span>
+        <span>Sender Settings</span>
+      </a>
+      <a href="/history" class="inline-flex items-center gap-1 bg-surface-container text-on-surface px-space-md py-space-sm rounded-lg hover:bg-surface-container-high font-label-md text-label-md transition-colors">
+        <span class="material-symbols-outlined text-[18px]">history</span>
+        <span>Sending History</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Multi-Step Flow Container -->
+  <div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+    <!-- Left Column: Step 1 (Upload CSV) & Step 2 (Detected Placeholders & Recipients) -->
+    <div class="xl:col-span-5 flex flex-col gap-space-lg">
+      <!-- Step 1: CSV Upload Card -->
+      <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+        <div class="flex items-center justify-between border-b border-surface-container pb-space-sm">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-xs font-bold flex items-center justify-center">1</span>
+            <h2 class="font-headline-md text-headline-md text-on-surface">Upload Recipient CSV</h2>
           </div>
-          <div class="p-space-md rounded-xl bg-surface-container flex flex-col gap-space-sm mt-space-xs">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Account Enrichment</span>
-<span class="font-label-sm text-label-sm text-primary flex items-center gap-0.5"><span class="w-2 h-2 rounded-full bg-tertiary inline-block"></span> 4 of 4 Ready</span>
-</div>
-<div class="grid grid-cols-3 gap-space-xs text-center">
-<div class="bg-surface-container-lowest p-2 rounded-lg">
-<div class="font-headline-md text-headline-md text-on-surface">3.8x</div>
-<div class="font-body-sm text-[11px] text-on-surface-variant">Avg Reply Rate</div>
-</div>
-<div class="bg-surface-container-lowest p-2 rounded-lg">
-<div class="font-headline-md text-headline-md text-on-surface">&lt;2min</div>
-<div class="font-body-sm text-[11px] text-on-surface-variant">Speed to Lead</div>
-</div>
-<div class="bg-surface-container-lowest p-2 rounded-lg">
-<div class="font-headline-md text-headline-md text-on-surface">100%</div>
-<div class="font-body-sm text-[11px] text-on-surface-variant">Deliverability</div>
-</div>
-</div>
-</div>
-</section>
-<section class="xl:col-span-7 flex flex-col gap-space-md">
-<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
-<div class="flex items-center justify-between pb-space-xs">
-<div class="flex items-center gap-space-sm">
-<span class="font-headline-md text-headline-md text-on-surface">Personalized Template Composer</span>
-<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm">Dynamic Variables</span>
-</div>
-<div class="flex items-center gap-space-xs">
-<button class="px-3 py-1 rounded-lg font-label-sm text-label-sm bg-primary text-on-primary transition-all" id="tab-compose" onclick="switchViewTab('compose')" type="button">Composer</button>
-<button class="px-3 py-1 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container transition-all" id="tab-preview" onclick="switchViewTab('preview')" type="button">Preview for Lead</button>
-</div>
-</div>
-<div class="flex flex-col gap-space-xs">
-<label class="font-label-md text-label-md text-on-surface font-semibold flex items-center justify-between">
-<span>Subject Line</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Resolved for Elena: "Quick idea for Veloce Security AI"</span>
-</label>
-<div class="flex items-center gap-space-xs px-space-md py-2.5 rounded-lg bg-surface-container-low focus-within:bg-surface-container-lowest focus-within:shadow-sm transition-all">
-<span class="font-body-md text-body-md text-on-surface">Quick idea for</span>
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary text-on-primary font-label-sm text-label-sm shadow-xs select-none">
-<span class="material-symbols-outlined text-[13px]">dataset</span>
-                Company Name
-                <span class="text-[10px] opacity-80">✕</span>
-</span>
-<input class="bg-transparent border-0 outline-none flex-1 font-body-md text-body-md text-on-surface placeholder:text-outline" id="subject-tail" placeholder="[Type additional context...]" type="text"/>
-</div>
-</div>
-<div class="flex flex-col gap-space-xs">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Personalization Token Palette (Click to append into editor)</span>
-<span class="font-body-sm text-body-sm text-primary flex items-center gap-0.5">
-<span class="material-symbols-outlined text-[14px]">bolt</span> Autofilled from CRM
-              </span>
-</div>
-<div class="flex flex-wrap gap-1.5 p-space-sm rounded-lg bg-surface-container-low">
-<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('First Name')" type="button">
-<span class="material-symbols-outlined text-[13px]">add</span> First Name
-              </button>
-<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Company Name')" type="button">
-<span class="material-symbols-outlined text-[13px]">add</span> Company Name
-              </button>
-<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Business Need')" type="button">
-<span class="material-symbols-outlined text-[13px]">add</span> Business Need
-              </button>
-<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Result Metric')" type="button">
-<span class="material-symbols-outlined text-[13px]">add</span> Result Metric
-              </button>
-<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Your Name')" type="button">
-<span class="material-symbols-outlined text-[13px]">add</span> Your Name
-              </button>
-<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Your Role')" type="button">
-<span class="material-symbols-outlined text-[13px]">add</span> Your Role
-              </button>
-<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface transition-all font-label-sm text-label-sm shadow-xs" onclick="insertToken('Your Link')" type="button">
-<span class="material-symbols-outlined text-[13px]">add</span> Your Link
-              </button>
-</div>
-</div>
-<div class="flex flex-col gap-0 rounded-xl overflow-hidden bg-surface-container-low shadow-inner" id="composer-mode-panel">
-<div class="flex items-center flex-wrap justify-between gap-space-xs p-space-sm bg-surface-container">
-<div class="flex items-center gap-1">
-<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface font-bold text-sm" title="Bold" type="button">B</button>
-<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface italic text-sm" title="Italic" type="button">I</button>
-<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface underline text-sm" title="Underline" type="button">U</button>
-<div class="h-4 w-px bg-outline-variant mx-1"></div>
-<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Link" type="button">
-<span class="material-symbols-outlined text-[18px]">link</span>
-</button>
-<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Bullet List" type="button">
-<span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
-</button>
-<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Numbered List" type="button">
-<span class="material-symbols-outlined text-[18px]">format_list_numbered</span>
-</button>
-<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Insert Image" type="button">
-<span class="material-symbols-outlined text-[18px]">image</span>
-</button>
-<button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-highest text-on-surface" title="Add Attachment" type="button">
-<span class="material-symbols-outlined text-[18px]">attach_file</span>
-</button>
-</div>
-<div class="flex items-center gap-space-xs">
-<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-xs hover:bg-surface-container-highest transition-colors" onclick="insertToken('Company Name')" type="button">
-<span class="material-symbols-outlined text-[14px] text-primary">data_object</span>
-<span>Insert Token ▼</span>
-</button>
-</div>
-</div>
-<div class="p-space-lg bg-surface-container-lowest min-h-[300px] outline-none font-body-lg text-body-lg text-on-surface leading-relaxed" contenteditable="true" id="email-editor">
-<p class="mb-4">Hi <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-md text-label-md align-middle shadow-xs">First Name</span>,</p>
-<p class="mb-4">Noticed <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-md text-label-md align-middle shadow-xs">Company Name</span> has been scaling <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-md text-label-md align-middle shadow-xs">Business Need</span> lately — congrats on the growth.</p>
-<p class="mb-4">Usually at that stage, teams start missing leads simply because there aren't enough hours to follow up with everyone fast enough, and speed-to-lead can make a major difference in conversions.</p>
-<p class="mb-4">We build AI agents that handle this automatically — responding to inbound leads in seconds, qualifying them, and booking calls straight into your calendar, 24/7.</p>
-<p class="mb-4">One client added <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary font-label-md text-label-md align-middle shadow-xs">Result Metric</span> more booked calls in their first month without hiring anyone new.</p>
-<p class="mb-6">Worth a quick look at how this could work for <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-md text-label-md align-middle shadow-xs">Company Name</span>?</p>
-<p class="font-medium text-on-surface"><span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-surface-variant text-on-surface font-label-md text-label-md align-middle">Your Name</span></p>
-<p class="text-on-surface-variant font-body-sm"><span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-surface-variant text-on-surface font-label-md text-label-md align-middle">Your Role</span></p>
-<p class="text-primary font-body-sm"><span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-surface-variant text-on-surface font-label-md text-label-md align-middle">Your Link</span></p>
-</div>
-</div>
-<div class="hidden flex flex-col gap-space-sm p-space-lg rounded-xl bg-surface-container-low" id="preview-mode-panel">
-<div class="flex items-center justify-between pb-space-xs bg-surface-container-high/60 p-space-sm rounded-lg">
-<div class="flex items-center gap-space-sm">
-<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
-<span class="font-label-md text-label-md text-on-surface font-semibold" id="preview-lead-heading">Elena Rostova @ Veloce Security AI</span>
-</div>
-<span class="font-code-sm text-code-sm text-on-surface-variant" id="preview-lead-email">elena.rostova@velocesec.ai</span>
-</div>
-<div class="p-space-lg rounded-xl bg-surface-container-lowest flex flex-col gap-space-md shadow-xs">
-<div class="flex flex-col gap-1 pb-space-sm bg-surface-container-lowest">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Subject</span>
-<span class="font-headline-md text-headline-md text-on-surface" id="preview-subject-text">Quick idea for Veloce Security AI</span>
-</div>
-<div class="font-body-lg text-body-lg text-on-surface leading-relaxed flex flex-col gap-space-md" id="preview-body-content">
-<p>Hi Elena,</p>
-<p>Noticed Veloce Security AI has been scaling manual SDR automation lately — congrats on the growth.</p>
-<p>Usually at that stage, teams start missing leads simply because there aren't enough hours to follow up with everyone fast enough, and speed-to-lead can make a major difference in conversions.</p>
-<p>We build AI agents that handle this automatically — responding to inbound leads in seconds, qualifying them, and booking calls straight into your calendar, 24/7.</p>
-<p>One client added 38% more booked calls in their first month without hiring anyone new.</p>
-<p>Worth a quick look at how this could work for Veloce Security AI?</p>
-<div>
-<p class="font-semibold text-on-surface">{{ user.name if (user and user.name) else 'User' }}</p>
-<p class="text-on-surface-variant font-body-sm">Head of Growth, Fameweb AI</p>
-<p class="text-primary font-body-sm">fameweb.ai</p>
-</div>
-</div>
-</div>
-</div>
-<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-sm">
-<div class="flex items-center gap-space-xs self-start sm:self-auto">
-<div class="inline-flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-[16px] text-primary">description</span>
-<span class="font-medium">pitch_deck_summary.pdf</span>
-<span class="text-on-surface-variant text-[10px]">(1.2 MB)</span>
-<button class="hover:text-error transition-colors ml-1 text-on-surface-variant" type="button">✕</button>
-</div>
-<button class="text-on-surface-variant hover:text-on-surface p-1 rounded transition-colors" title="Add another attachment" type="button">
-<span class="material-symbols-outlined text-[18px]">add</span>
-</button>
-</div>
-<div class="flex items-center gap-space-sm w-full sm:w-auto justify-end">
-<button class="px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors shadow-xs" onclick="saveDraft()" type="button">
-                Save Draft
-              </button>
-<button class="flex items-center gap-space-xs px-space-lg py-2 rounded-lg bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md transition-all shadow-sm hover:shadow" onclick="triggerMailtoCampaign()" type="button">
-<span>Prepare Mailto: Campaign</span>
-<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-</button>
-</div>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-<div class="p-space-md rounded-xl bg-surface-container-lowest flex items-start gap-space-sm shadow-sm">
-<div class="p-2 rounded-lg bg-surface-container text-primary shrink-0">
-<span class="material-symbols-outlined text-[20px]">mark_email_read</span>
-</div>
-<div class="flex flex-col">
-<span class="font-label-md text-label-md text-on-surface font-semibold">Zero-Spam Verification</span>
-<p class="font-body-sm text-body-sm text-on-surface-variant">MX &amp; DMARC records checked across 4 domains. All mailboxes warmed.</p>
-</div>
-</div>
-<div class="p-space-md rounded-xl bg-surface-container-lowest flex items-start gap-space-sm shadow-sm">
-<div class="p-2 rounded-lg bg-surface-container text-tertiary shrink-0">
-<span class="material-symbols-outlined text-[20px]">schedule_send</span>
-</div>
-<div class="flex flex-col">
-<span class="font-label-md text-label-md text-on-surface font-semibold">Native Mailto Orchestrator</span>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Dispatches cleanly into your default desktop email client with variables baked in.</p>
-</div>
-</div>
-</div>
-</section>
-</div>
-</div>
-<div class="fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-on-surface text-surface font-label-md text-label-md shadow-xl flex items-center gap-2 transform translate-y-16 opacity-0 transition-all duration-300 pointer-events-none z-50" id="toast">
-<span class="material-symbols-outlined text-tertiary-fixed text-[18px]">check_circle</span>
-<span id="toast-message">Draft saved successfully.</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Arbitrary Headers Supported</span>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div id="drop-zone" onclick="document.getElementById('csv-file-input').click()" class="border-2 border-dashed border-outline-variant hover:border-primary rounded-xl p-space-lg flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-surface-container-low/40">
+          <input type="file" id="csv-file-input" accept=".csv" class="hidden" onchange="handleFileSelect(event)">
+          <div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary mb-2">
+            <span class="material-symbols-outlined text-[28px]">upload_file</span>
+          </div>
+          <span class="font-label-md text-label-md text-on-surface font-semibold" id="upload-label">Choose CSV file or drag here</span>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">UTF-8 & UTF-8 BOM, quoted commas, custom columns supported.</p>
+        </div>
+
+        <!-- Import Summary (Hidden initially) -->
+        <div id="import-summary" class="hidden flex-col gap-space-sm">
+          <div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-tertiary text-[20px]">check_circle</span>
+              <span class="font-label-md text-label-md text-on-surface font-semibold" id="summary-filename">recipients.csv</span>
+            </div>
+            <button onclick="resetCSV()" class="text-xs text-outline hover:text-error">Change File</button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="p-2 rounded-lg bg-surface-container-low">
+              <span class="block text-xs text-on-surface-variant">Total Rows</span>
+              <span class="font-headline-sm font-semibold text-on-surface" id="stat-total">0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-tertiary-fixed/30 text-tertiary">
+              <span class="block text-xs">Valid</span>
+              <span class="font-headline-sm font-semibold" id="stat-valid">0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-error-container/40 text-error">
+              <span class="block text-xs">Invalid/Dupe</span>
+              <span class="font-headline-sm font-semibold" id="stat-invalid">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Dynamic Placeholders & Recipient Mapping -->
+      <div id="placeholders-card" class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md opacity-50 pointer-events-none transition-opacity">
+        <div class="flex items-center justify-between border-b border-surface-container pb-space-sm">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-xs font-bold flex items-center justify-center">2</span>
+            <h2 class="font-headline-md text-headline-md text-on-surface">Detected Columns & Placeholders</h2>
+          </div>
+        </div>
+
+        <p class="font-body-sm text-body-sm text-on-surface-variant">
+          Click any placeholder below to insert it into the subject line or message body:
+        </p>
+
+        <!-- Dynamic Placeholder Chips -->
+        <div id="placeholder-chips" class="flex flex-wrap gap-1.5">
+          <span class="text-xs text-on-surface-variant italic">Upload a CSV to view detected placeholders.</span>
+        </div>
+
+        <!-- Recipient List Mini Preview -->
+        <div class="flex flex-col gap-1 mt-2">
+          <div class="flex items-center justify-between text-xs text-on-surface-variant">
+            <span>Recipient Sample (Top 5)</span>
+            <span id="mapped-email-col" class="font-mono text-primary font-semibold">Email: not detected</span>
+          </div>
+          <div id="recipient-sample-list" class="flex flex-col gap-1 max-h-48 overflow-y-auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Step 3 (Composer) & Step 4 (Preview & Dispatch) -->
+    <div class="xl:col-span-7 flex flex-col gap-space-lg">
+      <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+        <!-- Composer Header -->
+        <div class="flex items-center justify-between border-b border-surface-container pb-space-sm flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-xs font-bold flex items-center justify-center">3</span>
+            <h2 class="font-headline-md text-headline-md text-on-surface">Email Composer</h2>
+          </div>
+          <!-- Sending Mode Toggle -->
+          <div class="inline-flex p-1 bg-surface-container rounded-lg text-xs">
+            <button type="button" id="mode-personalized" onclick="setSendingMode('PERSONALIZED')" class="px-3 py-1 rounded-md font-semibold bg-surface-container-lowest text-primary shadow-sm transition-all">
+              Personalized
+            </button>
+            <button type="button" id="mode-identical" onclick="setSendingMode('IDENTICAL')" class="px-3 py-1 rounded-md font-medium text-on-surface-variant hover:text-on-surface transition-all">
+              Identical
+            </button>
+          </div>
+        </div>
+
+        <!-- Sender Account Selector -->
+        <div class="flex flex-col gap-1">
+          <label class="font-label-md text-label-md text-on-surface font-medium">Sending Account *</label>
+          <select id="composer-account-select" class="w-full px-space-md py-2 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface">
+            <option value="">Loading accounts...</option>
+          </select>
+        </div>
+
+        <!-- Campaign / Batch Name -->
+        <div class="flex flex-col gap-1">
+          <label class="font-label-md text-label-md text-on-surface font-medium">Campaign Name</label>
+          <input type="text" id="composer-batch-name" placeholder="Q4 Outreach Batch" class="w-full px-space-md py-2 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface">
+        </div>
+
+        <!-- Subject Line -->
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center justify-between">
+            <label class="font-label-md text-label-md text-on-surface font-medium">Subject Line *</label>
+            <span class="text-xs text-outline">Supports placeholders (e.g. {{first_name}})</span>
+          </div>
+          <input type="text" id="composer-subject" placeholder="Partnership opportunity for {{company}}" class="w-full px-space-md py-2.5 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface">
+        </div>
+
+        <!-- Rich Text Toolbar -->
+        <div class="flex items-center flex-wrap gap-1 p-1 bg-surface-container-low rounded-lg border border-surface-container">
+          <button type="button" onclick="execCmd('bold')" class="p-1.5 rounded hover:bg-surface-container text-on-surface font-bold text-sm" title="Bold">B</button>
+          <button type="button" onclick="execCmd('italic')" class="p-1.5 rounded hover:bg-surface-container text-on-surface italic text-sm" title="Italic">I</button>
+          <button type="button" onclick="execCmd('underline')" class="p-1.5 rounded hover:bg-surface-container text-on-surface underline text-sm" title="Underline">U</button>
+          <button type="button" onclick="execCmd('strikeThrough')" class="p-1.5 rounded hover:bg-surface-container text-on-surface line-through text-sm" title="Strikethrough">S</button>
+          <span class="w-px h-5 bg-outline-variant mx-1"></span>
+          <button type="button" onclick="execCmd('insertUnorderedList')" class="p-1.5 rounded hover:bg-surface-container text-on-surface" title="Bullet List">
+            <span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+          </button>
+          <button type="button" onclick="execCmd('insertOrderedList')" class="p-1.5 rounded hover:bg-surface-container text-on-surface" title="Numbered List">
+            <span class="material-symbols-outlined text-[18px]">format_list_numbered</span>
+          </button>
+          <span class="w-px h-5 bg-outline-variant mx-1"></span>
+          <button type="button" onclick="execCmd('justifyLeft')" class="p-1.5 rounded hover:bg-surface-container text-on-surface" title="Align Left">
+            <span class="material-symbols-outlined text-[18px]">format_align_left</span>
+          </button>
+          <button type="button" onclick="execCmd('justifyCenter')" class="p-1.5 rounded hover:bg-surface-container text-on-surface" title="Align Center">
+            <span class="material-symbols-outlined text-[18px]">format_align_center</span>
+          </button>
+          <span class="w-px h-5 bg-outline-variant mx-1"></span>
+          <button type="button" onclick="insertLinkPrompt()" class="p-1.5 rounded hover:bg-surface-container text-on-surface" title="Insert Link">
+            <span class="material-symbols-outlined text-[18px]">link</span>
+          </button>
+        </div>
+
+        <!-- Content Editable Rich Text Area -->
+        <div id="composer-body" contenteditable="true" class="w-full min-h-[220px] p-space-md rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface overflow-y-auto leading-relaxed">
+          <p>Hello {{first_name}},</p>
+          <p><br></p>
+          <p>We noticed {{company}} has been expanding in your sector and wanted to reach out regarding our growth solutions.</p>
+          <p><br></p>
+          <p>Best regards,<br>The Fameweb Team</p>
+        </div>
+
+        <!-- Missing Placeholder & Preview Action Bar -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md pt-2 border-t border-surface-container">
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openRecipientPreviewModal()" id="btn-preview" class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors">
+              <span class="material-symbols-outlined text-[18px]">visibility</span>
+              <span>Preview Recipients</span>
+            </button>
+            <span id="preview-missing-flag" class="hidden text-xs text-error font-semibold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">warning</span>
+              Missing fields flagged
+            </span>
+          </div>
+
+          <!-- Compliance Confirmation & Send Button -->
+          <div class="flex items-center gap-space-sm">
+            <button type="button" onclick="confirmAndSendBatch()" id="btn-dispatch" class="inline-flex items-center gap-1.5 bg-primary text-on-primary px-space-lg py-2 rounded-lg shadow-sm hover:bg-secondary font-label-md text-label-md transition-colors">
+              <span class="material-symbols-outlined text-[18px]">send</span>
+              <span>Send Campaign</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Compliance Notice -->
+        <label class="flex items-start gap-2 cursor-pointer select-none mt-1 p-2 rounded-lg bg-surface-container-low/50 border border-surface-container text-xs text-on-surface-variant">
+          <input type="checkbox" id="compliance-check" checked class="w-4 h-4 text-primary rounded accent-primary shrink-0 mt-0.5">
+          <span>I confirm I have permission or a lawful basis to contact these recipients and will respect unsubscribe/suppression requests.</span>
+        </label>
+      </div>
+    </div>
+  </div>
 </div>
 
-</div>
-{% endblock %}
+<!-- Personalized Preview Modal -->
+<div id="preview-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-2xl border border-surface-container overflow-hidden flex flex-col max-h-[85vh]">
+    <div class="px-space-lg py-space-md border-b border-surface-container flex items-center justify-between bg-surface-container-low">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[22px]">preview</span>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">Recipient Email Preview</h3>
+      </div>
+      <button onclick="closePreviewModal()" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
 
-{% block scripts %}
+    <!-- Recipient Selector Dropdown -->
+    <div class="p-space-md border-b border-surface-container flex items-center justify-between bg-surface-container-lowest gap-space-md">
+      <div class="flex items-center gap-2 flex-1">
+        <span class="text-xs text-on-surface-variant font-medium">Viewing recipient:</span>
+        <select id="preview-recipient-select" onchange="renderSelectedPreview()" class="px-space-sm py-1.5 rounded-lg border border-outline-variant bg-surface text-xs text-on-surface font-semibold max-w-xs"></select>
+      </div>
+      <div id="preview-missing-alert" class="hidden px-2 py-0.5 rounded bg-error-container text-error text-xs font-semibold">
+        Missing Values
+      </div>
+    </div>
+
+    <!-- Preview Content -->
+    <div class="p-space-lg flex flex-col gap-space-md overflow-y-auto">
+      <div class="flex flex-col gap-1 p-3 rounded-lg bg-surface-container-low">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-on-surface-variant">To: <strong id="preview-to" class="text-on-surface font-mono">user@example.com</strong></span>
+          <span class="text-on-surface-variant">From: <strong id="preview-from" class="text-on-surface font-mono">sender@domain.com</strong></span>
+        </div>
+        <div class="mt-2 text-sm font-semibold text-on-surface" id="preview-subject">
+          Subject:
+        </div>
+      </div>
+
+      <div class="p-space-md rounded-lg border border-surface-container bg-surface-card min-h-[160px] font-body-md text-body-md leading-relaxed" id="preview-rendered-body">
+      </div>
+    </div>
+
+    <div class="px-space-lg py-space-sm border-t border-surface-container flex items-center justify-end bg-surface-container-low">
+      <button onclick="closePreviewModal()" class="px-space-md py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md">
+        Close Preview
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
-  window.currentUserName = {{ (user.name if (user and user.name) else 'User') | tojson }};
+const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+let parsedCSVData = null;
+let currentSendingMode = 'PERSONALIZED';
+let connectedAccounts = [];
+
+function setSendingMode(mode) {
+  currentSendingMode = mode;
+  const btnP = document.getElementById('mode-personalized');
+  const btnI = document.getElementById('mode-identical');
+
+  if (mode === 'PERSONALIZED') {
+    btnP.className = 'px-3 py-1 rounded-md font-semibold bg-surface-container-lowest text-primary shadow-sm transition-all';
+    btnI.className = 'px-3 py-1 rounded-md font-medium text-on-surface-variant hover:text-on-surface transition-all';
+  } else {
+    btnI.className = 'px-3 py-1 rounded-md font-semibold bg-surface-container-lowest text-primary shadow-sm transition-all';
+    btnP.className = 'px-3 py-1 rounded-md font-medium text-on-surface-variant hover:text-on-surface transition-all';
+  }
+}
+
+function execCmd(command, value = null) {
+  document.execCommand(command, false, value);
+}
+
+function insertLinkPrompt() {
+  const url = prompt('Enter destination URL:', 'https://');
+  if (url) {
+    execCmd('createLink', url);
+  }
+}
+
+function insertPlaceholder(placeholderText) {
+  const composer = document.getElementById('composer-body');
+  composer.focus();
+  document.execCommand('insertText', false, placeholderText);
+}
+
+async function loadComposerAccounts() {
+  const select = document.getElementById('composer-account-select');
+  try {
+    const res = await fetch('/api/bulk-email/accounts');
+    const data = await res.json();
+    if (data.success && data.accounts && data.accounts.length > 0) {
+      connectedAccounts = data.accounts;
+      select.innerHTML = '';
+      data.accounts.forEach(acc => {
+        const opt = document.createElement('option');
+        opt.value = acc.id;
+        opt.textContent = `${acc.email_address} (${acc.sender_name || 'No Name'}) ${acc.is_primary ? '★ Default' : ''}`;
+        if (acc.is_primary) opt.selected = true;
+        select.appendChild(opt);
+      });
+    } else {
+      select.innerHTML = '<option value="">No business email connected — go to Sender Settings</option>';
+    }
+  } catch (err) {
+    console.error('Failed to load accounts for composer:', err);
+  }
+}
+
+async function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const dropLabel = document.getElementById('upload-label');
+  dropLabel.textContent = `Parsing ${file.name}...`;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/api/bulk-email/parse-csv', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      parsedCSVData = data;
+      renderImportSummary(data);
+      renderPlaceholdersAndSamples(data);
+    } else {
+      alert(`CSV Error: ${data.error}`);
+      dropLabel.textContent = 'Choose CSV file or drag here';
+    }
+  } catch (err) {
+    alert('Failed to parse uploaded CSV file.');
+    dropLabel.textContent = 'Choose CSV file or drag here';
+  }
+}
+
+function renderImportSummary(data) {
+  document.getElementById('import-summary').classList.remove('hidden');
+  document.getElementById('summary-filename').textContent = data.filename;
+  document.getElementById('stat-total').textContent = data.summary.total_rows_read;
+  document.getElementById('stat-valid').textContent = data.summary.valid_count;
+  document.getElementById('stat-invalid').textContent = data.summary.invalid_count;
+}
+
+function renderPlaceholdersAndSamples(data) {
+  const card = document.getElementById('placeholders-card');
+  card.classList.remove('opacity-50', 'pointer-events-none');
+
+  const chipsContainer = document.getElementById('placeholder-chips');
+  chipsContainer.innerHTML = '';
+
+  data.detected_headers.forEach(h => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'px-2 py-1 rounded-md bg-surface-container hover:bg-primary hover:text-on-primary font-mono text-xs text-on-surface transition-colors flex items-center gap-1';
+    chip.innerHTML = `<span>${h.placeholder}</span><span class="material-symbols-outlined text-[12px] opacity-70">add</span>`;
+    chip.onclick = () => insertPlaceholder(h.placeholder);
+    chipsContainer.appendChild(chip);
+  });
+
+  const emailColLabel = document.getElementById('mapped-email-col');
+  emailColLabel.textContent = `Mapped Email: ${data.email_column_key || 'Detected from rows'}`;
+
+  const sampleContainer = document.getElementById('recipient-sample-list');
+  sampleContainer.innerHTML = '';
+  data.sample_preview.forEach((r, idx) => {
+    const item = document.createElement('div');
+    item.className = 'p-2 rounded bg-surface-container-low/60 flex items-center justify-between text-xs font-mono';
+    item.innerHTML = `
+      <span class="text-on-surface font-semibold truncate max-w-[200px]">${r.email}</span>
+      <span class="text-on-surface-variant truncate max-w-[180px]">${JSON.stringify(r.data)}</span>
+    `;
+    sampleContainer.appendChild(item);
+  });
+}
+
+function resetCSV() {
+  parsedCSVData = null;
+  document.getElementById('csv-file-input').value = '';
+  document.getElementById('upload-label').textContent = 'Choose CSV file or drag here';
+  document.getElementById('import-summary').classList.add('hidden');
+  document.getElementById('placeholders-card').classList.add('opacity-50', 'pointer-events-none');
+}
+
+function openRecipientPreviewModal() {
+  if (!parsedCSVData || !parsedCSVData.valid_recipients || parsedCSVData.valid_recipients.length === 0) {
+    alert('Please upload a valid recipient CSV before previewing.');
+    return;
+  }
+
+  const select = document.getElementById('preview-recipient-select');
+  select.innerHTML = '';
+  parsedCSVData.valid_recipients.slice(0, 50).forEach((r, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = `${idx + 1}. ${r.email}`;
+    select.appendChild(opt);
+  });
+
+  document.getElementById('preview-modal').classList.remove('hidden');
+  renderSelectedPreview();
+}
+
+function closePreviewModal() {
+  document.getElementById('preview-modal').classList.add('hidden');
+}
+
+async function renderSelectedPreview() {
+  const select = document.getElementById('preview-recipient-select');
+  const idx = parseInt(select.value || '0');
+  const recipient = parsedCSVData.valid_recipients[idx];
+  if (!recipient) return;
+
+  const subject = document.getElementById('composer-subject').value;
+  const bodyHtml = document.getElementById('composer-body').innerHTML;
+
+  try {
+    const res = await fetch('/api/bulk-email/preview', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        subject: subject,
+        body_html: bodyHtml,
+        recipient_data: recipient.data,
+        fallback_value: '[Not Provided]'
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      const p = result.preview;
+      document.getElementById('preview-to').textContent = recipient.email;
+      document.getElementById('preview-subject').textContent = `Subject: ${p.rendered_subject}`;
+      document.getElementById('preview-rendered-body').innerHTML = p.rendered_body_html;
+
+      const missingAlert = document.getElementById('preview-missing-alert');
+      if (p.has_missing_values) {
+        missingAlert.textContent = `Missing: ${p.missing_placeholders.join(', ')}`;
+        missingAlert.classList.remove('hidden');
+      } else {
+        missingAlert.classList.add('hidden');
+      }
+    }
+  } catch (err) {
+    console.error('Error generating preview:', err);
+  }
+}
+
+async function confirmAndSendBatch() {
+  if (!parsedCSVData || !parsedCSVData.valid_recipients || parsedCSVData.valid_recipients.length === 0) {
+    alert('Please upload a recipient CSV with at least one valid email address.');
+    return;
+  }
+
+  const accountId = document.getElementById('composer-account-select').value;
+  if (!accountId) {
+    alert('Please select or connect a business sending account first.');
+    return;
+  }
+
+  const subject = document.getElementById('composer-subject').value.trim();
+  if (!subject) {
+    alert('Subject line is required.');
+    return;
+  }
+
+  const bodyHtml = document.getElementById('composer-body').innerHTML.trim();
+  const compliance = document.getElementById('compliance-check').checked;
+  if (!compliance) {
+    alert('You must confirm lawful basis / permission before sending.');
+    return;
+  }
+
+  const batchName = document.getElementById('composer-batch-name').value.trim();
+  const validCount = parsedCSVData.valid_count;
+
+  if (!confirm(`Are you sure you want to send this ${currentSendingMode.toLowerCase()} bulk email campaign to ${validCount} recipient(s)?`)) {
+    return;
+  }
+
+  const btn = document.getElementById('btn-dispatch');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Queuing Campaign...</span>`;
+
+  try {
+    const res = await fetch('/api/bulk-email/batches', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        smtp_account_id: parseInt(accountId),
+        batch_name: batchName,
+        original_filename: parsedCSVData.filename,
+        subject: subject,
+        body_html: bodyHtml,
+        sending_mode: currentSendingMode,
+        valid_recipients: parsedCSVData.valid_recipients,
+        invalid_count: parsedCSVData.invalid_count,
+        detected_headers: parsedCSVData.detected_headers,
+        confirmed_lawful_basis: compliance
+      })
+    });
+    const result = await res.json();
+    btn.disabled = false;
+    btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">send</span><span>Send Campaign</span>`;
+
+    if (result.success) {
+      alert(`Success! ${result.message}`);
+      window.location.href = '/history';
+    } else {
+      alert(`Error: ${result.error || 'Failed to dispatch email batch.'}`);
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">send</span><span>Send Campaign</span>`;
+    alert('Network error while scheduling email campaign.');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadComposerAccounts();
+});
 </script>
-<script src="/static/js/email-outreach.js"></script>
 {% endblock %}

@@ -32,7 +32,7 @@ from app.services.gtm_pipeline_service import (
 )
 
 
-def _create_mock_user(verified=True):
+def _create_mock_user(verified=True, credits=100):
     user = UserTable(
         name="Test Founder",
         email_id="founder@testscale.io",
@@ -44,6 +44,15 @@ def _create_mock_user(verified=True):
     )
     db_session.add(user)
     db_session.commit()
+    if credits > 0:
+        from app.services.credit_service import CreditService
+        CreditService.grant_credits(
+            user_id=user.user_id,
+            amount=credits,
+            idempotency_key=f"init_user_cred_{user.user_id}",
+            reason="Test wallet setup",
+            session=db_session
+        )
     return user
 
 
@@ -1270,6 +1279,250 @@ def test_public_web_classifies_google_quota_and_auth_errors():
         assert res_auth.status == "AUTH_ERROR"
         assert res_auth.error_category == "auth_error"
         assert len(res_auth) == 0
+
+
+def test_api_gtm_search_plan_unauthenticated(client):
+    res = client.post('/api/gtm/search-plan', json={})
+    assert res.status_code == 401
+    data = res.get_json()
+    assert data["success"] is False
+
+
+def test_api_gtm_search_plan_incomplete_onboarding(client, clean_db):
+    user = _create_mock_user()
+    with client.session_transaction() as sess:
+        sess["user_id"] = user.user_id
+
+    res = client.post('/api/gtm/search-plan', json={})
+    assert res.status_code == 400
+    data = res.get_json()
+    assert data["success"] is False
+    assert "Onboarding not completed" in data["error"]
+
+
+def test_api_gtm_search_plan_success(client, clean_db):
+    user = _create_mock_user()
+    _setup_user_onboarding(user.user_id)
+
+    with client.session_transaction() as sess:
+        sess["user_id"] = user.user_id
+
+    mock_plan = {
+        "search_keywords": "B2B SaaS RevOps",
+        "keyword_title": "VP of Sales, CRO",
+        "target_industries": ["Enterprise Software"],
+        "target_company_types": ["B2B SaaS"],
+        "queries": [
+            {
+                "id": "q1",
+                "title": "VP of Sales",
+                "keywords": "B2B SaaS",
+                "industry": "Software Development",
+                "location": "North America",
+                "exclusions": ["intern"],
+                "rationale": "High-intent sales leadership"
+            },
+            {
+                "id": "q2",
+                "title": "Chief Revenue Officer",
+                "keywords": "Enterprise Software",
+                "industry": "Software Development",
+                "location": "North America",
+                "exclusions": ["intern"],
+                "rationale": "Executive revenue decision maker"
+            }
+        ]
+    }
+
+    with patch("app_module.generate_search_plan", return_value=mock_plan):
+        res = client.post('/api/gtm/search-plan', json={"max_queries": 4})
+        assert res.status_code == 200
+        data = res.get_json()
+        assert data["success"] is True
+        assert "data" in data
+        assert len(data["data"]["queries"]) == 2
+        assert data["data"]["queries"][0]["id"] == "q1"
+        assert data["data"]["queries"][0]["title"] == "VP of Sales"
+        assert data["context"]["company_name"] == "ScaleFlow AI"
+
+
+# =========================================================================
+# PHASE 2 INTEGRATION TESTS: IMPORT SEARCH RESULTS
+# =========================================================================
+
+def test_api_gtm_import_search_results_unauthenticated(client, clean_db):
+    res = client.post('/api/gtm/import-search-results', json={"candidates": [{"name": "Test"}]})
+    assert res.status_code == 401
+    data = res.get_json()
+    assert data["success"] is False
+    assert "Not authenticated" in data["error"]
+
+
+def test_api_gtm_import_search_results_empty_candidates(client, clean_db):
+    user = _create_mock_user()
+    with client.session_transaction() as sess:
+        sess["user_id"] = user.user_id
+
+    res = client.post('/api/gtm/import-search-results', json={"candidates": []})
+    assert res.status_code == 400
+    data = res.get_json()
+    assert data["success"] is False
+    assert "No candidates provided" in data["error"]
+
+
+def test_api_gtm_import_search_results_success(client, clean_db):
+    user = _create_mock_user()
+    _setup_user_onboarding(user.user_id)
+
+    with client.session_transaction() as sess:
+        sess["user_id"] = user.user_id
+
+    raw_candidates = [
+        {
+            "name": "Sarah Connor",
+            "role": "VP of Revenue Operations",
+            "headline": "VP of Revenue Operations at Cyberdyne Systems",
+            "company": "Cyberdyne Systems",
+            "location": "San Francisco, CA",
+            "profile_url": "https://www.linkedin.com/in/sarah-connor-revops/"
+        },
+        {
+            "name": "John Connor",
+            "role": "Chief Technology Officer",
+            "headline": "CTO at Tech Defense",
+            "company": "Tech Defense",
+            "location": "Austin, TX",
+            "profile_url": "https://www.linkedin.com/in/john-connor-tech/"
+        }
+    ]
+
+    mock_summary = {
+        "success": True,
+        "job_id": 999,
+        "processed": 2,
+        "validated_count": 2,
+        "qualified_count": 2,
+        "persisted_count": 2,
+        "billed_leads": 2,
+        "candidates": [
+            {
+                "name": "Sarah Connor",
+                "role": "VP of Revenue Operations",
+                "company": "Cyberdyne Systems",
+                "location": "San Francisco, CA",
+                "profile_url": "https://www.linkedin.com/in/sarah-connor-revops",
+                "fit_score": 92,
+                "tier": "Tier 1 Priority Match",
+                "qualification_reason": "High-fit RevOps leadership role."
+            },
+            {
+                "name": "John Connor",
+                "role": "Chief Technology Officer",
+                "company": "Tech Defense",
+                "location": "Austin, TX",
+                "profile_url": "https://www.linkedin.com/in/john-connor-tech",
+                "fit_score": 85,
+                "tier": "Tier 2 Fit",
+                "qualification_reason": "Tech leadership role."
+            }
+        ],
+        "rejected": [],
+        "duplicates": [],
+        "message": "Successfully evaluated 2 prospects (2 saved, 2 newly qualified)."
+    }
+
+    with patch("app_module.qualify_and_persist_discovered_leads", return_value=mock_summary):
+        res = client.post('/api/gtm/import-search-results', json={
+            "query_id": "q1",
+            "query": "VP Revenue Operations",
+            "candidates": raw_candidates
+        })
+        assert res.status_code == 200
+        data = res.get_json()
+        assert data["success"] is True
+        assert data["processed"] == 2
+        assert data["persisted_count"] == 2
+        assert data["billed_leads"] == 2
+        assert len(data["candidates"]) == 2
+        assert data["candidates"][0]["name"] == "Sarah Connor"
+
+
+def test_qualify_and_persist_discovered_leads_end_to_end(clean_db):
+    """
+    Direct integration test of qualify_and_persist_discovered_leads with wallet,
+    credit reservation, Gemini qualification, deduplication, and persistence.
+    """
+    user = _create_mock_user()
+    _setup_user_onboarding(user.user_id)
+
+    raw_candidates = [
+        {
+            "name": "Bruce Wayne",
+            "role": "CEO",
+            "headline": "CEO at Wayne Enterprises",
+            "company": "Wayne Enterprises",
+            "location": "Gotham, NY",
+            "profile_url": "https://www.linkedin.com/in/bruce-wayne-ceo/"
+        },
+        {
+            "name": "Lucius Fox",
+            "role": "Head of Applied Sciences",
+            "headline": "Head of Applied Sciences at Wayne Enterprises",
+            "company": "Wayne Enterprises",
+            "location": "Gotham, NY",
+            "profile_url": "https://www.linkedin.com/in/lucius-fox-tech/"
+        },
+        {
+            # Malformed URL should be rejected
+            "name": "Bad Lead",
+            "profile_url": "http://169.254.169.254/metadata"
+        }
+    ]
+
+    mock_gemini_qual = [
+        {
+            "urn_id": "bruce-wayne-ceo",
+            "fit_score": 95,
+            "tier": "Tier 1 Priority Match",
+            "qualification_reason": "Executive decision maker matching ICP.",
+            "intent_signals": "Expanding enterprise operations.",
+            "recommended_angle": "Automate B2B lead generation."
+        },
+        {
+            "urn_id": "lucius-fox-tech",
+            "fit_score": 55, # Low score < 70, not qualified / not billed
+            "tier": "Tier 3 Low Fit",
+            "qualification_reason": "Technical role outside target persona.",
+            "intent_signals": "None",
+            "recommended_angle": "N/A"
+        }
+    ]
+
+    from app.services.gtm_pipeline_service import qualify_and_persist_discovered_leads
+    with patch("app.services.gtm_pipeline_service._call_gemini_with_fallback", return_value=json.dumps(mock_gemini_qual)):
+        summary = qualify_and_persist_discovered_leads(
+            user_id=user.user_id,
+            raw_candidates=raw_candidates,
+            query_id="q_wayne",
+            query_text="CEO Wayne Enterprises"
+        )
+
+        assert summary["success"] is True
+        assert summary["processed"] == 3
+        assert summary["validated_count"] == 2
+        assert len(summary["rejected"]) == 1 # 1 malformed rejected
+        assert summary["qualified_count"] == 1 # only Bruce Wayne has score >= 70
+        assert summary["persisted_count"] == 2 # both saved to DB for audit/history
+        assert summary["billed_leads"] == 1 # only Bruce Wayne billed
+
+        # Verify persisted opportunities
+        opps = get_user_opportunities(user.user_id)
+        assert len(opps) == 2
+        names = [o["name"] for o in opps]
+        assert "Bruce Wayne" in names
+        assert "Lucius Fox" in names
+
+
 
 
 

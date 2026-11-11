@@ -1,0 +1,148 @@
+Created At: 2026-11-09T22:13:29+05:30
+Completed At: 2026-11-09T22:13:30+05:30
+Command exited with code 0.
+
+Command output:
+C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript_full.jsonl
+806 MODEL
+   Created At: 2026-11-05T00:01:42+05:30
+   Completed At: 2026-11-05T00:01:43+05:30
+   Command exited with code 0.
+   
+   Command output:
+   
+   Line                                                                                                  
+   ----                                                                                                  
+   def calculate_gemini_cost(                                                                            
+   def log_ai_provider_usage(                                                                            
+       def __init__(                                                                                     
+       def is_success(self) -> bool:                                                                     
+   def normalize_linkedin_identifier(profile_url: Optional[str], urn_id: Optional[str]) -> Optional[str]:
+   def normalize_profile_url(raw_url: Optional[str], urn_id: Optional[str] = None) -> Optional[str]:     
+   def _get_gemini_client() -> Optional[genai.Client]:                                                   
+   def _call_gemini_with_fallback(                                                                       
+   def _clean_json(text: Optional[str]) -> Any:                                                          
+   def get_user_gtm_context(user_id: int) -> Dict[str, Any]:                                             
+   def generate_search_plan(                                                                             
+   def discover_candidates_via_voyager(                                                                  
+C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript_full.jsonl
+822 MODEL
+   Created At: 2026-11-05T00:02:36+05:30
+   Completed At: 2026-11-05T00:02:37+05:30
+   Command exited with code 0.
+   
+   Command output:
+   
+   > app\services\gtm_pipeline_service.py:1048:def find_existing_global_candidates(
+     app\services\gtm_pipeline_service.py:1049:    user_id: int,
+     app\services\gtm_pipeline_service.py:1050:    user_context: Dict[str, Any],
+     app\services\gtm_pipeline_service.py:1051:    limit: int = 25
+     app\services\gtm_pipeline_service.py:1052:) -> List[Dict[str, Any]]:
+     app\services\gtm_pipeline_service.py:1053:    """
+     app\services\gtm_pipeline_service.py:1054:    Finds existing GlobalProfiles matching user's ICP that do NOT already 
+   have
+     app\services\gtm_pipeline_service.py:1055:    an association in UsersProfiles for this user.
+     app\services\gtm_pipeline_service.py:1056:    Adheres to:
+     app\services\gtm_pipeline_service.py:1057:    - Reuse existing global profile records without creating duplicates.
+     app\services\gtm_pipeline_service.py:1058:    - Exclude (user_id, global_id) associations that already exist.
+     app\services\gtm_pipeline_service.py:1059:    - Query based on ICP target roles, keywords, and industry.
+     app\services\gtm_pipeline_service.py:1060:    """
+C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript_full.jsonl
+852 MODEL
+   Created At: 2026-11-05T00:05:04+05:30
+   Completed At: 2026-11-05T00:05:04+05:30
+   Command exited with code 0.
+   
+   Command output:
+   
+   > app\services\gtm_pipeline_service.py:1048:def find_existing_global_candidates(
+     app\services\gtm_pipeline_service.py:1049:    user_id: int,
+     app\services\gtm_pipeline_service.py:1050:    user_context: Dict[str, Any],
+     app\services\gtm_pipeline_service.py:1051:    limit: int = 25
+     app\services\gtm_pipeline_service.py:1052:) -> List[Dict[str, Any]]:
+     app\services\gtm_pipeline_service.py:1053:    """
+     app\services\gtm_pipeline_service.py:1054:    Finds existing GlobalProfiles matching user's ICP that do NOT already 
+   have
+     app\services\gtm_pipeline_service.py:1055:    an association in UsersProfiles for this user.
+     app\services\gtm_pipeline_service.py:1056:    Adheres to:
+     app\services\gtm_pipeline_service.py:1057:    - Reuse existing global profile records without creating duplicates.
+     app\services\gtm_pipeline_service.py:1058:    - Exclude (user_id, global_id) associations that already exist.
+     app\services\gtm_pipeline_service.py:1059:    - Query based on ICP target roles, keywords, and industry.
+     app\services\gtm_pipeline_service.py:1060:    """
+C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript_full.jsonl
+865 MODEL
+   Created At: 2026-11-05T00:05:57+05:30
+   Completed At: 2026-11-05T00:05:58+05:30
+   Command exited with code 0.
+   
+   Command output:
+   
+   Line                                                                                                  
+   ----                                                                                                  
+   def calculate_gemini_cost(                                                                            
+   def log_ai_provider_usage(                                                                            
+       def __init__(                                                                                     
+       def is_success(self) -> bool:                                                                     
+   def normalize_linkedin_identifier(profile_url: Optional[str], urn_id: Optional[str]) -> Optional[str]:
+   def normalize_profile_url(raw_url: Optional[str], urn_id: Optional[str] = None) -> Optional[str]:     
+   def _get_gemini_client() -> Optional[genai.Client]:                                                   
+   def _call_gemini_with_fallback(                                                                       
+   def _clean_json(text: Optional[str]) -> Any:                                                          
+   def get_user_gtm_context(user_id: int) -> Dict[str, Any]:                                             
+   def generate_search_plan(                                                                             
+   def discover_candidates_via_voyager(                                                                  
+C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript_full.jsonl
+5636 MODEL
+   Created At: 2026-11-09T12:29:09+05:30
+   Completed At: 2026-11-09T12:29:09+05:30
+   Showing lines 1050-1120 of 2320
+   1050:         is_auth = any(k in last_err.lower() for k in ["400", "403", "auth", "permission", "key"])
+   1051: 
+   1052:         if is_quota:
+   1053:             status = "QUOTA_EXCEEDED"
+   1054:             cat = "quota_exceeded"
+   1055:         elif is_auth:
+   1056:             status = "AUTH_ERROR"
+   1057:             cat = "auth_error"
+   1058:         elif is_challenge:
+   1059:             status = "BOT_CHALLENGE"
+   1060:             cat = "search_engine_challenge"
+   1061:         else:
+   1062:             status = "FAILED"
+   1063:             cat = "search_engine_unavailable"
+   1064: 
+   1065:         return CandidateList([], status=status, error_category=cat, provider="PUBLIC_WEB", raw_error=last_err)
+   1066: 
+C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript_full.jsonl
+7178 MODEL
+   Created At: 2026-11-09T19:34:08+05:30
+   Completed At: 2026-11-09T19:34:09+05:30
+   Command exited with code 0.
+   
+   Command output:
+   
+   > app\services\gtm_pipeline_service.py:1103:def find_existing_global_candidates(
+     app\services\gtm_pipeline_service.py:1104:    user_id: int,
+     app\services\gtm_pipeline_service.py:1105:    user_context: Dict[str, Any],
+     app\services\gtm_pipeline_service.py:1106:    limit: int = 25
+     app\services\gtm_pipeline_service.py:1107:) -> List[Dict[str, Any]]:
+     app\services\gtm_pipeline_service.py:1108:    """
+     app\services\gtm_pipeline_service.py:1109:    Finds existing GlobalProfiles matching user's ICP that do NOT already 
+   have
+     app\services\gtm_pipeline_service.py:1110:    an association in UsersProfiles for this user.
+     app\services\gtm_pipeline_service.py:1111:    Adheres to:
+     app\services\gtm_pipeline_service.py:1112:    - Reuse existing global profile records without creating duplicates.
+     app\services\gtm_pipeline_service.py:1113:    - Exclude (user_id, global_id) associations that already exist.
+     app\services\gtm_pipeline_service.py:1114:    - Query based on ICP target roles, keywords, and industry.
+     app\services\gtm_pipeline_service.py:1115:    """
+C:\Users\mdkaa\.gemini\antigravity\brain\90378810-f9f7-47b6-b96b-7aed289e9512\.system_generated\logs\transcript_full.jsonl
+636 MODEL
+   Created At: 2026-11-09T22:13:12+05:30
+   Completed At: 2026-11-09T22:13:13+05:30
+   Command exited with code 0.
+   
+   Command output:
+   def find_existing_global_candidates(                                                                  
+   
+C:\Users\mdkaa\.gemini\antigravity\brain\90378810-f9f7-47b6-b96b-7aed289e9512\.system_generated\logs\transcript_full.jsonl
+641 MODEL

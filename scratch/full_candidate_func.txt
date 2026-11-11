@@ -1,0 +1,64 @@
+Created At: 2026-11-09T22:17:57+05:30
+Completed At: 2026-11-09T22:17:58+05:30
+Command exited with code 0.
+
+Command output:
+Created At: 2026-11-05T00:05:04+05:30
+Completed At: 2026-11-05T00:05:04+05:30
+Command exited with code 0.
+
+Command output:
+
+> app\services\gtm_pipeline_service.py:1048:def find_existing_global_candidates(
+  app\services\gtm_pipeline_service.py:1049:    user_id: int,
+  app\services\gtm_pipeline_service.py:1050:    user_context: Dict[str, Any],
+  app\services\gtm_pipeline_service.py:1051:    limit: int = 25
+  app\services\gtm_pipeline_service.py:1052:) -> List[Dict[str, Any]]:
+  app\services\gtm_pipeline_service.py:1053:    """
+  app\services\gtm_pipeline_service.py:1054:    Finds existing GlobalProfiles matching user's ICP that do NOT already 
+have
+  app\services\gtm_pipeline_service.py:1055:    an association in UsersProfiles for this user.
+  app\services\gtm_pipeline_service.py:1056:    Adheres to:
+  app\services\gtm_pipeline_service.py:1057:    - Reuse existing global profile records without creating duplicates.
+  app\services\gtm_pipeline_service.py:1058:    - Exclude (user_id, global_id) associations that already exist.
+  app\services\gtm_pipeline_service.py:1059:    - Query based on ICP target roles, keywords, and industry.
+  app\services\gtm_pipeline_service.py:1060:    """
+  app\services\gtm_pipeline_service.py:1061:    if limit <= 0:
+  app\services\gtm_pipeline_service.py:1062:        return []
+  app\services\gtm_pipeline_service.py:1063:
+  app\services\gtm_pipeline_service.py:1064:    # Get all global_ids already associated with this user
+  app\services\gtm_pipeline_service.py:1065:    existing_assoc_ids = [
+  app\services\gtm_pipeline_service.py:1066:        row[0] for row in 
+db_session.query(UsersProfiles.global_id).filter_by(user_id=user_id).all()
+  app\services\gtm_pipeline_service.py:1067:    ]
+  app\services\gtm_pipeline_service.py:1068:
+  app\services\gtm_pipeline_service.py:1069:    query = db_session.query(GlobalProfiles)
+  app\services\gtm_pipeline_service.py:1070:    if existing_assoc_ids:
+  app\services\gtm_pipeline_service.py:1071:        query = 
+query.filter(~GlobalProfiles.global_id.in_(existing_assoc_ids))
+  app\services\gtm_pipeline_service.py:1072:
+  app\services\gtm_pipeline_service.py:1073:    icp_raw = user_context.get("icp_raw", {})
+  app\services\gtm_pipeline_service.py:1074:    target_roles = icp_raw.get("target_jobs_roles") or ""
+  app\services\gtm_pipeline_service.py:1075:    keywords = icp_raw.get("keywords") or ""
+  app\services\gtm_pipeline_service.py:1076:    industry = icp_raw.get("industry") or user_context.get("industry") or 
+""
+  app\services\gtm_pipeline_service.py:1077:
+  app\services\gtm_pipeline_service.py:1078:    search_terms = []
+  app\services\gtm_pipeline_service.py:1079:    if target_roles:
+  app\services\gtm_pipeline_service.py:1080:        for r in re.split(r"[,;|\n]", target_roles):
+  app\services\gtm_pipeline_service.py:1081:            r_clean = r.strip()
+  app\services\gtm_pipeline_service.py:1082:            if r_clean and len(r_clean) > 2:
+  app\services\gtm_pipeline_service.py:1083:                search_terms.append(r_clean)
+  app\services\gtm_pipeline_service.py:1084:    if keywords:
+  app\services\gtm_pipeline_service.py:1085:        for k in re.split(r"[,;|\n]", keywords):
+  app\services\gtm_pipeline_service.py:1086:            k_clean = k.strip()
+  app\services\gtm_pipeline_service.py:1087:            if k_clean and len(k_clean) > 2:
+  app\services\gtm_pipeline_service.py:1088:                search_terms.append(k_clean)
+  app\services\gtm_pipeline_service.py:1089:
+  app\services\gtm_pipeline_service.py:1090:    if search_terms:
+  app\services\gtm_pipeline_service.py:1091:        filters = []
+  app\services\gtm_pipeline_service.py:1092:        for term in search_terms[:8]:
+  app\services\gtm_pipeline_service.py:1093:            term_pat = f"%{term}%"
+
+
+

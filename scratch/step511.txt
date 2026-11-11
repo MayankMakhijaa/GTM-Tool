@@ -1,0 +1,154 @@
+Created At: 2026-11-05T00:06:24+05:30
+Completed At: 2026-11-05T00:06:24+05:30
+Showing lines 1500-1650 of 2056
+1500:                     return
+1501: 
+1502:                 if actual_billable_qty > 0:
+1503:                     CreditService.settle_reservation(
+1504:                         reservation_id=reservation_id,
+1505:                         actual_quantity=actual_billable_qty,
+1506:                         idempotency_key=f"gtm_job_settle_{job_id}",
+1507:                         reason=f"GTM Research Job #{job_id}: Settled for {actual_billable_qty} qualified newly delivered lead(s)",
+1508:                         session=db_session
+1509:                     )
+1510:                 else:
+1511:                     CreditService.release_reservation(
+1512:                         reservation_id=reservation_id,
+1513:                         idempotency_key=f"gtm_job_rel_{job_id}",
+1514:                         reason=f"GTM Research Job #{job_id}: Released reservation ({outcome_reason})",
+1515:                         session=db_session
+1516:                     )
+1517:             except Exception as e_settle:
+1518:                 logger.error(f"[GTM Worker] Error settling/releasing reservation {reservation_id} for job {job_id}: {e_settle}")
+1519: 
+1520:         try:
+1521:             job.status = ResearchJobStatus.RUNNING.value
+1522:             job.started_at = datetime.utcnow()
+1523:             job.heartbeat_at = datetime.utcnow()
+1524:             job.progress = {"step": "PLANNING", "pct": 10, "message": "Analyzing ICP & creating targeted queries"}
+1525:             db_session.commit()
+1526: 
+1527:             # 1. Fetch User Context
+1528:             context = get_user_gtm_context(user_id)
+1529:             context["job_id"] = job_id
+1530:             if not context.get("onboarding_completed"):
+1531:                 raise ValueError("Onboarding incomplete. Please complete company and ICP questions.")
+1532: 
+1533:             icp_ver = context.get("icp_raw", {}).get("version", 1)
+1534:             provider_errors = {}
+1535:             provider_outcomes = {}
+1536: 
+1537:             # ====================================================================
+1538:             # PHASE 2: EXISTING GLOBAL PROFILES FIRST
+1539:             # ====================================================================
+1540:             job.progress = {"step": "DIRECTORY_SEARCH", "pct": 20, "message": "Searching existing lead directory for ICP matches"}
+1541:             job.heartbeat_at = datetime.utcnow()
+1542:             db_session.commit()
+1543: 
+1544:             existing_candidates = find_existing_global_candidates(user_id, context, limit=target_leads)
+1545:             existing_persisted_count = 0
+1546: 
+1547:             if existing_candidates:
+1548:                 logger.info(f"[GTM Worker] Found {len(existing_candidates)} potential candidates in existing GlobalProfiles")
+1549:                 # Enrich any missing company summaries from cache/web if necessary
+1550:                 dir_enrichment = {}
+1551:                 for ec in existing_candidates:
+1552:                     cname = ec.get("company")
+1553:                     if cname and ec.get("company_summary"):
+1554:                         dir_enrichment[cname] = {"summary": ec.get("company_summary")}
+1555: 
+1556:                 qualified_existing = qualify_candidates_with_gemini(existing_candidates, context, dir_enrichment)
+1557:                 # Filter to qualified candidates only (fit_score >= 70)
+1558:                 qualified_existing_high = [c for c in qualified_existing if c.get("fit_score", 0) >= 70]
+1559:                 if qualified_existing_high:
+1560:                     existing_persisted_count = persist_qualified_opportunities(
+1561:                         user_id, job_id, qualified_existing_high[:target_leads], icp_version=icp_ver
+1562:                     )
+1563:                     logger.info(f"[GTM Worker] Successfully persisted {existing_persisted_count} qualified leads from existing directory.")
+1564: 
+1565:             # Calculate deficit
+1566:             deficit = target_leads - existing_persisted_count
+1567:             logger.info(f"[GTM Worker] Target leads: {target_leads}, Persisted from directory: {existing_persisted_count}, Deficit: {deficit}")
+1568: 
+1569:             # ====================================================================
+1570:             # PHASE 2B: DISCOVERY ONLY IF DEFICIT > 0
+1571:             # ====================================================================
+1572:             if deficit <= 0:
+1573:                 # Target satisfied completely from existing directory! Skip external discovery.
+1574:                 provider_outcomes["DIRECTORY"] = "FULFILLED"
+1575:                 discovery_mode = "DIRECTORY_ONLY"
+1576:             else:
+1577:                 # 2. Multi-Query Planning via Gemini
+1578:                 search_plan = generate_search_plan(context, persona_filter)
+1579:                 job.progress = {"step": "DISCOVERY", "pct": 40, "message": f"Executing multi-channel discovery for remaining {deficit} prospects"}
+1580:                 job.heartbeat_at = datetime.utcnow()
+1581:                 db_session.commit()
+1582: 
+1583:                 # Native Candidate Discovery: LinkedIn Voyager (Per-User Authenticated Session)
+1584:                 logger.info(f"[GTM Worker] Running native Voyager discovery for deficit of {deficit} leads (user {user_id})")
+1585:                 voyager_res = discover_candidates_via_voyager(user_id, search_plan, limit=min(deficit, 25))
+1586:                 v_status = getattr(voyager_res, "status", "SUCCESS" if voyager_res else "ZERO_RESULTS")
+1587:                 provider_outcomes["VOYAGER"] = v_status
+1588: 
+1589:                 if v_status == "SUCCESS" and len(voyager_res) > 0:
+1590:                     merged_candidates = voyager_res
+1591:                     discovery_mode = "VOYAGER"
+1592:                     logger.info(f"[GTM Worker] Discovered {len(merged_candidates)} candidates via Voyager.")
+1593: 
+1594:                     # Company Enrichment
+1595:                     job.progress = {"step": "ENRICHMENT", "pct": 60, "message": "Enriching company context via public intelligence", "provider_outcomes": provider_outcomes}
+1596:                     job.heartbeat_at = datetime.utcnow()
+1597:                     db_session.commit()
+1598: 
+1599:                     web_enrichment_cache = {}
+1600:                     for c in merged_candidates:
+1601:                         comp_name = c.get("company")
+1602:                         if comp_name and comp_name not in web_enrichment_cache:
+1603:                             web_enrichment_cache[comp_name] = enrich_company_public_web(comp_name)
+1604: 
+1605:                     # Evidence-based Qualification & Scoring via Gemini
+1606:                     job.progress = {"step": "QUALIFYING", "pct": 80, "message": "Evaluating prospects against ICP criteria", "provider_outcomes": provider_outcomes}
+1607:                     job.heartbeat_at = datetime.utcnow()
+1608:                     db_session.commit()
+1609: 
+1610:                     qualified_discovered = qualify_candidates_with_gemini(merged_candidates, context, web_enrichment_cache)
+1611:                     qualified_discovered_high = [c for c in qualified_discovered if c.get("fit_score", 0) >= 70]
+1612: 
+1613:                     # Persist up to remaining deficit
+1614:                     job.progress = {"step": "PERSISTING", "pct": 90, "message": "Saving qualified opportunities to dashboard", "provider_outcomes": provider_outcomes}
+1615:                     job.heartbeat_at = datetime.utcnow()
+1616:                     db_session.commit()
+1617: 
+1618:                     persist_qualified_opportunities(
+1619:                         user_id, job_id, qualified_discovered_high[:deficit], icp_version=icp_ver
+1620:                     )
+1621:                 elif v_status == "ZERO_RESULTS" or (v_status == "SUCCESS" and len(voyager_res) == 0):
+1622:                     # Zero results from new discovery, but we may already have existing_persisted_count leads
+1623:                     logger.info(f"[GTM Worker] Discovery yielded 0 new candidates. Existing delivered: {existing_persisted_count}")
+1624:                     discovery_mode = "VOYAGER_ZERO"
+1625:                 else:
+1626:                     # Voyager failure
+1627:                     v_cat = getattr(voyager_res, "error_category", None) or v_status
+1628:                     v_raw = getattr(voyager_res, "raw_error", None) or v_status
+1629:                     provider_outcomes["VOYAGER"] = f"FAILED_{v_status}"
+1630:                     provider_errors["VOYAGER"] = v_cat
+1631: 
+1632:                     # If we already delivered some leads from existing directory, don't fail the whole job!
+1633:                     if existing_persisted_count > 0:
+1634:                         logger.warning(f"[GTM Worker] Discovery failed ({v_cat}), but {existing_persisted_count} leads delivered from directory.")
+1635:                         discovery_mode = "PARTIAL_DIRECTORY"
+1636:                     else:
+1637:                         if v_cat in ("expired", "auth_expired", "login", "disconnected", "no_connection"):
+1638:                             err_summary = "LinkedIn session expired or disconnected. Please reconnect your LinkedIn account in Settings/Onboarding to continue discovery."
+1639:                         elif v_cat in ("challenge", "checkpoint", "checkpoint_challenge"):
+1640:                             err_summary = "LinkedIn security verification required. Please complete verification by logging in interactively."
+1641:                         elif v_cat in ("rate_limit", "rate_limited"):
+1642:                             err_summary = "LinkedIn rate limit encountered. Please wait a short while before initiating new prospect discovery."
+1643:                         else:
+1644:                             err_summary = f"LinkedIn discovery failed: {v_raw}"
+1645: 
+1646:                         job.status = ResearchJobStatus.FAILED.value
+1647:                         job.error_message = err_summary
+1648:                         job.progress = {
+1649:                             "step": "FAILED",
+1650:                             "pct": 100,

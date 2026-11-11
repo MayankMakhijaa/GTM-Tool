@@ -3,9 +3,10 @@ import re
 import json
 import logging
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List, Tuple
 from urllib.parse import quote
+from sqlalchemy import or_, and_
 
 import requests
 from google import genai
@@ -22,8 +23,11 @@ from app.models.all_models import (
     ResearchJobStatus,
     ResearchType,
     LeadStatus,
-    GlobalProfileSource
+    GlobalProfileSource,
+    CreditReservation,
+    ReservationStatus
 )
+from app.services.credit_service import CreditService
 from app.integrations.linkedin.voyager_client import (
     create_voyager_client_from_db,
     validate_user_session
@@ -33,8 +37,13 @@ from app.services.scraping_service import (
     is_google_search_configured,
     validate_google_search_config
 )
+from app.services.discovery.orchestrator import SinglePromptMultiEngineOrchestrator
 
 logger = logging.getLogger(__name__)
+
+# Feature flag to select OpenSERP multi-engine discovery flow vs legacy Voyager flow
+# Defaults to False to guarantee 100% backward-compatible fallback unless enabled
+GTM_USE_OPENSERP = os.getenv("GTM_USE_OPENSERP", "false").strip().lower() in ("true", "1", "yes")
 
 
 class CandidateList(list):
@@ -55,6 +64,78 @@ class CandidateList(list):
         self.error_category = error_category
         self.provider = provider
         self.raw_error = raw_error
+
+
+class JobHeartbeatController:
+    """
+    Lightweight, thread-safe heartbeat controller for long-running GTM jobs.
+    Runs a daemon background timer that periodically executes an isolated SQL UPDATE
+    on `ResearchJobs.heartbeat_at`, conditioned strictly on `status IN ('QUEUED', 'RUNNING')`.
+
+    Guarantees:
+    - Never shares SQLAlchemy sessions with worker or request threads.
+    - Uses independent database connections from the application engine pool.
+    - Fails open on transient database glitches without crashing the parent worker.
+    - Conditionally updates only active jobs to prevent overwriting terminal states.
+    - Stops immediately upon worker exit or explicit stop() call.
+    """
+    def __init__(self, job_id: int, interval_seconds: int = 60):
+        self.job_id = job_id
+        self.interval_seconds = interval_seconds
+        self._stop_event = threading.Event()
+        self._thread: Optional[threading.Thread] = None
+
+    def start(self) -> None:
+        """Starts the periodic background heartbeat thread."""
+        if self._thread is not None and self._thread.is_alive():
+            return
+        self._stop_event.clear()
+        self._thread = threading.Thread(
+            target=self._heartbeat_loop,
+            name=f"GTM-Heartbeat-{self.job_id}",
+            daemon=True
+        )
+        self._thread.start()
+
+    def stop(self, timeout: float = 2.0) -> None:
+        """Stops the heartbeat thread and waits for clean exit."""
+        self._stop_event.set()
+        if self._thread is not None and self._thread.is_alive():
+            self._thread.join(timeout=timeout)
+
+    def pulse_now(self) -> bool:
+        """Performs a direct synchronous heartbeat pulse in an isolated connection."""
+        return self._do_pulse()
+
+    def _do_pulse(self) -> bool:
+        """Executes a single atomic heartbeat update without touching session state."""
+        from app.database import engine
+        from sqlalchemy import text
+        try:
+            now = datetime.utcnow()
+            stmt = text("""
+                UPDATE research_jobs
+                SET heartbeat_at = :now, updated_at = :now
+                WHERE id = :job_id AND status IN ('QUEUED', 'RUNNING')
+            """)
+            with engine.connect() as conn:
+                res = conn.execute(stmt, {"now": now, "job_id": self.job_id})
+                conn.commit()
+                return res.rowcount > 0
+        except Exception as e:
+            logger.warning(f"[GTM Heartbeat #{self.job_id}] Transient heartbeat update failed: {e}")
+            return False
+
+    def _heartbeat_loop(self) -> None:
+        """Loop running inside daemon thread until stopped."""
+        while not self._stop_event.wait(timeout=self.interval_seconds):
+            if self._stop_event.is_set():
+                break
+            active = self._do_pulse()
+            if not active:
+                # Job is no longer in QUEUED or RUNNING status in DB; stop pulsing
+                logger.info(f"[GTM Heartbeat #{self.job_id}] Job reached terminal status or not found. Stopping pulse.")
+                break
 
     @property
     def is_success(self) -> bool:
@@ -930,24 +1011,67 @@ Return a single JSON ARRAY of objects:
 # POSTGRESQL PERSISTENCE
 # ====================================================================
 
+class PersistenceResult(int):
+    """
+    Structured integer subclass representing the persistence outcome.
+    Behaves directly as an int (`saved_count`) for backward compatibility with existing
+    callers and test assertions (`res == 1`, `int(res)`, etc.), while providing structured
+    access to `persisted_urns` (list of confirmed normalized LinkedIn IDs) and `saved_count`.
+    """
+    def __new__(cls, saved_count: int, persisted_urns: Optional[List[str]] = None):
+        instance = super().__new__(cls, saved_count)
+        instance.saved_count = saved_count
+        instance.persisted_urns = persisted_urns or []
+        return instance
+
+    def get(self, key: str, default=None):
+        if key == "saved_count":
+            return self.saved_count
+        if key == "persisted_urns":
+            return self.persisted_urns
+        return default
+
+    def __getitem__(self, key: str):
+        if key == "saved_count":
+            return self.saved_count
+        if key == "persisted_urns":
+            return self.persisted_urns
+        raise KeyError(key)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "saved_count": self.saved_count,
+            "persisted_urns": self.persisted_urns
+        }
+
+
 def persist_qualified_opportunities(
     user_id: int,
     job_id: Optional[int],
     qualified_candidates: List[Dict[str, Any]],
     icp_version: int = 1
-) -> int:
+) -> PersistenceResult:
     """
     Persists qualified prospects to PostgreSQL:
     1. Upserts into GlobalProfiles (deduplicated by linkedin_id).
     2. Upserts into UsersProfiles (tenant-isolated for user_id).
+
+    Returns a PersistenceResult containing:
+    - saved_count: int (number of successfully persisted qualified prospects)
+    - persisted_urns: List[str] (exact normalized identities successfully persisted to GlobalProfiles)
     """
     saved_count = 0
+    persisted_urns = []
     now = datetime.utcnow()
 
     valid_job = db_session.query(ResearchJobs).filter_by(id=job_id).first() if job_id else None
     actual_job_id = valid_job.id if valid_job else None
 
     for c in qualified_candidates:
+        # Exclude candidates explicitly rejected or disqualified
+        if c.get("is_excluded") or c.get("tier") == "Disqualified":
+            continue
+
         norm_urn = normalize_linkedin_identifier(c.get("profile_url"), c.get("urn_id"))
         if not norm_urn:
             continue
@@ -995,6 +1119,10 @@ def persist_qualified_opportunities(
             global_profile.recommended_no_of_times = (global_profile.recommended_no_of_times or 0) + 1
             global_profile.last_updated = now
 
+        if not global_profile:
+            logger.error(f"[GTM Persistence] Failed to retrieve or create GlobalProfile for {norm_urn}")
+            continue
+
         # 2. UsersProfiles Tenant Isolation & Upsert
         user_profile = db_session.query(UsersProfiles).filter_by(
             user_id=user_id,
@@ -1039,10 +1167,95 @@ def persist_qualified_opportunities(
             user_profile.last_seen_at = now
             user_profile.updated_at = now
 
-        saved_count += 1
+            saved_count += 1
+            persisted_urns.append(norm_urn)
+        else:
+            logger.error(
+                f"[GTM Persistence] Failed to create or retrieve UsersProfiles tenant association "
+                f"for user {user_id}, profile {norm_urn} (GlobalID: {global_profile.global_id}). "
+                f"Lead will not be counted as persisted."
+            )
 
-    db_session.commit()
-    return saved_count
+    try:
+        db_session.commit()
+    except Exception as commit_err:
+        db_session.rollback()
+        logger.error(
+            f"[GTM Persistence] Failed to commit qualified opportunities batch for user {user_id}, "
+            f"job {job_id} ({len(persisted_urns)} staged records): {commit_err}",
+            exc_info=True
+        )
+        raise
+
+    return PersistenceResult(saved_count, persisted_urns)
+
+
+def synchronize_profile_provenance(provenance_updates: List[Dict[str, Any]]) -> int:
+    """
+    Synchronizes late-discovered multi-engine provenance (sources and queries)
+    for already-persisted GlobalProfiles without requalifying or recharging credits.
+
+    Preserves all existing company_data keys (intent_signals, recommended_angle,
+    public_contact, tier, etc.) while merging sources and queries.
+    """
+    if not provenance_updates:
+        return 0
+
+    updated_count = 0
+    now = datetime.utcnow()
+
+    for item in provenance_updates:
+        urn_id = item.get("urn_id")
+        if not urn_id:
+            continue
+
+        norm_urn = normalize_linkedin_identifier(item.get("profile_url"), urn_id)
+        if not norm_urn:
+            continue
+
+        global_profile = db_session.query(GlobalProfiles).filter_by(linkedin_id=norm_urn).first()
+        if not global_profile:
+            continue
+
+        # Inspect and merge company_data
+        existing_data = dict(global_profile.company_data or {})
+        existing_sources = list(existing_data.get("sources") or [])
+        existing_queries = list(existing_data.get("queries") or [])
+
+        incoming_sources = item.get("sources") or []
+        incoming_queries = item.get("queries") or []
+
+        changed = False
+
+        for src in incoming_sources:
+            if src and src not in existing_sources:
+                existing_sources.append(src)
+                changed = True
+
+        for q in incoming_queries:
+            if q and q not in existing_queries:
+                existing_queries.append(q)
+                changed = True
+
+        # If evidence fields are missing on existing record, fill them in safely
+        if not global_profile.company and item.get("company"):
+            global_profile.company = item.get("company")
+            changed = True
+        if not global_profile.location and item.get("location"):
+            global_profile.location = item.get("location")
+            changed = True
+
+        if changed:
+            existing_data["sources"] = existing_sources
+            existing_data["queries"] = existing_queries
+            global_profile.company_data = existing_data
+            global_profile.last_updated = now
+            updated_count += 1
+
+    if updated_count > 0:
+        db_session.commit()
+
+    return updated_count
 
 
 # ====================================================================
@@ -1066,6 +1279,9 @@ def _execute_gtm_pipeline_worker(
             logger.error(f"[GTM Worker] Job {job_id} not found.")
             return
 
+        heartbeat_ctrl = JobHeartbeatController(job_id=job_id, interval_seconds=45)
+        heartbeat_ctrl.start()
+
         try:
             job.status = ResearchJobStatus.RUNNING.value
             job.started_at = datetime.utcnow()
@@ -1087,6 +1303,117 @@ def _execute_gtm_pipeline_worker(
             provider_errors = {}
             provider_outcomes = {}
 
+            # Check feature flag for discovery execution mode
+            use_openserp = GTM_USE_OPENSERP or (os.getenv("GTM_USE_OPENSERP", "false").strip().lower() in ("true", "1", "yes"))
+
+            if use_openserp:
+                logger.info(f"[GTM Worker] Executing Phase 1.1 Canonical OpenSERP Multi-Engine discovery for job {job_id}")
+
+                web_enrichment_cache = {}
+
+                def _process_candidate_batch(batch: List[Dict[str, Any]], prompt_meta: Dict[str, Any]) -> PersistenceResult:
+                    """
+                    Synchronously enriches, qualifies with Gemini, and persists a batch of candidates for this prompt.
+                    Guarantees full drainage before the prompt barrier completes.
+                    Returns PersistenceResult containing saved_count and exact persisted_urns list.
+                    """
+                    if not batch:
+                        return PersistenceResult(0, [])
+
+                    # 1. Company enrichment
+                    for c in batch:
+                        c_name = c.get("company")
+                        if c_name and c_name != "Target Company" and c_name not in web_enrichment_cache:
+                            web_enrichment_cache[c_name] = enrich_company_public_web(c_name)
+
+                    # 2. Evidence-based qualification with Gemini
+                    qualified = qualify_candidates_with_gemini(batch, context, web_enrichment_cache)
+
+                    # 3. PostgreSQL persistence returning structured PersistenceResult
+                    icp_v = context.get("icp_raw", {}).get("version", 1)
+                    res = persist_qualified_opportunities(user_id, job_id, qualified, icp_version=icp_v)
+                    return res
+
+                def _on_orchestrator_progress(prog_data: Dict[str, Any]):
+                    """Updates ResearchJobs.progress with compact telemetry."""
+                    try:
+                        p_idx = prog_data.get("current_prompt_index", 1)
+                        tot_p = prog_data.get("total_prompts", 1)
+                        pct = min(95, 20 + int((p_idx / max(1, tot_p)) * 70))
+
+                        # Compact engine summary
+                        compact_engines = {
+                            eng: {
+                                "status": prog_data.get("engine_status", {}).get(eng, "UNKNOWN"),
+                                "count": prog_data.get("engine_result_counts", {}).get(eng, 0)
+                            }
+                            for eng in prog_data.get("engine_status", {})
+                        }
+
+                        current_job = db_session.query(ResearchJobs).filter_by(id=job_id).first()
+                        if current_job and current_job.status == ResearchJobStatus.RUNNING.value:
+                            current_job.heartbeat_at = datetime.utcnow()
+                            current_job.progress = {
+                                "step": prog_data.get("prompt_status", "DISCOVERY"),
+                                "pct": pct,
+                                "message": f"Prompt {p_idx}/{tot_p} ({prog_data.get('prompt_status', 'RUNNING')}): {prog_data.get('qualified_persisted', 0)} qualified leads",
+                                "discovery_mode": "OPENSERP_MULTI_ENGINE",
+                                "current_prompt_index": p_idx,
+                                "total_prompts": tot_p,
+                                "prompt_query": prog_data.get("current_prompt_query", ""),
+                                "engines": compact_engines,
+                                "total_discovered": prog_data.get("total_discovered", 0),
+                                "total_filtered": prog_data.get("total_filtered", 0),
+                                "batches_completed": prog_data.get("batches_completed", 0),
+                                "qualified_persisted": prog_data.get("qualified_persisted", 0)
+                            }
+                            db_session.commit()
+                    except Exception as prog_err:
+                        logger.debug(f"[GTM Worker] Progress update exception: {prog_err}")
+                        db_session.rollback()
+
+                def _on_sync_provenance(updates: List[Dict[str, Any]]) -> int:
+                    """Synchronizes late-discovered sources/queries without calling Gemini or recharging credits."""
+                    return synchronize_profile_provenance(updates)
+
+                orchestrator = SinglePromptMultiEngineOrchestrator(
+                    qualification_batch_size=5,
+                    engine_timeout=15.0
+                )
+
+                orch_summary = orchestrator.execute_gtm_search_plan(
+                    search_plan=search_plan,
+                    target_leads=target_leads,
+                    process_batch_fn=_process_candidate_batch,
+                    on_progress_fn=_on_orchestrator_progress,
+                    on_sync_provenance_fn=_on_sync_provenance
+                )
+
+                saved_count = orch_summary["qualified_persisted"]
+                job.status = ResearchJobStatus.COMPLETED.value
+                job.progress = {
+                    "step": "COMPLETED",
+                    "pct": 100,
+                    "message": f"Successfully discovered and qualified {saved_count} leads via OpenSERP multi-engine discovery",
+                    "discovery_mode": "OPENSERP_MULTI_ENGINE",
+                    "total_discovered": orch_summary["total_discovered"],
+                    "total_filtered": orch_summary["total_filtered"],
+                    "batches_completed": orch_summary["batches_completed"],
+                    "qualified_persisted": saved_count,
+                    "engine_outcomes": {
+                        eng: tel["last_status"] for eng, tel in orch_summary["engine_telemetry"].items()
+                    }
+                }
+                job.results_count = saved_count
+                job.completed_at = datetime.utcnow()
+                job.heartbeat_at = datetime.utcnow()
+                db_session.commit()
+                logger.info(f"[GTM Worker] OpenSERP Job {job_id} completed with {saved_count} qualified leads.")
+                return
+
+            # ---------------------------------------------------------
+            # Fallback Legacy Flow: LinkedIn Voyager Discovery
+            # ---------------------------------------------------------
             # 3. Native Candidate Discovery: LinkedIn Voyager (Per-User Authenticated Session)
             logger.info(f"[GTM Worker] Running native Voyager discovery for user {user_id}")
             voyager_res = discover_candidates_via_voyager(user_id, search_plan, limit=min(target_leads, 25))
@@ -1208,7 +1535,182 @@ def _execute_gtm_pipeline_worker(
                 logger.error(f"[GTM Worker] Failed to persist failure status for job {job_id}: {commit_err}")
                 db_session.rollback()
         finally:
+            heartbeat_ctrl.stop(timeout=2.0)
             db_session.remove()
+
+
+# ====================================================================
+# STALE JOB RECONCILIATION & RECOVERY
+# ====================================================================
+
+DEFAULT_STALE_THRESHOLD_MINUTES = 15
+
+
+def reconcile_stale_research_jobs(
+    max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,
+    session: Optional[Any] = None
+) -> Dict[str, Any]:
+    """
+    Detects and safely reconciles abandoned/stale QUEUED or RUNNING research jobs.
+    Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to guarantee
+    safe concurrent execution across multiple worker/app processes.
+
+    Reconciliation rules:
+    1. Selects candidate jobs in QUEUED or RUNNING whose heartbeat_at (or created_at if heartbeat_at is NULL)
+       is strictly older than max_stale_minutes.
+    2. Re-validates job status and timestamp under exclusive lock.
+    3. Counts durably persisted, qualified leads attributable to that exact job.
+    4. If reservation is RESERVED:
+       - If durable count > 0, settles Q leads using captured pricing snapshot via stable key gtm_job_settle_{job_id}.
+       - If durable count == 0, releases reservation via stable key gtm_job_rel_{job_id}.
+    5. If reservation is already SETTLED or RELEASED:
+       - Preserves the existing settlement/release outcome without duplicate charge or conflicting mutation.
+    6. If reservation is missing/unexpected:
+       - Records a clear diagnostic and marks the job failed without fabricating ledger entries.
+    7. Sets terminal status FAILED with truthful diagnostic explanation.
+    """
+    s = session or db_session
+    now = datetime.utcnow()
+    cutoff = now - timedelta(minutes=max_stale_minutes)
+
+    stats = {
+        "examined": 0,
+        "recovered": 0,
+        "skipped": 0,
+        "failed_to_reconcile": 0,
+        "details": []
+    }
+
+    # Query candidate job IDs first
+    candidate_ids = [
+        row[0] for row in s.query(ResearchJobs.id).filter(
+            ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value]),
+            or_(
+                and_(ResearchJobs.heartbeat_at.isnot(None), ResearchJobs.heartbeat_at < cutoff),
+                and_(ResearchJobs.heartbeat_at.is_(None), ResearchJobs.created_at < cutoff)
+            )
+        ).all()
+    ]
+
+    stats["examined"] = len(candidate_ids)
+    if not candidate_ids:
+        return stats
+
+    for candidate_id in candidate_ids:
+        try:
+            # Acquire row lock with skip_locked=True for safe concurrency
+            job = s.query(ResearchJobs).filter_by(id=candidate_id).with_for_update(skip_locked=True).first()
+            if not job:
+                # Locked by another process or no longer exists
+                stats["skipped"] += 1
+                continue
+
+            # Re-verify staleness and status under lock
+            if job.status not in (ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value):
+                stats["skipped"] += 1
+                continue
+
+            effective_ts = job.heartbeat_at or job.created_at
+            if effective_ts and effective_ts >= cutoff:
+                stats["skipped"] += 1
+                continue
+
+            job_id = job.id
+            user_id = job.user_id
+            target_leads = (job.budget or {}).get("target_leads", 25)
+
+            # Query durable billable results created by this exact job
+            durable_count = s.query(UsersProfiles).filter(
+                UsersProfiles.user_id == user_id,
+                UsersProfiles.research_job_id == job_id,
+                UsersProfiles.lead_status == LeadStatus.QUALIFIED.value,
+                UsersProfiles.match_score >= 70
+            ).count()
+
+            billable_count = min(durable_count, target_leads)
+
+            # Locate reservation
+            reservation_id = (job.budget or {}).get("reservation_id")
+            res_rec = None
+            if reservation_id:
+                res_rec = s.query(CreditReservation).filter_by(id=reservation_id).first()
+            if not res_rec:
+                res_rec = s.query(CreditReservation).filter_by(job_id=job_id).first()
+
+            credit_action = "NONE"
+            if res_rec:
+                if res_rec.status == ReservationStatus.RESERVED.value:
+                    if billable_count > 0:
+                        CreditService.settle_reservation(
+                            reservation_id=res_rec.id,
+                            actual_quantity=billable_count,
+                            idempotency_key=f"gtm_job_settle_{job_id}",
+                            reason=f"Recovery: Settled {billable_count} durable qualified lead(s) for stale job #{job_id}",
+                            session=s
+                        )
+                        credit_action = f"SETTLED_{billable_count}"
+                    else:
+                        CreditService.release_reservation(
+                            reservation_id=res_rec.id,
+                            idempotency_key=f"gtm_job_rel_{job_id}",
+                            reason=f"Recovery: Released uncharged reserved credits for stale job #{job_id}",
+                            session=s
+                        )
+                        credit_action = "RELEASED"
+                elif res_rec.status == ReservationStatus.SETTLED.value:
+                    credit_action = "PRESERVED_SETTLED"
+                elif res_rec.status == ReservationStatus.RELEASED.value:
+                    credit_action = "PRESERVED_RELEASED"
+                else:
+                    credit_action = f"UNEXPECTED_STATUS_{res_rec.status}"
+            else:
+                credit_action = "NO_RESERVATION_FOUND"
+
+            # Transition job to terminal FAILED status
+            job.status = ResearchJobStatus.FAILED.value
+            job.results_count = billable_count
+            job.completed_at = datetime.utcnow()
+            job.heartbeat_at = datetime.utcnow()
+
+            if credit_action.startswith("SETTLED"):
+                msg = f"Job interrupted: stale worker heartbeat; recovery settled {billable_count} durable qualified lead(s) and released unused credits."
+            elif credit_action == "RELEASED":
+                msg = "Job interrupted: stale worker heartbeat; recovery released reserved credits (0 qualified leads persisted)."
+            elif credit_action == "PRESERVED_SETTLED":
+                msg = f"Job interrupted: recovery reconciled terminal state; previous settlement of {billable_count} lead(s) preserved."
+            elif credit_action == "PRESERVED_RELEASED":
+                msg = "Job interrupted: recovery reconciled terminal state; previous release preserved."
+            else:
+                msg = f"Job interrupted: stale worker heartbeat; recovery completed with reservation state '{credit_action}'."
+
+            job.error_message = msg
+            job.progress = {
+                "step": "FAILED",
+                "pct": 100,
+                "message": msg,
+                "recovery": {
+                    "reconciled_at": now.isoformat(),
+                    "durable_leads": billable_count,
+                    "credit_action": credit_action
+                }
+            }
+            s.commit()
+
+            stats["recovered"] += 1
+            stats["details"].append({
+                "job_id": job_id,
+                "user_id": user_id,
+                "billable_count": billable_count,
+                "credit_action": credit_action
+            })
+            logger.info(f"[GTM Recovery] Successfully reconciled stale job #{job_id}: {credit_action}, billable_count={billable_count}")
+
+        except Exception as e:
+            s.rollback()
+            stats["failed_to_reconcile"] += 1
+            logger.error(f"[GTM Recovery] Failed to reconcile candidate job #{candidate_id}: {e}", exc_info=True)
+
+    return stats
 
 
 def start_gtm_research_job(
@@ -1242,6 +1744,7 @@ def start_gtm_research_job(
 
     icp_ver = context.get("icp_raw", {}).get("version", 1)
 
+    now = datetime.utcnow()
     job = ResearchJobs(
         user_id=user_id,
         status=ResearchJobStatus.QUEUED.value,
@@ -1250,7 +1753,8 @@ def start_gtm_research_job(
         budget={"target_leads": target_leads},
         progress={"step": "QUEUED", "pct": 5, "message": "Job queued for background processing"},
         attempts=1,
-        created_at=datetime.utcnow()
+        created_at=now,
+        heartbeat_at=now
     )
     db_session.add(job)
     db_session.commit()

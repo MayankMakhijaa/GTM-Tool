@@ -1,0 +1,155 @@
+{
+  "engine": "google",
+  "endpoint": "google",
+  "query": "site:linkedin.com/in \"VP Sales\" \"B2B SaaS\" India",
+  "url": "http://127.0.0.1:7000/google/search?text=site%3Alinkedin.com%2Fin+%22VP+Sales%22+%22B2B+SaaS%22+India&limit=5",
+  "http_status": 200,
+  "took_seconds": 4.78,
+  "raw_response": {
+    "query": {
+      "text": "site:linkedin.com/in \"VP Sales\" \"B2B SaaS\" India",
+      "engines_requested": [
+        "google"
+      ]
+    },
+    "meta": {
+      "request_id": "01a1bbed-17b6-757d-935a-d89fe6f6e916",
+      "requested_at": "2026-11-08T16:10:39Z",
+      "took_ms": 4765,
+      "engines_failed": [],
+      "version": "2.1"
+    },
+    "results": [
+      {
+        "id": "s_4dc95bc514a66550",
+        "rank": 1,
+        "type": "organic",
+        "title": "Mohamed Rafiuddin, PhD. - VP \u2013 Sales | Director",
+        "url": "https://www.google.com/goto?url=CAESdQHEIkXXLFt9hCuMJHC3DEqEKC4_gBfTl22ZnXtQbyjFfmntYfjKd6RX3n6F2utt8d85cXOwxKJff7MGPq3ybnnbH7NmWKMGmJvxEs-gDZSkA0AHAkfVM1oDl3tEmQgb21QVanA51mdmZcwZ3Eurg27ysEG-DA",
+        "display_url": "linkedin.com",
+        "snippet": "Mohamed Rafiuddin, PhD. VP \u2013 Sales | Director \u2013 Sales | Head of Sales | Chief Revenue Officer | B2B SaaS, Cloud, Cybersecurity & AI | 25+ Yrs Driving\u00a0...Read more",
+        "domain": "linkedin.com",
+        "favicon": "https://linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 1
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": "social"
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      },
+      {
+        "id": "s_095aa601a8936be5",
+        "rank": 2,
+        "type": "organic",
+        "title": "Tejas Mehta - VP Sales & Customer Success",
+        "url": "https://in.linkedin.com/in/tejas-mehta-51842880",
+        "display_url": "in.linkedin.com \u203a in \u203a tejas-mehta-51842880",
+        "snippet": "Tejas Mehta. VP Sales & Customer Success | B2B SaaS GTM, Revenue Operations & Retention | Building AI into Revenue Ops | Enterprise SaaS & PropTech. Sell.Do\u00a0...Read more",
+        "domain": "in.linkedin.com",
+        "favicon": "https://in.linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 2
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      },
+      {
+        "id": "s_63c465b3b38c55e5",
+        "rank": 3,
+        "type": "organic",
+        "title": "Kurt S - VP Sales | Scaling revenue and sales teams",
+        "url": "https://www.google.com/goto?url=CAESawHEIkXXNn1iuO8434KC7JWHmV1mMCNEA5R3hl7-3N_pax1W8wFdNFIKbTH26yNNdV_ZG095BNanTj6GojmUpiM3WusA4UmcOSqe6ep3cgXAwRmkyNi_nLrJB4F_a7el0LTS9IGQdD_flmZY",
+        "display_url": "linkedin.com",
+        "snippet": "Bengaluru, Karnataka, India \u00b7 VP of Sales \u00b7 Sprouts.ai",
+        "domain": "linkedin.com",
+        "favicon": "https://linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 3
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": "social"
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      },
+      {
+        "id": "s_f27f201d8c5b1177",
+        "rank": 4,
+        "type": "organic",
+        "title": "Apu Thomas - CMO | VP Sales & Marketing | B2B SaaS & AI",
+        "url": "https://in.linkedin.com/in/aputhomas",
+        "display_url": "in.linkedin.com \u203a in \u203a aputhomas",
+        "snippet": "Bengaluru, Karnataka, India \u00b7 Director Strategic Marketing \u00b7 Scienaptic AI",
+        "domain": "in.linkedin.com",
+        "favicon": "https://in.linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 4
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      },
+      {
+        "id": "s_bea55ba53348eb64",
+        "rank": 5,
+        "type": "organic",
+        "title": "Achal Chhajed - VP Sales & Marketing",
+        "url": "https://www.google.com/goto?url=CAESZAHEIkXXXGMswHLakRD3S2WYesmKEFgLr6E2kWyCFw6Fo5WluYkGusCfYUgwe7KgYZhTw7Oxiv406LoXHiimYqtZ1Oz_-8MZUTlnCVsmnrmbdhHreeu9srpB6QNBBU3NFLpmUtU",
+        "display_url": "linkedin.com",
+        "snippet": "Bengaluru, Karnataka, India \u00b7 VP Sales and Marketing \u00b7 Cubic Logics (apps365.com)",
+        "domain": "linkedin.com",
+        "favicon": "https://linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 5
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": "social"
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      }
+    ],
+    "serp_features": [],
+    "pagination": {
+      "page": 1,
+      "has_more": true,
+      "next_start": 5
+    }
+  },
+  "status_category": "RESULTS_RETURNED",
+  "results_count": 5,
+  "candidates": [],
+  "error_message": null
+}

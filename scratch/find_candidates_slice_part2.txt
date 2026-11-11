@@ -1,0 +1,74 @@
+Created At: 2026-11-04T19:59:11+05:30
+Completed At: 2026-11-04T19:59:11+05:30
+Showing lines 1080-1150 of 2194
+1080:                     pipe.shutdown(timeout=1.0)
+1081:                 return False
+1082: 
+1083:             pipe.camera = camera
+1084:             pipe.ai_worker_running = True
+1085: 
+1086:             if self.is_research_capture:
+1087:                 roster_size = "unknown"
+1088:                 enrolled_count = len(pipe.master_gallery) if hasattr(pipe, 'master_gallery') else 0
+1089:                 try:
+1090:                     with app_obj.app_context():
+1091:                         from core_logic.db import MasterStudent
+1092:                         roster_size = MasterStudent.query.filter_by(section_id=section_id).count()
+1093:                 except Exception:
+1094:                     pass
+1095: 
+1096:                 session_params = {
+1097:                     "section_id": section_id,
+1098:                     "section_roster_size": roster_size,
+1099:                     "enrolled_identities": enrolled_count,
+1100:                     "similarity_threshold": FACE_MATCH_THRESHOLD,
+1101:                     "margin_threshold": AMBIGUITY_MARGIN,
+1102:                     "temporal_consensus_k": 3,
+1103:                     "override_timetable_entry_id": self.override_timetable_entry_id,
+1104:                     "override_subject_id": self.override_subject_id,
+1105:                     "override_faculty_id": self.override_faculty_id
+1106:                 }
+1107:                 rec_session_id = self.current_session_id or int(time.time())
+1108:                 self.research_recorder = ResearchSessionRecorder(
+1109:                     session_id=rec_session_id,
+1110:                     camera_id=self.camera_id,
+1111:                     section_id=section_id,
+1112:                     session_params=session_params
+1113:                 )
+1114:                 pipe.research_recorder = self.research_recorder
+1115:                 pipe.is_research_capture = True
+1116:                 pipe.current_session_id = rec_session_id
+1117:                 pipe.camera_id = self.camera_id
+1118: 
+1119:             ai_thread = threading.Thread(
+1120:                 target=pipe._ai_worker_loop,
+1121:                 args=(camera,),
+1122:                 name=f"CameraWorker-{self.camera_id}-AI",
+1123:                 daemon=True
+1124:             )
+1125:             pipe.ai_thread = ai_thread
+1126:             ai_thread.start()
+1127: 
+1128:             self.pipeline = pipe
+1129:             self.last_error = None
+1130:             logger.info(f"[Worker #{self.camera_id}] Pipeline, camera, and AI thread started successfully.")
+1131:             return True
+1132: 
+1133:         except Exception as e:
+1134:             self.last_error = f"{type(e).__name__}: {str(e)}"
+1135:             logger.error(f"[Worker #{self.camera_id}] Failed to set up pipeline: {e}", exc_info=True)
+1136:             if pipe is not None:
+1137:                 try:
+1138:                     pipe.shutdown(timeout=1.0)
+1139:                 except Exception:
+1140:                     pass
+1141:             self.pipeline = None
+1142:             return False
+1143: 
+1144:     def poll_camera_and_timetable(self, reference_datetime: datetime | None = None) -> dict[str, Any]:
+1145:         """
+1146:         Queries camera configuration and resolves current timetable period.
+1147:         Fails closed if camera is inactive, unassigned, or cannot be resolved safely.
+1148:         Never creates attendance sessions or records.
+1149:         """
+1150:         from flask import has_app_context

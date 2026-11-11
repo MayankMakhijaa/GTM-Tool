@@ -1,0 +1,104 @@
+Created At: 2026-11-09T21:48:23+05:30
+Completed At: 2026-11-09T21:48:24+05:30
+The tool's output was truncated due to being too long. You can find the full output in a file at file:///C:/Users/mdkaa/.gemini/antigravity/brain/90378810-f9f7-47b6-b96b-7aed289e9512/.system_generated/steps/299/output.txt.
+
+Here is a preview with the middle of the output truncated:
+Command exited with code 0.
+
+Command output:
+
+> C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript.jsonl
+:440:{"step_index":806,"source":"MODEL","type":"GENERIC","status":"DONE","created_at":"2026-11-04T18:31:42Z","content":
+"Created At: 2026-11-05T00:01:42+05:30\nCompleted At: 2026-11-05T00:01:43+05:30\nCommand exited with code 
+0.\n\nCommand output:\n\r\nLine                                                                                        
+          \r\n----                                                                                                  
+\r\ndef calculate_gemini_cost(                                                                            \r\ndef 
+log_ai_provider_usage(                                                                            \r\n    def 
+__init__(                                                                                     \r\n    def 
+is_success(self) -> bool:                                                                     \r\ndef 
+normalize_linkedin_identifier(profile_url: Optional[str], urn_id: Optional[str]) -> Optional[str]:\r\ndef 
+normalize_profile_url(raw_url: Optional[str], urn_id: Optional[str] = None) -> Optional[str]:     \r\ndef 
+_get_gemini_client() -> Optional[genai.Client]:                                                   \r\ndef 
+_call_gemini_with_fallback(                                                                       \r\ndef 
+_clean_json(text: Optional[str]) -> Any:                                                          \r\ndef 
+get_user_gtm_context(user_id: int) -> Dict[str, Any]:                                             \r\ndef 
+generate_search_plan(                                                                             \r\ndef 
+discover_candidates_via_voyager(                                                                  \r\ndef 
+read_public_url_agent_reach(url: str, timeout: int = 8) -> Dict[str, Any]:                        \r\ndef 
+enrich_company_public_web(company_name: str, website_url: Optional[str] = None) -> Dict[str, Any]:\r\ndef 
+discover_candidates_via_public_web(                                                               \r\ndef 
+find_existing_global_candidates(                                                                  \r\ndef 
+merge_and_deduplicate_candidates(                                                                 \r\ndef 
+qualify_candidates_with_gemini(                                                                   \r\ndef 
+persist_qualified_opportunities(                                                                  \r\ndef 
+_execute_gtm_pipeline_worker(                                                                     \r\n        def 
+_safe_settle_or_release(actual_billable_qty: int, outcome_reason: str):                   \r\ndef 
+reconcile_stale_research_jobs(                                                                    \r\ndef 
+start_gtm_research_job(                                                                           \r\ndef 
+get_user_opportunities(user_id: int) -> List[Dict[str, Any]]:                                     \r\n\r\n\r\n"}
+  C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript.jsonl
+:441:{"step_index":807,"source":"MODEL","type":"PLANNER_RESPONSE","status":"DONE","created_at":"2026-11-04T18:31:43Z","
+input_tokens":2677,"cache_read_tokens":225745,"output_tokens":76,"tool_calls":[{"name":"run_command","args":{"CommandLi
+ne":"\"Select-String -Path app/models/all_models.py -Pattern \\\"class GlobalProfiles|class UsersProfiles\\\" -Context 
+0,25\"","WaitMsBeforeAsync":"10000","toolSummary":"\"Inspect GlobalProfiles and UsersProfiles in all_models.py\""}}]}
+  C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript.jsonl
+:442:{"step_index":808,"source":"MODEL","type":"GENERIC","status":"DONE","created_at":"2026-11-04T18:31:55Z","content":
+"Created At: 2026-11-05T00:01:55+05:30\nCompleted At: 2026-11-05T00:01:55+05:30\nCommand exited with code 
+0.\n\nCommand output:\n\r\n> app\\models\\all_models.py:130:class GlobalProfileSource(str, enum.Enum):\r\n  
+app\\models\\all_models.py:131:    SEED = \"SEED\"\r\n  app\\models\\all_models.py:132:    CSV_IMPORT = 
+\"CSV_IMPORT\"\r\n  app\\models\\all_models.py:133:    USER_MANUAL = \"USER_MANUAL\"\r\n  
+app\\models\\all_models.py:134:    WEB = \"WEB\"\r\n  app\\models\\all_models.py:135:\r\n> 
+app\\models\\all_models.py:136:class GlobalProfiles(Base):\r\n  app\\models\\all_models.py:137:    __tablename__ = 
+'global_profiles'\r\n  app\\models\\all_models.py:138:    global_id = Column(Integer, primary_key=True)\r\n  
+app\\models\\all_models.py:139:    linkedin_id = Column(String, unique=True, nullable=False)\r\n  
+app\\models\\all_mode
+<truncated 102238 of 112128 bytes from the middle of the output>
+= res_rec.id\r\n  +\r\n  +        def 
+_safe_settle_or_release(actual_billable_qty: int, outcome_reason: str):\r\n  +           \n<truncated 1703 
+bytes>\nlter_by(id=job_id).first()\r\n> @@ -1211,6 +1867,180 @@ def _execute_gtm_pipeline_worker(\r\n               
+db_session.remove()\r\n   \r\n   \r\n  +# ====================================================================\r\n  +# 
+STALE JOB RECONCILIATION & RECOVERY\r\n  +# ====================================================================\r\n  
++\r\n  +DEFAULT_STALE_THRESHOLD_MINUTES = 15\r\n  +\r\n  +\r\n  +def reconcile_stale_research_jobs(\r\n  +    
+max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,\r\n  +    session: Optional[Any] = None\r\n  +) -> Dict[str, 
+Any]:\r\n  +    \"\"\"\r\n  +    Detects and safely reconciles abandoned/stale QUEUED or RUNNING research jobs.\r\n  + 
+   Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to guarantee\r\n  +    safe concurrent 
+execution across multiple worker/app processes.\r\n  +\r\n  +    Reconciliation rules:\r\n  +    1. Selects candidate 
+jobs in QUEUED or RUNNING whose heartbeat_at (or created_at if heartbeat_at is NULL)\r\n  +       is strictly older 
+than max_stale_minutes.\r\n  +    2. Re-validates job status and timestamp under exclusive lock.\r\n  +    3. Counts 
+durably persisted, qualified leads attributable to that exact job.\r\n  +    4. If reservation is RESERVED:\r\n  +     
+  - If durable count > 0, settles Q leads using captured pricing snapshot via stable key 
+\r\ngtm_job_settle_{job_id}.\r\n  +       - If durable count == 0, releases reservation via stable key 
+gtm_job_rel_{job_id}.\r\n  +    5. If reservation is already SETTLED or RELEASED:\r\n  +       - Preserves the 
+existing settlement/release outcome without duplicate charge or conflicting mutation.\r\n  +    6. If reservation is 
+missing/unexpected:\r\n  +       - Records a clear diagnostic and marks the job failed without fabricating ledger 
+entries.\r\n  +    7. Sets terminal status FAILED with truthful diagnostic explanation.\r\n  +    \"\"\"\r\n  +    s = 
+session or db_session\r\n  +    now = datetime.utcnow()\r\n  +    cutoff = now - 
+timedelta(minutes=max_stale_minutes)\r\n  +\r\n  +    stats = {\r\n  +        \"examined\": 0,\r\n  +        
+\"recovered\": 0,\r\n\r\n\r\n","truncated_fields":["content"]}
+  C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript.jsonl
+:7714:{"step_index":7953,"source":"MODEL","type":"PLANNER_RESPONSE","status":"DONE","created_at":"2026-11-09T15:52:56Z"
+,"input_tokens":2841,"cache_read_tokens":152989,"output_tokens":80,"tool_calls":[{"name":"run_command","args":{"Command
+Line":"\"Select-String -Path \\\"tests\\\\integration\\\\test_gtm_pipeline.py\\\" -Pattern 
+\\\"test_existing_global_profiles_sourced_before_new_discovery\\\"\"","WaitMsBeforeAsync":"5000","toolSummary":"\"Find 
+test in test_gtm_pipeline.py\""}}]}
+  C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript.jsonl
+:7715:{"step_index":7954,"source":"MODEL","type":"GENERIC","status":"DONE","created_at":"2026-11-09T15:53:02Z","content
+":"Created At: 2026-11-09T21:23:02+05:30\nCompleted At: 2026-11-09T21:23:02+05:30\nCommand exited with code 0.\n\nNo 
+output from the command."}
+  C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript.jsonl
+:7716:{"step_index":7955,"source":"MODEL","type":"PLANNER_RESPONSE","status":"DONE","created_at":"2026-11-09T15:53:02Z"
+,"input_tokens":2209,"cache_read_tokens":153788,"output_tokens":73,"tool_calls":[{"name":"run_command","args":{"Command
+Line":"\"git log --all -S 
+\\\"test_existing_global_profiles_sourced_before_new_discovery\\\"\"","WaitMsBeforeAsync":"5000","toolSummary":"\"Find 
+which commit added test_existing_global_profiles_sourced_before_new_discovery\""}}]}
+  C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript.jsonl
+:7717:{"step_index":7956,"source":"MODEL","type":"GENERIC","status":"DONE","created_at":"2026-11-09T15:53:08Z","content
+":"Created At: 2026-11-09T21:23:08+05:30\nCompleted At: 2026-11-09T21:23:08+05:30\nCommand exited with code 0.\n\nNo 
+output from the command."}
+  C:\Users\mdkaa\.gemini\antigravity\brain\42f415b0-3b5c-4646-84e8-f65f701f33e7\.system_generated\logs\transcript.jsonl
+:7718:{"step_index":7957,"source":"MODEL","type":"PLANNER_RESPONSE","status":"DONE","created_at":"2026-11-09T15:53:09Z"
+,"input_tokens":2202,"cache_read_tokens":153955,"output_tokens":69,"tool_calls":[{"name":"run_command","args":{"Command
+Line":"\"Select-String -Path \\\"tests\\\\integration\\\\test_gtm_credits.py\\\" -Pattern 
+\\\"patch\\\\(\\\"\"","WaitMsBeforeAsync":"5000","toolSummary":"\"Find all patch calls in test_gtm_credits.py\""}}]}
+
+

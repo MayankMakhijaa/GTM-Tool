@@ -1,0 +1,508 @@
+[
+  {
+    "query_idx": 1,
+    "query": "site:linkedin.com/in \"VP Sales\" \"B2B SaaS\" Bengaluru",
+    "elapsed_s": 6.628168821334839,
+    "meta": {
+      "request_id": "01a1bc30-47a0-74bc-a9a8-466d68ed61d6",
+      "requested_at": "2026-11-08T17:24:03Z",
+      "took_ms": 6618,
+      "engines_responded": [
+        "bing",
+        "google"
+      ],
+      "engines_failed": [],
+      "version": "2.1"
+    },
+    "results": [
+      {
+        "id": "s_1549bfbac65eacc8",
+        "rank": 1,
+        "type": "organic",
+        "title": "The best VPN for speed and security",
+        "url": "https://protonvpn.com/",
+        "display_url": "protonvpn.com",
+        "snippet": "Proton VPN protects your online privacy by hiding your real IP address. With your virtual location hidden, it's much harder for your \u2026",
+        "domain": "protonvpn.com",
+        "favicon": "https://protonvpn.com/favicon.ico",
+        "position": {
+          "absolute": 1
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "protonvpn",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_40a382c53b21d77c",
+        "rank": 1,
+        "type": "organic",
+        "title": "Sirisha Naidu - Enterprise Sales Leader | Chief Sales Officer",
+        "url": "https://www.google.com/goto?url=CAESZQHEIkXXMLIXrBtI0efFDG-NU6p7DzgvIITsZLZgCwp3e2aXQ6kMabO5ekWIl267u58XKAp0zC1tkeUfRKZx6CV8inrD1_B0MGsMPqi9TMlB5sJoduKu79mk-0xwxJf2YOzAH4H2",
+        "display_url": "linkedin.com",
+        "snippet": "Sirisha Naidu. Enterprise Sales Leader | Chief Sales Officer | VP Sales | SaaS & Digital Transformation | Building High-Performing Teams Across Diverse Sectors|\u00a0...Read more",
+        "domain": "linkedin.com",
+        "favicon": "https://linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 1
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": "social"
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      },
+      {
+        "id": "s_404afb89c98bca92",
+        "rank": 2,
+        "type": "organic",
+        "title": "Prasenjit Banerjee - VP Sales | Enterprise Technology & IT ...",
+        "url": "https://in.linkedin.com/in/prasenjit-banerjee-9ba728220",
+        "display_url": "in.linkedin.com \u203a in \u203a prasenjit-banerjee-9ba728220",
+        "snippet": "VP Sales | Enterprise Technology & IT Services | Global Business ... Managed full-cycle B2B SaaS sales \u2014 lead generation, pipeline governance\u00a0...Read more",
+        "domain": "in.linkedin.com",
+        "favicon": "https://in.linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 2
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      },
+      {
+        "id": "s_bcca0bc4f116d28f",
+        "rank": 2,
+        "type": "organic",
+        "title": "Homepage | Vice President of India | India",
+        "url": "https://vicepresidentofindia.nic.in/",
+        "display_url": "vicepresidentofindia.nic.in",
+        "snippet": "5 days ago \u00b7 Vice President Shri C. P. Radhakrishnan inaugurates GKNM college of Nursing in Coimbatore, TN. Vice President \u2026",
+        "domain": "vicepresidentofindia.nic.in",
+        "favicon": "https://vicepresidentofindia.nic.in/favicon.ico",
+        "position": {
+          "absolute": 2
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "nic.in",
+          "sld": "vicepresidentofindia",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_99386e2d13bdf9dc",
+        "rank": 3,
+        "type": "organic",
+        "title": "Vice President of India - Wikipedia",
+        "url": "https://en.m.wikipedia.org/wiki/Vice_President_of_India",
+        "display_url": "en.m.wikipedia.org \u203a wiki \u203a Vice_President_of_India",
+        "snippet": "The Vice President of India (ISO: Bh\u0101rata Ke Upar\u0101\u1e63\u1e6drapati) is the deputy head of state of the Republic of India, i.e. next to the \u2026",
+        "domain": "en.m.wikipedia.org",
+        "favicon": "https://en.m.wikipedia.org/favicon.ico",
+        "position": {
+          "absolute": 3
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "org",
+          "sld": "wikipedia",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "article",
+          "source_hint": "encyclopedia"
+        }
+      },
+      {
+        "id": "s_63c465b3b38c55e5",
+        "rank": 3,
+        "type": "organic",
+        "title": "Kurt S - VP Sales | Scaling revenue and sales teams",
+        "url": "https://www.google.com/goto?url=CAESawHEIkXXw7RxUhj_fB_NjMwo1wApSHNDM0anoUiIEybL8E335ZSDBsb7rCcnC_HvLEVjnTJm1HTI8_UdKaixskXUb-C5zJZbKHnx8AlWRSozYd0xrOo1OQeNyB98DpuEj7-j4ACAQqS6O62q",
+        "display_url": "linkedin.com",
+        "snippet": "Bengaluru, Karnataka, India \u00b7 VP of Sales \u00b7 Sprouts.ai",
+        "domain": "linkedin.com",
+        "favicon": "https://linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 3
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": "social"
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      },
+      {
+        "id": "s_3c5794d3c39a3b23",
+        "rank": 4,
+        "type": "organic",
+        "title": "Vinay Aradhya - Sales Leader | B2B SaaS | GTM Strategy",
+        "url": "https://in.linkedin.com/in/vinayaradhya",
+        "display_url": "in.linkedin.com \u203a in \u203a vinayaradhya",
+        "snippet": "Sales Leader || 17-Year B2B SaaS track record of driving revenue growth || 110%+ quota attainment 6 years in a row || Over 200+ enterprise logos || Built\u00a0...Read more",
+        "domain": "in.linkedin.com",
+        "favicon": "https://in.linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 4
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      },
+      {
+        "id": "s_fd08ff841f2d1889",
+        "rank": 4,
+        "type": "organic",
+        "title": "Turbo VPN - Secure VPN Proxy - Apps on Google Play",
+        "url": "https://play.google.com/store/apps/details?hl=en&id=free.vpn.unblock.proxy.turbovpn",
+        "display_url": "play.google.com \u203a store \u203a apps \u203a details",
+        "snippet": "Download Turbo VPN now to enjoy fast, private and safe internet. The best unlimited free VPN proxy for android. You can enjoy \u2026",
+        "domain": "play.google.com",
+        "favicon": "https://play.google.com/favicon.ico",
+        "position": {
+          "absolute": 4
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "google",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_f400f6323efb63dc",
+        "rank": 5,
+        "type": "organic",
+        "title": "Vice president - Wikipedia",
+        "url": "https://en.m.wikipedia.org/wiki/Vice_President",
+        "display_url": "en.m.wikipedia.org \u203a wiki \u203a Vice_President",
+        "snippet": "In everyday speech, the abbreviation VP is used. In government, a vice president is a person whose primary responsibility is to act in \u2026",
+        "domain": "en.m.wikipedia.org",
+        "favicon": "https://en.m.wikipedia.org/favicon.ico",
+        "position": {
+          "absolute": 5
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "org",
+          "sld": "wikipedia",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "article",
+          "source_hint": "encyclopedia"
+        }
+      },
+      {
+        "id": "s_6142272035e81ecc",
+        "rank": 5,
+        "type": "organic",
+        "title": "Sanjay Prasad - VP Enterprise Sales",
+        "url": "https://www.google.com/goto?url=CAESbQHEIkXX6RuK1XbhVBMtmq6DElp1DiSpkyFcqLiAODDXF74D9Rce6eEjc49cJWUz5CYj59ZcCBcvSbg2x1jHaj64KMY1wsPgaefPK6pUjHDHn82JpKyPnG8m3nM7ZrhgGeiTKiGjFOxPFqM5VEg",
+        "display_url": "linkedin.com",
+        "snippet": "Mumbai Metropolitan Region \u00b7 VP Enterprise Sales \u00b7 Kapture CX",
+        "domain": "linkedin.com",
+        "favicon": "https://linkedin.com/favicon.ico",
+        "position": {
+          "absolute": 5
+        },
+        "engine": "google",
+        "domain_info": {
+          "tld": "com",
+          "sld": "linkedin",
+          "category": "social"
+        },
+        "classification": {
+          "content_type": "webpage",
+          "source_hint": "professional_network"
+        }
+      }
+    ]
+  },
+  {
+    "query_idx": 2,
+    "query": "site:linkedin.com/in \"Chief Revenue Officer\" Cybersecurity Mumbai",
+    "elapsed_s": 4.289787530899048,
+    "meta": {
+      "request_id": "01a1bc30-7522-727e-8bb6-d985cff2e655",
+      "requested_at": "2026-11-08T17:24:14Z",
+      "took_ms": 4273,
+      "engines_responded": [
+        "bing"
+      ],
+      "engines_failed": [
+        "google"
+      ],
+      "engine_errors": [
+        {
+          "engine": "google",
+          "error": "captcha_detected",
+          "message": "captcha detected"
+        }
+      ],
+      "version": "2.1"
+    },
+    "results": [
+      {
+        "id": "s_4a7afbcdac220358",
+        "rank": 1,
+        "type": "organic",
+        "title": "CHIEF Definition & Meaning - Merriam-Webster",
+        "url": "https://www.merriam-webster.com/dictionary/chief",
+        "display_url": "merriam-webster.com \u203a dictionary \u203a chief",
+        "snippet": "6 days ago \u00b7 The meaning of CHIEF is accorded highest rank or office. How to use chief in a sentence.",
+        "domain": "merriam-webster.com",
+        "favicon": "https://merriam-webster.com/favicon.ico",
+        "position": {
+          "absolute": 1
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "merriam-webster",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_2da2574d347198b3",
+        "rank": 2,
+        "type": "organic",
+        "title": "CHIEF | English meaning - Cambridge Dictionary",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chief",
+        "display_url": "dictionary.cambridge.org \u203a dictionary \u203a english \u203a chi\u2026",
+        "snippet": "CHIEF definition: 1. most important or main: 2. highest in rank: 3. the person in charge of a group or\u2026. Learn more.",
+        "domain": "dictionary.cambridge.org",
+        "favicon": "https://dictionary.cambridge.org/favicon.ico",
+        "position": {
+          "absolute": 2
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "org",
+          "sld": "cambridge",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_cf01cc829d8da7be",
+        "rank": 3,
+        "type": "organic",
+        "title": "Chief - Wikipedia",
+        "url": "https://en.m.wikipedia.org/wiki/Chief",
+        "display_url": "en.m.wikipedia.org \u203a wiki \u203a Chief",
+        "snippet": "Chief master sergeant, the ninth, and highest, enlisted rank in the U.S. Air Force and U.S. Space Force Chief of police, the head of a \u2026",
+        "domain": "en.m.wikipedia.org",
+        "favicon": "https://en.m.wikipedia.org/favicon.ico",
+        "position": {
+          "absolute": 3
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "org",
+          "sld": "wikipedia",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "article",
+          "source_hint": "encyclopedia"
+        }
+      },
+      {
+        "id": "s_af825f188bae4808",
+        "rank": 4,
+        "type": "organic",
+        "title": "Chief - definition of chief by The Free Dictionary",
+        "url": "https://www.thefreedictionary.com/chief",
+        "display_url": "thefreedictionary.com \u203a chief",
+        "snippet": "Define chief. chief synonyms, chief pronunciation, chief translation, English dictionary definition of chief. n. 1. One who is highest in \u2026",
+        "domain": "thefreedictionary.com",
+        "favicon": "https://thefreedictionary.com/favicon.ico",
+        "position": {
+          "absolute": 4
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "thefreedictionary",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_40cb298e77def79c",
+        "rank": 5,
+        "type": "organic",
+        "title": "Chief | Membership and Community Platform for Senior Women Leaders",
+        "url": "https://chief.com/",
+        "display_url": "chief.com",
+        "snippet": "Chief exists to create more possibilities for women's power. Through our membership and community platform, we provide senior \u2026",
+        "domain": "chief.com",
+        "favicon": "https://chief.com/favicon.ico",
+        "position": {
+          "absolute": 5
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "chief",
+          "category": ""
+        }
+      }
+    ]
+  },
+  {
+    "query_idx": 3,
+    "query": "site:linkedin.com/in \"Head of Engineering\" \"Sell.Do\"",
+    "elapsed_s": 5.1923041343688965,
+    "meta": {
+      "request_id": "01a1bc30-9970-7e8d-b0df-4fe75c221cbf",
+      "requested_at": "2026-11-08T17:24:24Z",
+      "took_ms": 5175,
+      "engines_responded": [
+        "bing"
+      ],
+      "engines_failed": [
+        "google"
+      ],
+      "engine_errors": [
+        {
+          "engine": "google",
+          "error": "captcha_detected",
+          "message": "captcha detected"
+        }
+      ],
+      "version": "2.1"
+    },
+    "results": [
+      {
+        "id": "s_6c11357b9e06cfb1",
+        "rank": 1,
+        "type": "organic",
+        "title": "HEAD | Ski, Snowboard, Tennis, Padel and Pickleball equipment",
+        "url": "https://www.head.com/",
+        "display_url": "head.com",
+        "snippet": "Discover the innovative world of HEAD and experience premium equipment for tennis, ski, and padel, along with high-quality \u2026",
+        "domain": "head.com",
+        "favicon": "https://head.com/favicon.ico",
+        "position": {
+          "absolute": 1
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "head",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_482046af65dfbfc7",
+        "rank": 2,
+        "type": "organic",
+        "title": "Head - Wikipedia",
+        "url": "https://en.m.wikipedia.org/wiki/Head",
+        "display_url": "en.m.wikipedia.org \u203a wiki \u203a Head",
+        "snippet": "Heads develop in animals by an evolutionary trend known as cephalization. In bilaterally symmetrical animals, nervous tissue \u2026",
+        "domain": "en.m.wikipedia.org",
+        "favicon": "https://en.m.wikipedia.org/favicon.ico",
+        "position": {
+          "absolute": 2
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "org",
+          "sld": "wikipedia",
+          "category": ""
+        },
+        "classification": {
+          "content_type": "article",
+          "source_hint": "encyclopedia"
+        }
+      },
+      {
+        "id": "s_188cb72cf6fef5b9",
+        "rank": 3,
+        "type": "organic",
+        "title": "HEAD Definition & Meaning - Merriam-Webster",
+        "url": "https://www.merriam-webster.com/dictionary/head",
+        "display_url": "merriam-webster.com \u203a dictionary \u203a head",
+        "snippet": "4 days ago \u00b7 The meaning of HEAD is the upper or anterior division of the animal body that contains the brain, the chief sense \u2026",
+        "domain": "merriam-webster.com",
+        "favicon": "https://merriam-webster.com/favicon.ico",
+        "position": {
+          "absolute": 3
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "merriam-webster",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_37c3e6e3daad477d",
+        "rank": 4,
+        "type": "organic",
+        "title": "Head Anatomy | Cranial and Facial Structures \u2013 TeachMeAnatomy",
+        "url": "https://teachmeanatomy.info/head",
+        "display_url": "teachmeanatomy.info \u203a head",
+        "snippet": "Study the anatomy of the head, including the skull, cranial nerves, facial muscles, sensory organs and blood supply. Designed for \u2026",
+        "domain": "teachmeanatomy.info",
+        "favicon": "https://teachmeanatomy.info/favicon.ico",
+        "position": {
+          "absolute": 4
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "info",
+          "sld": "teachmeanatomy",
+          "category": ""
+        }
+      },
+      {
+        "id": "s_3e2532f19d10cea9",
+        "rank": 5,
+        "type": "organic",
+        "title": "HTML head tag - W3Schools",
+        "url": "https://www.w3schools.com/tags/tag_head.asp",
+        "display_url": "w3schools.com \u203a tags \u203a tag_head.asp",
+        "snippet": "The <head> element is a container for metadata (data about data) and is placed between the <html> tag and the <body> tag. \u2026",
+        "domain": "w3schools.com",
+        "favicon": "https://w3schools.com/favicon.ico",
+        "position": {
+          "absolute": 5
+        },
+        "engine": "bing",
+        "domain_info": {
+          "tld": "com",
+          "sld": "w3schools",
+          "category": ""
+        }
+      }
+    ]
+  }
+]

@@ -6,5 +6,11 @@ from .all_models import (
     GlobalProfiles,
     UsersProfiles,
     ResearchJobs,
-    ConnectAndMessage
+    ConnectAndMessage,
+    Tenant,
+    TenantMembership,
+    TenantRole,
+    TenantStatus,
+    TenantMembershipStatus
 )
+

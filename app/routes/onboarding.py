@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from flask import Blueprint, request, jsonify
 from app.security.session import login_required
 from app.security.limiter import limiter
@@ -255,6 +256,118 @@ def connect_linkedin():
         return jsonify({"success": False, "message": "Unable to connect LinkedIn. Please try again."}), 500
 
 
+@onboarding_bp.route('/linkedin/verify-extension-session', methods=['POST'])
+@login_required
+def verify_extension_session():
+    """
+    Receives verification from the locally installed FameWeb Chrome extension.
+    CRITICAL SECURITY: Does NOT accept, store, transmit, or log raw li_at cookies or passwords.
+    Only accepts the verified status signal and updates UsersLinkedinDetails.
+    """
+    user_id = request.user_id
+    data = request.get_json() or {}
+
+    status_signal = data.get("status")  # 'CONNECTED', 'NOT_LOGGED_IN', 'VERIFICATION_FAILED'
+    authenticated = bool(data.get("authenticated", False))
+    profile_url = (data.get("profile_url") or "").strip()
+    name = (data.get("name") or "").strip()
+
+    from app.database import db_session
+    from app.models.all_models import UsersLinkedinDetails, ConnectionStatus, UserTable
+    from datetime import datetime
+
+    try:
+        linkedin = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+        if not linkedin:
+            linkedin = UsersLinkedinDetails(user_id=user_id)
+            db_session.add(linkedin)
+
+        if status_signal == "CONNECTED" and authenticated:
+            linkedin.connection_status = ConnectionStatus.CONNECTED.value
+            linkedin.last_verified_at = datetime.utcnow()
+            linkedin.profile_source = "CHROME_EXTENSION_LOCAL"
+            if profile_url:
+                linkedin.profile_url = profile_url
+            if name:
+                linkedin.name = name
+
+            # Advance user onboarding step if pending
+            user = db_session.query(UserTable).filter_by(user_id=user_id).first()
+            if user and user.onboarding_step in ("LINKEDIN", "INTEGRATIONS"):
+                user.onboarding_step = "COMPANY"
+
+            db_session.commit()
+            return jsonify({
+                "success": True,
+                "connected": True,
+                "status": "CONNECTED",
+                "message": "LinkedIn session verified successfully via FameWeb Chrome Extension.",
+                "last_verified_at": linkedin.last_verified_at.isoformat()
+            }), 200
+        else:
+            linkedin.connection_status = ConnectionStatus.DISCONNECTED.value
+            db_session.commit()
+            return jsonify({
+                "success": True,
+                "connected": False,
+                "status": status_signal or "NOT_LOGGED_IN",
+                "message": "LinkedIn is not currently logged in in your browser."
+            }), 200
+
+    except Exception as e:
+        db_session.rollback()
+        logger.error(f"[Onboarding LinkedIn] Error saving extension verification: {e}")
+        return jsonify({"success": False, "message": "Failed to update LinkedIn verification status."}), 500
+
+
+@onboarding_bp.route('/integrations/status', methods=['GET'])
+@login_required
+def get_integrations_status():
+    """
+    Returns current onboarding integration statuses (SMTP and LinkedIn)
+    for the authenticated user. Never exposes passwords or sensitive credentials.
+    """
+    user_id = request.user_id
+    from app.database import db_session
+    from app.models.all_models import UserSMTPAccount, UsersLinkedinDetails, ConnectionStatus
+
+    # 1. SMTP Account status
+    smtp_acc = db_session.query(UserSMTPAccount).filter_by(user_id=user_id, is_primary=True).first()
+    if not smtp_acc:
+        smtp_acc = db_session.query(UserSMTPAccount).filter_by(user_id=user_id).order_by(UserSMTPAccount.created_at.desc()).first()
+
+    smtp_data = {
+        "configured": bool(smtp_acc),
+        "email_address": smtp_acc.email_address if smtp_acc else None,
+        "smtp_host": smtp_acc.smtp_host if smtp_acc else None,
+        "smtp_port": smtp_acc.smtp_port if smtp_acc else None,
+        "smtp_username": smtp_acc.smtp_username if smtp_acc else None,
+        "use_tls": smtp_acc.use_tls if smtp_acc else True,
+        "use_ssl": smtp_acc.use_ssl if smtp_acc else False,
+        "connection_status": smtp_acc.connection_status if smtp_acc else "PENDING",
+        "last_tested_at": smtp_acc.last_tested_at.isoformat() if smtp_acc and smtp_acc.last_tested_at else None
+    }
+
+    # 2. LinkedIn status
+    linkedin = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+    is_li_connected = bool(linkedin and linkedin.connection_status == ConnectionStatus.CONNECTED.value)
+
+    linkedin_data = {
+        "connected": is_li_connected,
+        "status": linkedin.connection_status if linkedin else ConnectionStatus.DISCONNECTED.value,
+        "profile_url": linkedin.profile_url if linkedin else None,
+        "name": linkedin.name if linkedin else None,
+        "last_verified_at": linkedin.last_verified_at.isoformat() if linkedin and linkedin.last_verified_at else None,
+        "profile_source": linkedin.profile_source if linkedin else None
+    }
+
+    return jsonify({
+        "success": True,
+        "smtp": smtp_data,
+        "linkedin": linkedin_data
+    }), 200
+
+
 @onboarding_bp.route('/linkedin/disconnect', methods=['POST'])
 @login_required
 def disconnect_linkedin():
@@ -272,3 +385,226 @@ def disconnect_linkedin():
         db_session.rollback()
         logger.error(f"Error disconnecting LinkedIn: {str(e)}")
         return jsonify({"success": False, "message": "Failed to disconnect"}), 500
+
+
+@onboarding_bp.route('/profile/import-extension', methods=['POST'])
+@login_required
+def import_extension_profile():
+    """
+    Receives user-consented, sanitized own-profile data extracted by the FameWeb Chrome extension.
+    CRITICAL SECURITY & COMPLIANCE:
+    - Never accepts, logs, or stores cookies, tokens, or credentials.
+    - Validates payload structure and field limits.
+    - Persists cleanly into UsersLinkedinDetails without external APIs.
+    """
+    user_id = request.user_id
+    data = request.get_json(silent=True)
+
+    if not data or not isinstance(data, dict):
+        return jsonify({
+            "success": False,
+            "error": "INVALID_PAYLOAD",
+            "message": "Valid JSON profile payload is required."
+        }), 400
+
+    profile = data.get("profile") or data.get("data") or data
+    if not isinstance(profile, dict):
+        return jsonify({
+            "success": False,
+            "error": "MISSING_PROFILE_DATA",
+            "message": "Payload must include a structured 'profile' or 'data' object."
+        }), 400
+
+    # Sanitize helper
+    def clean_str(val, max_len=1000):
+        if val is None:
+            return None
+        s = str(val).strip()
+        return s[:max_len] if s else None
+
+    # Validate essential identity fields
+    name = clean_str(profile.get("name"), 200)
+    headline = clean_str(profile.get("headline"), 500)
+
+    if not name and not headline:
+        return jsonify({
+            "success": False,
+            "error": "INSUFFICIENT_IDENTITY",
+            "message": "Imported profile must at least include a visible name or headline."
+        }), 400
+
+    from app.database import db_session
+    from app.models.all_models import UsersLinkedinDetails, ConnectionStatus
+
+    try:
+        linkedin = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+        if not linkedin:
+            linkedin = UsersLinkedinDetails(user_id=user_id)
+            db_session.add(linkedin)
+
+        if name:
+            linkedin.name = name
+        if headline:
+            linkedin.headline = headline
+
+        about = clean_str(profile.get("about"), 4000)
+        if about:
+            linkedin.about = about
+
+        location = clean_str(profile.get("location"), 200)
+        if location:
+            linkedin.location = location
+
+        current_pos = clean_str(profile.get("current_position"), 300)
+        if current_pos:
+            linkedin.current_position = current_pos
+
+        profile_url = clean_str(profile.get("profile_url"), 500)
+        if profile_url and "linkedin.com" in profile_url:
+            linkedin.profile_url = profile_url
+
+        vanity_name = clean_str(profile.get("vanity_name"), 100)
+        if vanity_name:
+            linkedin.linkedin_id = vanity_name
+
+        # Experience (sanitized list of dicts)
+        raw_exp = profile.get("experience")
+        clean_exp = []
+        if isinstance(raw_exp, list):
+            for item in raw_exp[:25]:  # Reasonable limit
+                if isinstance(item, dict):
+                    clean_exp.append({
+                        "title": clean_str(item.get("title"), 200) or "",
+                        "company": clean_str(item.get("company"), 200) or "",
+                        "start_date": clean_str(item.get("start_date") or item.get("dates"), 100) or "",
+                        "location": clean_str(item.get("location"), 150) or "",
+                        "description": clean_str(item.get("description"), 2000) or ""
+                    })
+        if clean_exp:
+            linkedin.experience = clean_exp
+
+        # Education (sanitized list of dicts)
+        raw_edu = profile.get("education")
+        clean_edu = []
+        if isinstance(raw_edu, list):
+            for item in raw_edu[:15]:
+                if isinstance(item, dict):
+                    clean_edu.append({
+                        "school": clean_str(item.get("school"), 200) or "",
+                        "degree": clean_str(item.get("degree"), 200) or "",
+                        "field_of_study": clean_str(item.get("field_of_study"), 200) or "",
+                        "dates": clean_str(item.get("dates"), 100) or ""
+                    })
+        if clean_edu:
+            linkedin.education = clean_edu
+
+        # Skills (list of strings)
+        raw_skills = profile.get("skills")
+        clean_skills = []
+        if isinstance(raw_skills, list):
+            for s in raw_skills[:100]:
+                cleaned = clean_str(s, 100)
+                if cleaned and cleaned not in clean_skills:
+                    clean_skills.append(cleaned)
+        if clean_skills:
+            linkedin.skills = clean_skills
+
+        # Certifications (sanitized list of dicts or strings)
+        raw_certs = profile.get("certifications")
+        clean_certs = []
+        if isinstance(raw_certs, list):
+            for c in raw_certs[:25]:
+                if isinstance(c, dict):
+                    clean_certs.append({
+                        "name": clean_str(c.get("name"), 200) or "",
+                        "authority": clean_str(c.get("authority"), 200) or "",
+                        "issued": clean_str(c.get("issued"), 100) or ""
+                    })
+                elif isinstance(c, str) and c.strip():
+                    clean_certs.append({
+                        "name": clean_str(c, 200),
+                        "authority": "",
+                        "issued": ""
+                    })
+
+        # Profile photo url and rich fields into profile_data JSONB
+        existing_pdata = dict(linkedin.profile_data or {})
+        photo_url = clean_str(profile.get("profile_photo_url"), 1000)
+        if photo_url:
+            existing_pdata["profile_photo_url"] = photo_url
+        if clean_certs:
+            existing_pdata["certifications"] = clean_certs
+
+        # Store metadata
+        raw_meta = data.get("metadata") or {}
+        existing_pdata["last_imported_via"] = "CHROME_EXTENSION_DOM"
+        existing_pdata["imported_at"] = datetime.utcnow().isoformat()
+        if isinstance(raw_meta, dict):
+            existing_pdata["extraction_warnings"] = raw_meta.get("warnings", [])
+
+        # Determine completeness honestly
+        substantive_count = sum([
+            1 if clean_exp else 0,
+            1 if clean_edu else 0,
+            1 if clean_skills else 0,
+            1 if about else 0
+        ])
+        profile_completeness_status = "complete" if substantive_count >= 2 else ("partial" if (name or headline) else "insufficient")
+        existing_pdata["completeness_status"] = profile_completeness_status
+        linkedin.profile_completeness = profile_completeness_status
+
+        linkedin.profile_data = existing_pdata
+        linkedin.profile_source = "CHROME_EXTENSION_DOM"
+        linkedin.connection_status = ConnectionStatus.CONNECTED.value
+        linkedin.last_verified_at = datetime.utcnow()
+
+        db_session.commit()
+
+        imported_sections = []
+        if name: imported_sections.append("name")
+        if headline: imported_sections.append("headline")
+        if about: imported_sections.append("about")
+        if location: imported_sections.append("location")
+        if clean_exp: imported_sections.append("experience")
+        if clean_edu: imported_sections.append("education")
+        if clean_skills: imported_sections.append("skills")
+        if clean_certs: imported_sections.append("certifications")
+
+        warnings_list = raw_meta.get("warnings", []) if isinstance(raw_meta, dict) else []
+
+        return jsonify({
+            "success": True,
+            "message": "LinkedIn profile successfully imported from active browser session.",
+            "import_status": profile_completeness_status,
+            "sections_imported": imported_sections,
+            "experience_count": len(clean_exp),
+            "education_count": len(clean_edu),
+            "skills_count": len(clean_skills),
+            "certifications_count": len(clean_certs),
+            "has_about": bool(linkedin.about),
+            "warnings": warnings_list,
+            "data": {
+                "name": linkedin.name,
+                "headline": linkedin.headline,
+                "about": bool(linkedin.about),
+                "location": linkedin.location,
+                "current_position": linkedin.current_position,
+                "experience_count": len(clean_exp),
+                "education_count": len(clean_edu),
+                "skills_count": len(clean_skills),
+                "certifications_count": len(clean_certs),
+                "sections_imported": len(imported_sections),
+                "import_status": profile_completeness_status,
+                "warnings": warnings_list
+            }
+        }), 200
+
+    except Exception as e:
+        db_session.rollback()
+        logger.error(f"[Profile Import] Error importing profile for user {user_id}: {e}", exc_info=True)
+        return jsonify({
+            "success": False,
+            "error": "IMPORT_FAILED",
+            "message": f"Failed to save imported profile: {str(e)}"
+        }), 500
+

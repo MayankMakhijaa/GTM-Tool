@@ -1,0 +1,604 @@
+Created At: 2026-11-09T13:45:07+05:30
+Completed At: 2026-11-09T13:45:07+05:30
+Showing lines 520-580 of 2322
+520:         ResearchJobs.user_id == user_id,
+521:         ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value])
+522:     ).order_by(ResearchJobs.id.desc()).first()
+523: 
+524:     active_job_dict = None
+525:     if active_job:
+526:         active_job_dict = {
+527:             "id": active_job.id,
+528:             "job_id": active_job.id,
+529:             "status": active_job.status,
+530:             "progress": active_job.progress or {},
+531:             "results_count": active_job.results_count or 0,
+532:             "error": active_job.error_message
+533:         }
+534: 
+535:     return {
+536:         "user_id": user_id,
+537:         "onboarding_completed": has_onboarding,
+538:         "company_name": company.company_name if company else "",
+539:         "website_url": company.website_url if company else "",
+540:         "industry": company.industry if company else (icp.industry if icp else ""),
+541:         "offer": offer_text,
+542:         "target_icp": target_icp_text,
+543:         "icp_raw": {
+544:             "target_customer": icp.target_customer if icp else None,
+545:             "target_jobs_roles": icp.target_jobs_roles if icp else None,
+546:             "industry": icp.industry if icp else None,
+547:             "company_size": icp.company_size if icp else None,
+548:             "location": icp.location if icp else None,
+549:             "keywords": icp.keywords if icp else None,
+550:             "exclusions": icp.exclusions if icp else None,
+551:             "signals": icp.signals if icp else None,
+552:             "version": icp.version if icp else 1
+553:         } if icp else {},
+554:         "session_valid": session_validation.get("valid", False),
+555:         "session_category": session_validation.get("category", "disconnected"),
+556:         "session_message": session_validation.get("message", ""),
+557:         "active_job": active_job_dict
+558:     }
+559: 
+560: 
+561: # ====================================================================
+562: # GEMINI QUERY PLANNING
+563: # ====================================================================
+564: 
+565: def generate_search_plan(
+566:     user_context: Dict[str, Any],
+567:     persona_filter: Optional[str] = None,
+568:     max_queries: int = 4
+569: ) -> Dict[str, Any]:
+570:     """
+571:     Uses Gemini to translate PostgreSQL ICP and Company context into structured LinkedIn
+572:     search parameters, distinct targeted query objects, and public web targets.
+573:     """
+574:     icp = user_context.get("icp_raw", {})
+575:     offer = user_context.get("offer", "")
+576:     target_icp = user_context.get("target_icp", "")
+577:     user_id = user_context.get("user_id")
+578:     job_id = user_context.get("job_id")
+579: 
+580:     fallback_title = persona_filter or icp.get("target_jobs_roles") or "VP of Sales, CRO, Head of Growth"
+===
+Created At: 2026-11-09T13:45:10+05:30
+Completed At: 2026-11-09T13:45:10+05:30
+Showing lines 1580-1650 of 2322
+1580:                 logger.info(f"[GTM Worker] Found {len(existing_candidates)} potential candidates in existing GlobalProfiles")
+1581:                 # Enrich any missing company summaries from cache/web if necessary
+1582:                 dir_enrichment = {}
+1583:                 for ec in existing_candidates:
+1584:                     cname = ec.get("company")
+1585:                     if cname and ec.get("company_summary"):
+1586:                         dir_enrichment[cname] = {"summary": ec.get("company_summary")}
+1587: 
+1588:                 qualified_existing = qualify_candidates_with_gemini(existing_candidates, context, dir_enrichment)
+1589:                 # Filter to qualified candidates only (fit_score >= 70)
+1590:                 qualified_existing_high = [c for c in qualified_existing if c.get("fit_score", 0) >= 70]
+1591:                 if qualified_existing_high:
+1592:                     existing_persisted_count = persist_qualified_opportunities(
+1593:                         user_id, job_id, qualified_existing_high[:target_leads], icp_version=icp_ver
+1594:                     )
+1595:                     logger.info(f"[GTM Worker] Successfully persisted {existing_persisted_count} qualified leads from existing directory.")
+1596: 
+1597:             # Calculate deficit
+1598:             deficit = target_leads - existing_persisted_count
+1599:             logger.info(f"[GTM Worker] Target leads: {target_leads}, Persisted from directory: {existing_persisted_count}, Deficit: {deficit}")
+1600: 
+1601:             # ====================================================================
+1602:             # PHASE 2B: DISCOVERY ONLY IF DEFICIT > 0 (CLAUDE AI DISCOVERY)
+1603:             # ====================================================================
+1604:             if deficit <= 0:
+1605:                 # Target satisfied completely from existing directory! Skip external discovery.
+1606:                 provider_outcomes["DIRECTORY"] = "FULFILLED"
+1607:                 discovery_mode = "DIRECTORY_ONLY"
+1608:             else:
+1609:                 # 2. Multi-Query Planning via Gemini
+1610:                 search_plan = generate_search_plan(context, persona_filter)
+1611:                 job.progress = {"step": "DISCOVERY", "pct": 40, "message": f"Executing AI discovery with Claude for remaining {deficit} prospects"}
+1612:                 job.heartbeat_at = datetime.utcnow()
+1613:                 db_session.commit()
+1614: 
+1615:                 logger.info(f"[GTM Worker] Running Claude discovery for deficit of {deficit} leads (user {user_id})")
+1616:                 claude_res = discover_candidates_with_claude(
+1617:                     structured_icp=search_plan,
+1618:                     user_company=context,
+1619:                     count_needed=min(deficit * 2, 25),
+1620:                     user_id=user_id,
+1621:                     job_id=job_id
+1622:                 )
+1623:                 c_status = claude_res.get("status", "FAILED")
+1624:                 provider_outcomes["CLAUDE"] = c_status
+1625: 
+1626:                 raw_discovered = claude_res.get("candidates", [])
+1627:                 valid_candidates = []
+1628: 
+1629:                 if c_status == "SUCCESS" and raw_discovered:
+1630:                     # Validate sources and evidence with SSRF protections
+1631:                     for raw_c in raw_discovered:
+1632:                         classification, sanitized_c, rej_reason = validate_and_classify_candidate(raw_c)
+1633:                         if classification == "VERIFIED":
+1634:                             valid_candidates.append(sanitized_c)
+1635:                         else:
+1636:                             logger.info(f"[GTM Worker] Rejected candidate: {rej_reason}")
+1637: 
+1638:                 if valid_candidates:
+1639:                     discovery_mode = "CLAUDE_DISCOVERY"
+1640:                     logger.info(f"[GTM Worker] Validated {len(valid_candidates)} candidates via Claude discovery.")
+1641: 
+1642:                     # Evidence-based Qualification & Scoring via Gemini
+1643:                     job.progress = {"step": "QUALIFYING", "pct": 80, "message": "Evaluating prospects against ICP criteria with Gemini", "provider_outcomes": provider_outcomes}
+1644:                     job.heartbeat_at = datetime.utcnow()
+1645:                     db_session.commit()
+1646: 
+1647:                     qualified_discovered = qualify_candidates_with_gemini(valid_candidates, context, {})
+1648:                     qualified_discovered_high = [c for c in qualified_discovered if c.get("fit_score", 0) >= 70]
+1649: 
+1650:                     # Persist up to remaining deficit
+===
+Created At: 2026-11-09T13:45:14+05:30
+Completed At: 2026-11-09T13:45:14+05:30
+Showing lines 1730-1780 of 2322
+1730:                 # Check if any leads were durably persisted before crash
+1731:                 durable_on_err = db_session.query(UsersProfiles).filter(
+1732:                     UsersProfiles.user_id == user_id,
+1733:                     UsersProfiles.research_job_id == job_id,
+1734:                     UsersProfiles.lead_status == LeadStatus.QUALIFIED.value,
+1735:                     UsersProfiles.match_score >= 70
+1736:                 ).count()
+1737:                 billable_on_err = min(durable_on_err, target_leads)
+1738:                 _safe_settle_or_release(billable_on_err, f"Pipeline exception: {err_msg}")
+1739: 
+1740:                 fail_job = db_session.query(ResearchJobs).filter_by(id=job_id).first()
+1741:                 if fail_job:
+1742:                     fail_job.status = ResearchJobStatus.FAILED.value
+1743:                     fail_job.error_message = err_msg
+1744:                     fail_job.results_count = billable_on_err
+1745:                     fail_job.progress = {
+1746:                         "step": "FAILED",
+1747:                         "pct": 100,
+1748:                         "message": f"Pipeline failure: {err_msg}",
+1749:                         "provider_outcomes": provider_outcomes if 'provider_outcomes' in locals() else {}
+1750:                     }
+1751:                     fail_job.completed_at = datetime.utcnow()
+1752:                     fail_job.heartbeat_at = datetime.utcnow()
+1753:                     db_session.commit()
+1754:             except Exception as commit_err:
+1755:                 logger.error(f"[GTM Worker] Failed to persist failure status for job {job_id}: {commit_err}")
+1756:                 db_session.rollback()
+1757:         finally:
+1758:             db_session.remove()
+1759: 
+1760: 
+1761: # ====================================================================
+1762: # STALE JOB RECONCILIATION & RECOVERY
+1763: # ====================================================================
+1764: 
+1765: DEFAULT_STALE_THRESHOLD_MINUTES = 15
+1766: 
+1767: 
+1768: def reconcile_stale_research_jobs(
+1769:     max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,
+1770:     session: Optional[Any] = None
+1771: ) -> Dict[str, Any]:
+1772:     """
+1773:     Detects and safely reconciles abandoned/stale QUEUED or RUNNING research jobs.
+1774:     Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to guarantee
+1775:     safe concurrent execution across multiple worker/app processes.
+1776: 
+1777:     Reconciliation rules:
+1778:     1. Selects candidate jobs in QUEUED or RUNNING whose heartbeat_at (or created_at if heartbeat_at is NULL)
+1779:        is strictly older than max_stale_minutes.
+1780:     2. Re-validates job status and timestamp under exclusive lock.
+===
+Created At: 2026-11-09T13:45:18+05:30
+Completed At: 2026-11-09T13:45:18+05:30
+Showing lines 1800-1860 of 2322
+1800:         "details": []
+1801:     }
+1802: 
+1803:     # Query candidate job IDs first
+1804:     candidate_ids = [
+1805:         row[0] for row in s.query(ResearchJobs.id).filter(
+1806:             ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value]),
+1807:             or_(
+1808:                 and_(ResearchJobs.heartbeat_at.isnot(None), ResearchJobs.heartbeat_at < cutoff),
+1809:                 and_(ResearchJobs.heartbeat_at.is_(None), ResearchJobs.created_at < cutoff)
+1810:             )
+1811:         ).all()
+1812:     ]
+1813: 
+1814:     stats["examined"] = len(candidate_ids)
+1815:     if not candidate_ids:
+1816:         return stats
+1817: 
+1818:     for candidate_id in candidate_ids:
+1819:         try:
+1820:             # Acquire row lock with skip_locked=True for safe concurrency
+1821:             job = s.query(ResearchJobs).filter_by(id=candidate_id).with_for_update(skip_locked=True).first()
+1822:             if not job:
+1823:                 # Locked by another process or no longer exists
+1824:                 stats["skipped"] += 1
+1825:                 continue
+1826: 
+1827:             # Re-verify staleness and status under lock
+1828:             if job.status not in (ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value):
+1829:                 stats["skipped"] += 1
+1830:                 continue
+1831: 
+1832:             effective_ts = job.heartbeat_at or job.created_at
+1833:             if effective_ts and effective_ts >= cutoff:
+1834:                 stats["skipped"] += 1
+1835:                 continue
+1836: 
+1837:             job_id = job.id
+1838:             user_id = job.user_id
+1839:             target_leads = (job.budget or {}).get("target_leads", 25)
+1840: 
+1841:             # Query durable billable results created by this exact job
+1842:             durable_count = s.query(UsersProfiles).filter(
+1843:                 UsersProfiles.user_id == user_id,
+1844:                 UsersProfiles.research_job_id == job_id,
+1845:                 UsersProfiles.lead_status == LeadStatus.QUALIFIED.value,
+1846:                 UsersProfiles.match_score >= 70
+1847:             ).count()
+1848: 
+1849:             billable_count = min(durable_count, target_leads)
+1850: 
+1851:             # Locate reservation
+1852:             reservation_id = (job.budget or {}).get("reservation_id")
+1853:             res_rec = None
+1854:             if reservation_id:
+1855:                 res_rec = s.query(CreditReservation).filter_by(id=reservation_id).first()
+1856:             if not res_rec:
+1857:                 res_rec = s.query(CreditReservation).filter_by(job_id=job_id).first()
+1858: 
+1859:             credit_action = "NONE"
+1860:             if res_rec:
+===
+Created At: 2026-11-09T13:45:23+05:30
+Completed At: 2026-11-09T13:45:23+05:30
+Showing lines 1920-1980 of 2322
+1920:                 "job_id": job_id,
+1921:                 "user_id": user_id,
+1922:                 "billable_count": billable_count,
+1923:                 "credit_action": credit_action
+1924:             })
+1925:             logger.info(f"[GTM Recovery] Successfully reconciled stale job #{job_id}: {credit_action}, billable_count={billable_count}")
+1926: 
+1927:         except Exception as e:
+1928:             s.rollback()
+1929:             stats["failed_to_reconcile"] += 1
+1930:             logger.error(f"[GTM Recovery] Failed to reconcile candidate job #{candidate_id}: {e}", exc_info=True)
+1931: 
+1932:     return stats
+1933: 
+1934: 
+1935: def start_gtm_research_job(
+1936:     app,
+1937:     user_id: int,
+1938:     target_leads: int = 25,
+1939:     persona_filter: Optional[str] = None
+1940: ) -> Dict[str, Any]:
+1941:     """
+1942:     Public entry point to initiate an asynchronous GTM research job.
+1943:     Enforces active job singularity, validates required context and credit balances,
+1944:     and atomically creates the research job with a durable credit reservation.
+1945:     """
+1946:     if not isinstance(target_leads, int) or target_leads < 5 or target_leads > 50:
+1947:         raise ValueError("target_leads must be an integer between 5 and 50.")
+1948: 
+1949:     # Check for active existing job
+1950:     existing = db_session.query(ResearchJobs).filter(
+1951:         ResearchJobs.user_id == user_id,
+1952:         ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value])
+1953:     ).first()
+1954: 
+1955:     if existing:
+1956:         return {
+1957:             "job_id": existing.id,
+1958:             "status": existing.status,
+1959:             "is_existing": True,
+1960:             "message": "A research run is already in progress."
+1961:         }
+1962: 
+1963:     # Verify context
+1964:     context = get_user_gtm_context(user_id)
+1965:     if not context.get("onboarding_completed"):
+1966:         raise ValueError("Onboarding not completed. Please complete company and ICP setup first.")
+1967: 
+1968:     # Check active pricing for GTM research
+1969:     pricing = db_session.query(FeaturePricing).filter_by(feature_code="GTM_RESEARCH_LEAD", is_active=True).first()
+1970:     if not pricing:
+1971:         raise ValueError("GTM lead research pricing is not configured.")
+1972: 
+1973:     required_credits = (pricing.credit_cost * target_leads).quantize(Decimal("0.01"))
+1974:     wallet_info = CreditService.get_wallet_balance(user_id, session=db_session)
+1975:     if wallet_info["available_balance"] < required_credits:
+1976:         raise InsufficientCreditsError(
+1977:             f"Insufficient credits. This research run requires {required_credits} credits ({pricing.credit_cost} per lead), but your available balance is {wallet_info['available_balance']}."
+1978:         )
+1979: 
+1980:     icp_ver = context.get("icp_raw", {}).get("version", 1)
+===
+Created At: 2026-11-09T13:45:35+05:30
+Completed At: 2026-11-09T13:45:35+05:30
+Showing lines 620-680 of 2322
+620:       "rationale": "one sentence explaining why this query targets high-intent buyers"
+621:     }}
+622:   ]
+623: }}
+624: """
+625:     t_uid = _current_telemetry_user_id.set(user_id)
+626:     t_jid = _current_telemetry_job_id.set(job_id)
+627:     t_op = _current_telemetry_operation.set("SEARCH_PLANNING")
+628:     try:
+629:         raw_response = _call_gemini_with_fallback(prompt, response_json=True)
+630:     finally:
+631:         _current_telemetry_user_id.reset(t_uid)
+632:         _current_telemetry_job_id.reset(t_jid)
+633:         _current_telemetry_operation.reset(t_op)
+634:     parsed = _clean_json(raw_response)
+635: 
+636:     if not parsed or not isinstance(parsed, dict):
+637:         parsed = {
+638:             "search_keywords": fallback_keywords,
+639:             "keyword_title": fallback_title,
+640:             "target_industries": [fallback_industry],
+641:             "target_company_types": ["B2B SaaS", "Technology"],
+642:             "queries": []
+643:         }
+644: 
+645:     # Ensure required top-level keys exist for backward compatibility
+646:     if not parsed.get("search_keywords"):
+647:         parsed["search_keywords"] = fallback_keywords
+648:     if not parsed.get("keyword_title"):
+649:         parsed["keyword_title"] = fallback_title
+650:     if not parsed.get("target_industries"):
+651:         parsed["target_industries"] = [fallback_industry]
+652:     if not parsed.get("target_company_types"):
+653:         parsed["target_company_types"] = ["B2B SaaS", "Technology"]
+654: 
+655:     # Validate and bound queries list
+656:     queries = parsed.get("queries")
+657:     if not queries or not isinstance(queries, list):
+658:         role_candidates = [r.strip() for r in re.split(r"[,/|;]|\band\b", fallback_title) if r.strip()]
+659:         if not role_candidates:
+660:             role_candidates = [fallback_title]
+661:         queries = []
+662:         for idx, role in enumerate(role_candidates[:max_queries], 1):
+663:             queries.append({
+664:                 "id": f"q{idx}",
+665:                 "title": role,
+666:                 "keywords": fallback_keywords,
+667:                 "industry": fallback_industry,
+668:                 "location": icp.get("location") or "",
+669:                 "exclusions": raw_exclusions,
+670:                 "rationale": f"Targets core ICP role: {role}"
+671:             })
+672: 
+673:     # Enforce deterministic limits: max_queries, unique query IDs
+674:     sanitized_queries = []
+675:     seen_combos = set()
+676:     for idx, q in enumerate(queries[:max_queries], 1):
+677:         if not isinstance(q, dict):
+678:             continue
+679:         q_title = q.get("title") or fallback_title
+680:         q_kw = q.get("keywords") or fallback_keywords
+===
+Created At: 2026-11-09T13:45:42+05:30
+Completed At: 2026-11-09T13:45:42+05:30
+Showing lines 680-740 of 2322
+680:         q_kw = q.get("keywords") or fallback_keywords
+681:         combo = (q_title.lower().strip(), q_kw.lower().strip())
+682:         if combo in seen_combos:
+683:             continue
+684:         seen_combos.add(combo)
+685:         sanitized_queries.append({
+686:             "id": q.get("id") or f"q{idx}",
+687:             "title": q_title,
+688:             "keywords": q_kw,
+689:             "industry": q.get("industry") or fallback_industry,
+690:             "location": q.get("location") or (icp.get("location") or ""),
+691:             "exclusions": q.get("exclusions") or raw_exclusions,
+692:             "rationale": q.get("rationale") or f"Targets role '{q_title}' with focus on '{q_kw}'"
+693:         })
+694: 
+695:     parsed["queries"] = sanitized_queries or [{
+696:         "id": "q1",
+697:         "title": fallback_title,
+698:         "keywords": fallback_keywords,
+699:         "industry": fallback_industry,
+700:         "location": icp.get("location") or "",
+701:         "exclusions": raw_exclusions,
+702:         "rationale": "Default baseline ICP query"
+703:     }]
+704: 
+705:     return parsed
+706: 
+707: 
+708: # ====================================================================
+709: # DISCOVERY PATH A: VOYAGER LINKEDIN DISCOVERY
+710: # ====================================================================
+711: 
+712: def discover_candidates_via_voyager(
+713:     user_id: int,
+714:     search_plan: Dict[str, Any],
+715:     limit: int = 15
+716: ) -> CandidateList:
+717:     """
+718:     Executes live LinkedIn people discovery using the user's authenticated Voyager session.
+719:     Distinguishes: success, zero results, expired auth, rate limited, network error, endpoint incompatible, malformed.
+720:     Returns CandidateList with candidates and structured execution metadata.
+721:     """
+722:     # 1. Pre-flight session validation using stored credentials (safe, non-destructive, zero Chromium)
+723:     linkedin = db_session.query(UsersLinkedinDetails).filter_by(user_id=user_id).first()
+724:     if linkedin and linkedin.auth_data_encrypted:
+725:         validation = validate_user_session(user_id)
+726:         if not validation.get("valid"):
+727:             cat = validation.get("category", "expired")
+728:             msg = validation.get("message", "LinkedIn session is not authenticated.")
+729:             logger.warning(f"[GTM Voyager] Pre-flight session validation failed for user {user_id}: {cat} - {msg}")
+730:             return CandidateList([], status="AUTH_EXPIRED", error_category=cat, provider="VOYAGER", raw_error=msg)
+731: 
+732:     client = create_voyager_client_from_db(user_id)
+733:     if not client:
+734:         validation = validate_user_session(user_id)
+735:         cat = validation.get("category", "no_connection")
+736:         msg = validation.get("message", "No active Voyager client found.")
+737:         logger.warning(f"[GTM Voyager] No active Voyager client for user {user_id}: {cat} - {msg}")
+738:         return CandidateList([], status="AUTH_EXPIRED", error_category=cat, provider="VOYAGER", raw_error=msg)
+739: 
+740:     queries_to_run = search_plan.get("queries")
+===
+Created At: 2026-11-09T13:45:45+05:30
+Completed At: 2026-11-09T13:45:45+05:30
+Showing lines 840-900 of 2322
+840: 
+841:             all_candidates.append({
+842:                 "urn_id": norm_urn or urn_id or f"urn:li:member:{abs(hash(name + raw_title)) % 10000000}",
+843:                 "name": name,
+844:                 "role": role,
+845:                 "raw_headline": raw_title,
+846:                 "company": company_name or "Target Company",
+847:                 "location": location,
+848:                 "profile_url": profile_url,
+849:                 "distance": item.get("distance", "DISTANCE_2"),
+850:                 "provider": "VOYAGER",
+851:                 "source_query": q_id,
+852:                 "source_evidence": f"Voyager People Search: {keywords or ''} {keyword_title or ''}".strip()
+853:             })
+854: 
+855:         if len(all_candidates) >= limit:
+856:             break
+857: 
+858:     if all_candidates:
+859:         return CandidateList(all_candidates[:limit], status="SUCCESS", provider="VOYAGER")
+860:     elif overall_error_category:
+861:         return CandidateList([], status=overall_status, error_category=overall_error_category, provider="VOYAGER", raw_error=overall_error_msg)
+862:     else:
+863:         return CandidateList([], status="ZERO_RESULTS", provider="VOYAGER")
+864: 
+865: 
+866: # ====================================================================
+867: # DISCOVERY PATH B: AGENT-REACH & PUBLIC-WEB DISCOVERY
+868: # ====================================================================
+869: 
+870: def read_public_url_agent_reach(url: str, timeout: int = 8) -> Dict[str, Any]:
+871:     """
+872:     Agent-Reach Jina Reader adapter:
+873:     Converts public web URLs to clean markdown via https://r.jina.ai/{url}.
+874:     Applies security headers, strict timeouts, and antibot detection.
+875:     Never includes LinkedIn cookies or session credentials.
+876:     """
+877:     if not url or not url.startswith("http"):
+878:         return {"status": "INVALID_URL", "summary": "", "source": "AGENT_REACH_JINA"}
+879: 
+880:     jina_endpoint = f"https://r.jina.ai/{url}"
+881:     headers = {
+882:         "Accept": "text/markdown",
+883:         "User-Agent": "FamewebAgentReach/1.0"
+884:     }
+885: 
+886:     try:
+887:         resp = requests.get(jina_endpoint, headers=headers, timeout=timeout)
+888:         if resp.status_code == 200 and resp.text:
+889:             text = resp.text
+890:             if "anomaly-modal" in text or "challenge-form" in text:
+891:                 return {"status": "BOT_CHALLENGE", "summary": "", "source": "AGENT_REACH_JINA"}
+892:             return {
+893:                 "status": "OK",
+894:                 "summary": text[:2500],
+895:                 "verified_url": url,
+896:                 "source": "AGENT_REACH_JINA"
+897:             }
+898:         return {"status": f"HTTP_{resp.status_code}", "summary": "", "source": "AGENT_REACH_JINA"}
+899:     except Exception as e:
+900:         logger.debug(f"[Agent Reach] Jina read failed for {url}: {e}")
+===
+Created At: 2026-11-09T13:45:50+05:30
+Completed At: 2026-11-09T13:45:50+05:30
+Showing lines 900-980 of 2322
+900:         logger.debug(f"[Agent Reach] Jina read failed for {url}: {e}")
+901:         return {"status": "ERROR", "summary": "", "source": "AGENT_REACH_JINA", "error": str(e)}
+902: 
+903: 
+904: def enrich_company_public_web(company_name: str, website_url: Optional[str] = None) -> Dict[str, Any]:
+905:     """
+906:     Enriches target company information using the verified Agent-Reach Jina Reader capability.
+907:     STRICT SECURITY: Never includes LinkedIn cookies or session credentials in external requests.
+908:     """
+909:     if not company_name and not website_url:
+910:         return {"summary": "", "signals": "", "source": "None"}
+911: 
+912:     target_url = website_url
+913:     if not target_url or not target_url.startswith("http"):
+914:         clean_name = re.sub(r"[^a-zA-Z0-9]", "", company_name.lower())
+915:         target_url = f"https://www.{clean_name}.com"
+916: 
+917:     reach_res = read_public_url_agent_reach(target_url)
+918:     if reach_res.get("status") == "OK" and reach_res.get("summary"):
+919:         return {
+920:             "summary": reach_res["summary"],
+921:             "verified_url": target_url,
+922:             "source": "JINA_READER",
+923:             "status": "OK"
+924:         }
+925: 
+926:     return {
+927:         "summary": f"{company_name} - active commercial organization.",
+928:         "verified_url": target_url,
+929:         "source": "FALLBACK",
+930:         "status": "FALLBACK"
+931:     }
+932: 
+933: 
+934: def discover_candidates_via_public_web(
+935:     user_context: Dict[str, Any],
+936:     search_plan: Dict[str, Any],
+937:     limit: int = 15
+938: ) -> CandidateList:
+939:     """
+940:     Independent public web discovery provider.
+941:     Executes search engine discovery (Google Custom Search API if configured) using ICP queries
+942:     to find publicly indexed LinkedIn member profiles, completely independent of Voyager session.
+943:     Keeps provider disabled with NOT_CONFIGURED when credentials are absent.
+944:     """
+945:     if not is_google_search_configured():
+946:         cfg_status = validate_google_search_config()
+947:         logger.info(f"[GTM Public Web] Provider disabled: {cfg_status['message']}")
+948:         return CandidateList(
+949:             [],
+950:             status="NOT_CONFIGURED",
+951:             error_category="not_configured",
+952:             provider="PUBLIC_WEB",
+953:             raw_error=cfg_status["message"]
+954:         )
+955: 
+956:     queries_to_run = search_plan.get("queries")
+957:     if not queries_to_run or not isinstance(queries_to_run, list):
+958:         queries_to_run = [{
+959:             "id": "q1",
+960:             "title": search_plan.get("keyword_title", "Executive"),
+961:             "keywords": search_plan.get("search_keywords", "B2B SaaS")
+962:         }]
+963: 
+964:     candidates = []
+965:     seen_urls = set()
+966:     engine_errors = []
+967: 
+968:     for q in queries_to_run[:3]:
+969:         q_id = q.get("id", "q1")
+970:         title = q.get("title", "")
+971:         keywords = q.get("keywords", "")
+972:         industry = q.get("industry", "")
+973: 
+974:         search_query = f'site:linkedin.com/in/ "{title}" "{keywords or industry}"'
+975:         logger.info(f"[GTM Public Web] Executing public search: '{search_query}'")
+976: 
+977:         try:
+978:             results = perform_public_web_search(search_query, max_results=min(10, limit))
+979:         except Exception as e:
+980:             err_msg = str(e)

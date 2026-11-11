@@ -1,0 +1,108 @@
+{
+  "test_timestamp": "2026-11-08T21:42:00Z",
+  "engine_used": "google",
+  "openserp_endpoint": "http://127.0.0.1:7000/google/search",
+  "query": "site:linkedin.com/in \"VP Sales\" \"B2B SaaS\" India",
+  "candidates": [
+    {
+      "rank": 1,
+      "name": "Mohamed Rafiuddin",
+      "profile_url": "https://in.linkedin.com/in/mohamed-rafiuddin-phd-a2ba475",
+      "redirect_source": "https://www.google.com/goto?url=CAESdQHEIkXX...",
+      "role": "VP \u2013 Sales | Director \u2013 Sales",
+      "company": null,
+      "location": "India",
+      "evidence_snippet": "Mohamed Rafiuddin, PhD. VP \u2013 Sales | Director \u2013 Sales | Head of Sales | Chief Revenue Officer | B2B SaaS, Cloud, Cybersecurity & AI | 25+ Yrs Driving ...",
+      "validation_flags": {
+        "URL_FORMAT_VALID": true,
+        "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+        "NAME_INFERRED_FROM_SLUG": false,
+        "ROLE_SUPPORTED": true,
+        "COMPANY_SUPPORTED": false,
+        "LOCATION_SUPPORTED": true,
+        "GEOGRAPHY_MISMATCH": false,
+        "IDENTITY_UNVERIFIED": false
+      }
+    },
+    {
+      "rank": 2,
+      "name": "Tejas Mehta",
+      "profile_url": "https://in.linkedin.com/in/tejas-mehta-51842880",
+      "redirect_source": null,
+      "role": "VP Sales & Customer Success",
+      "company": "Sell.Do",
+      "location": "India",
+      "evidence_snippet": "Tejas Mehta. VP Sales & Customer Success | B2B SaaS GTM, Revenue Operations & Retention | Building AI into Revenue Ops | Enterprise SaaS & PropTech. Sell.Do ...",
+      "validation_flags": {
+        "URL_FORMAT_VALID": true,
+        "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+        "NAME_INFERRED_FROM_SLUG": false,
+        "ROLE_SUPPORTED": true,
+        "COMPANY_SUPPORTED": true,
+        "LOCATION_SUPPORTED": true,
+        "GEOGRAPHY_MISMATCH": false,
+        "IDENTITY_UNVERIFIED": false
+      }
+    },
+    {
+      "rank": 3,
+      "name": "Kurt Srivastava",
+      "profile_url": "https://in.linkedin.com/in/kurt-srivastava-02s",
+      "redirect_source": "https://www.google.com/goto?url=CAESawHEIkXX...",
+      "role": "VP of Sales",
+      "company": "Sprouts.ai",
+      "location": "Bengaluru, Karnataka, India",
+      "evidence_snippet": "Bengaluru, Karnataka, India \u00b7 VP of Sales \u00b7 Sprouts.ai",
+      "validation_flags": {
+        "URL_FORMAT_VALID": true,
+        "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+        "NAME_INFERRED_FROM_SLUG": false,
+        "ROLE_SUPPORTED": true,
+        "COMPANY_SUPPORTED": true,
+        "LOCATION_SUPPORTED": true,
+        "GEOGRAPHY_MISMATCH": false,
+        "IDENTITY_UNVERIFIED": false
+      }
+    },
+    {
+      "rank": 4,
+      "name": "Apu Thomas",
+      "profile_url": "https://in.linkedin.com/in/aputhomas",
+      "redirect_source": null,
+      "role": "CMO | VP Sales & Marketing",
+      "company": "Scienaptic AI",
+      "location": "Bengaluru, Karnataka, India",
+      "evidence_snippet": "Bengaluru, Karnataka, India \u00b7 Director Strategic Marketing \u00b7 Scienaptic AI",
+      "validation_flags": {
+        "URL_FORMAT_VALID": true,
+        "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+        "NAME_INFERRED_FROM_SLUG": false,
+        "ROLE_SUPPORTED": true,
+        "COMPANY_SUPPORTED": true,
+        "LOCATION_SUPPORTED": true,
+        "GEOGRAPHY_MISMATCH": false,
+        "IDENTITY_UNVERIFIED": false
+      }
+    },
+    {
+      "rank": 5,
+      "name": "Achal Chhajed",
+      "profile_url": "https://in.linkedin.com/in/achalchhajed",
+      "redirect_source": "https://www.google.com/goto?url=CAESZAHEIkXX...",
+      "role": "VP Sales and Marketing",
+      "company": "Cubic Logics (apps365.com)",
+      "location": "Bengaluru, Karnataka, India",
+      "evidence_snippet": "Bengaluru, Karnataka, India \u00b7 VP Sales and Marketing \u00b7 Cubic Logics (apps365.com)",
+      "validation_flags": {
+        "URL_FORMAT_VALID": true,
+        "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+        "NAME_INFERRED_FROM_SLUG": false,
+        "ROLE_SUPPORTED": true,
+        "COMPANY_SUPPORTED": true,
+        "LOCATION_SUPPORTED": true,
+        "GEOGRAPHY_MISMATCH": false,
+        "IDENTITY_UNVERIFIED": false
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Index, UniqueConstraint, text
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Index, UniqueConstraint, text, Numeric, CheckConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from app.database import Base
 
@@ -17,6 +17,11 @@ class OptimizationStatus(str, enum.Enum):
     ACCEPTED = "ACCEPTED"
     COMPLETED = "COMPLETED"
 
+class UserRole(str, enum.Enum):
+    CUSTOMER = "CUSTOMER"
+    ADMIN = "ADMIN"
+    SUPER_ADMIN = "SUPER_ADMIN"
+
 class UserTable(Base):
     __tablename__ = 'user_table'
     user_id = Column(Integer, primary_key=True)
@@ -24,6 +29,7 @@ class UserTable(Base):
     email_id = Column(String, unique=True, nullable=True)
     phone_no = Column(String, unique=True, nullable=True)
     password_hash = Column(String, nullable=False)
+    role = Column(String, default=UserRole.CUSTOMER.value, nullable=False)
     email_verified_at = Column(DateTime, nullable=True)
     onboarding_step = Column(String, default=OnboardingStep.LINKEDIN.value)
     optimization_status = Column(String, default=OptimizationStatus.NOT_OFFERED.value)
@@ -262,3 +268,302 @@ class EmailVerificationOTP(Base):
     expires_at = Column(DateTime, nullable=False)
     attempts = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+class AuditLog(Base):
+    __tablename__ = 'audit_logs'
+    id = Column(Integer, primary_key=True)
+    admin_user_id = Column(Integer, ForeignKey('user_table.user_id'), nullable=True, index=True)
+    target_user_id = Column(Integer, ForeignKey('user_table.user_id'), nullable=True, index=True)
+    action = Column(String(64), nullable=False, index=True)
+    metadata_json = Column(JSONB, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+class UserCreditWallet(Base):
+    __tablename__ = 'user_credit_wallets'
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='RESTRICT'), primary_key=True)
+    total_balance = Column(Numeric(12, 2), nullable=False, default=0)
+    reserved_balance = Column(Numeric(12, 2), nullable=False, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint('total_balance >= 0', name='chk_wallet_total_balance_non_negative'),
+        CheckConstraint('reserved_balance >= 0', name='chk_wallet_reserved_balance_non_negative'),
+        CheckConstraint('reserved_balance <= total_balance', name='chk_wallet_reserved_le_total'),
+    )
+
+class FeaturePricing(Base):
+    __tablename__ = 'feature_pricing'
+    feature_code = Column(String(64), primary_key=True)
+    name = Column(String(128), nullable=False)
+    description = Column(String(255), nullable=True)
+    unit_name = Column(String(32), nullable=False, default='qualified_lead')
+    credit_cost = Column(Numeric(10, 2), nullable=False, default=0)
+    is_active = Column(Boolean, nullable=False, default=True)
+    version = Column(Integer, nullable=False, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    updated_by_user_id = Column(Integer, ForeignKey('user_table.user_id'), nullable=True)
+
+    __table_args__ = (
+        CheckConstraint('credit_cost >= 0', name='chk_feature_pricing_credit_cost_non_negative'),
+    )
+
+class ReservationStatus(str, enum.Enum):
+    RESERVED = "RESERVED"
+    SETTLED = "SETTLED"
+    RELEASED = "RELEASED"
+
+class CreditReservation(Base):
+    __tablename__ = 'credit_reservations'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='RESTRICT'), nullable=False, index=True)
+    job_id = Column(Integer, ForeignKey('research_jobs.id', ondelete='RESTRICT'), nullable=True, index=True)
+    billing_operation_id = Column(String(160), unique=True, nullable=False, index=True)
+    feature_code = Column(String(64), ForeignKey('feature_pricing.feature_code', ondelete='RESTRICT'), nullable=False)
+    requested_quantity = Column(Integer, nullable=False)
+    unit_price_snapshot = Column(Numeric(10, 2), nullable=False)
+    pricing_version_snapshot = Column(Integer, nullable=False)
+    reserved_amount = Column(Numeric(12, 2), nullable=False)
+    charged_amount = Column(Numeric(12, 2), nullable=False, default=0)
+    status = Column(String(32), nullable=False, default=ReservationStatus.RESERVED.value, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    settled_at = Column(DateTime, nullable=True)
+    released_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        CheckConstraint('reserved_amount >= 0', name='chk_res_reserved_amount_non_negative'),
+        CheckConstraint('charged_amount >= 0', name='chk_res_charged_amount_non_negative'),
+        CheckConstraint('charged_amount <= reserved_amount', name='chk_res_charged_le_reserved'),
+    )
+
+class TransactionType(str, enum.Enum):
+    ADMIN_GRANT = "ADMIN_GRANT"
+    ADMIN_ADJUSTMENT = "ADMIN_ADJUSTMENT"
+    RESERVATION = "RESERVATION"
+    SETTLEMENT = "SETTLEMENT"
+    RELEASE = "RELEASE"
+    REFUND = "REFUND"
+
+class CreditTransaction(Base):
+    __tablename__ = 'credit_transactions'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='RESTRICT'), nullable=False, index=True)
+    job_id = Column(Integer, ForeignKey('research_jobs.id', ondelete='RESTRICT'), nullable=True, index=True)
+    reservation_id = Column(Integer, ForeignKey('credit_reservations.id', ondelete='RESTRICT'), nullable=True, index=True)
+    transaction_type = Column(String(32), nullable=False, index=True)
+    amount = Column(Numeric(12, 2), nullable=False)
+    reserved_delta = Column(Numeric(12, 2), nullable=False, default=0)
+    balance_after = Column(Numeric(12, 2), nullable=False)
+    reserved_after = Column(Numeric(12, 2), nullable=False)
+    feature_code = Column(String(64), ForeignKey('feature_pricing.feature_code', ondelete='RESTRICT'), nullable=True)
+    unit_price_snapshot = Column(Numeric(10, 2), nullable=True)
+    pricing_version_snapshot = Column(Integer, nullable=True)
+    quantity = Column(Integer, nullable=True)
+    idempotency_key = Column(String(160), unique=True, nullable=False, index=True)
+    actor_user_id = Column(Integer, ForeignKey('user_table.user_id'), nullable=True)
+    reason = Column(String(255), nullable=False)
+    metadata_json = Column(JSONB, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        Index('ix_credit_tx_user_created', 'user_id', 'created_at'),
+    )
+
+class AIProviderUsageLog(Base):
+    __tablename__ = 'ai_provider_usage_logs'
+    id = Column(Integer, primary_key=True)
+    job_id = Column(Integer, ForeignKey('research_jobs.id', ondelete='SET NULL'), nullable=True, index=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='CASCADE'), nullable=False, index=True)
+    correlation_id = Column(String(64), nullable=False, index=True)
+    provider = Column(String(32), nullable=False)
+    model_name = Column(String(64), nullable=False)
+    operation = Column(String(64), nullable=False)
+    prompt_tokens = Column(Integer, nullable=True)
+    completion_tokens = Column(Integer, nullable=True)
+    total_tokens = Column(Integer, nullable=True)
+    duration_ms = Column(Integer, nullable=True)
+    estimated_cost_usd = Column(Numeric(10, 6), nullable=True)
+    provider_cost = Column(Numeric(10, 6), nullable=True)
+    provider_currency = Column(String(8), nullable=True, default='USD')
+    status = Column(String(32), nullable=False, default='SUCCESS')
+    error_category = Column(String(64), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class TenantStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    SUSPENDED = "SUSPENDED"
+    DELETED = "DELETED"
+
+
+class TenantRole(str, enum.Enum):
+    OWNER = "OWNER"
+    ADMIN = "ADMIN"
+    MEMBER = "MEMBER"
+
+
+class TenantMembershipStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    INVITED = "INVITED"
+    SUSPENDED = "SUSPENDED"
+
+
+class Tenant(Base):
+    __tablename__ = 'tenants'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    slug = Column(String(255), unique=True, nullable=False)
+    status = Column(String(50), nullable=False, default=TenantStatus.ACTIVE.value)
+    is_deleted = Column(Boolean, nullable=False, default=False)
+    deleted_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        Index('ix_tenants_status', 'status'),
+    )
+
+
+class TenantMembership(Base):
+    __tablename__ = 'tenant_memberships'
+
+    id = Column(Integer, primary_key=True)
+    tenant_id = Column(Integer, ForeignKey('tenants.id', ondelete='RESTRICT'), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='RESTRICT'), nullable=False, index=True)
+    role = Column(String(50), nullable=False, default=TenantRole.MEMBER.value)
+    status = Column(String(50), nullable=False, default=TenantMembershipStatus.ACTIVE.value)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('tenant_id', 'user_id', name='uq_tenant_membership_tenant_user'),
+    )
+
+
+# ==============================================================================
+# Bulk Email & User-Owned SMTP Models
+# ==============================================================================
+
+class SMTPConnectionType(str, enum.Enum):
+    SMTP = "SMTP"
+    OAUTH = "OAUTH"
+
+
+class SMTPAccountStatus(str, enum.Enum):
+    CONNECTED = "CONNECTED"
+    NEEDS_REAUTH = "NEEDS_REAUTH"
+    FAILED = "FAILED"
+    DISCONNECTED = "DISCONNECTED"
+
+
+class EmailBatchSendingMode(str, enum.Enum):
+    PERSONALIZED = "PERSONALIZED"
+    IDENTICAL = "IDENTICAL"
+
+
+class EmailBatchStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    QUEUED = "QUEUED"
+    SENDING = "SENDING"
+    COMPLETED = "COMPLETED"
+    PAUSED = "PAUSED"
+    CANCELLED = "CANCELLED"
+    FAILED = "FAILED"
+
+
+class EmailRecipientStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    ACCEPTED = "ACCEPTED"
+    FAILED = "FAILED"
+    DELIVERED = "DELIVERED"
+    BOUNCED = "BOUNCED"
+
+
+class UserSMTPAccount(Base):
+    __tablename__ = 'user_smtp_accounts'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='CASCADE'), nullable=False, index=True)
+    email_address = Column(String(255), nullable=False, index=True)
+    sender_name = Column(String(255), nullable=True)
+    provider = Column(String(64), nullable=True)
+    connection_type = Column(String(32), default=SMTPConnectionType.SMTP.value, nullable=False)
+    smtp_host = Column(String(255), nullable=True)
+    smtp_port = Column(Integer, nullable=True, default=587)
+    smtp_username = Column(String(255), nullable=True)
+    use_tls = Column(Boolean, default=True, nullable=False)
+    use_ssl = Column(Boolean, default=False, nullable=False)
+    encrypted_credentials = Column(String, nullable=True)
+    encryption_key_version = Column(Integer, default=1, nullable=False)
+    connection_status = Column(String(32), default=SMTPAccountStatus.CONNECTED.value, nullable=False)
+    is_primary = Column(Boolean, default=False, nullable=False)
+    last_tested_at = Column(DateTime, nullable=True)
+    last_error_message = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class EmailBatch(Base):
+    __tablename__ = 'email_batches'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='CASCADE'), nullable=False, index=True)
+    smtp_account_id = Column(Integer, ForeignKey('user_smtp_accounts.id', ondelete='SET NULL'), nullable=True, index=True)
+    batch_name = Column(String(255), nullable=False)
+    original_filename = Column(String(255), nullable=True)
+    subject = Column(String, nullable=False)
+    body_html = Column(String, nullable=True)
+    body_text = Column(String, nullable=True)
+    sending_mode = Column(String(32), default=EmailBatchSendingMode.PERSONALIZED.value, nullable=False)
+    total_recipients = Column(Integer, default=0, nullable=False)
+    valid_recipients = Column(Integer, default=0, nullable=False)
+    invalid_recipients = Column(Integer, default=0, nullable=False)
+    accepted_count = Column(Integer, default=0, nullable=False)
+    failed_count = Column(Integer, default=0, nullable=False)
+    status = Column(String(32), default=EmailBatchStatus.DRAFT.value, nullable=False, index=True)
+    error_message = Column(String, nullable=True)
+    detected_headers = Column(JSONB, nullable=True)
+    header_mapping = Column(JSONB, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class EmailRecipient(Base):
+    __tablename__ = 'email_recipients'
+
+    id = Column(Integer, primary_key=True)
+    batch_id = Column(Integer, ForeignKey('email_batches.id', ondelete='CASCADE'), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='CASCADE'), nullable=False, index=True)
+    email_address = Column(String(255), nullable=False, index=True)
+    recipient_data = Column(JSONB, nullable=True)
+    rendered_subject = Column(String, nullable=True)
+    rendered_body = Column(String, nullable=True)
+    status = Column(String(32), default=EmailRecipientStatus.PENDING.value, nullable=False, index=True)
+    attempt_count = Column(Integer, default=0, nullable=False)
+    error_message = Column(String, nullable=True)
+    provider_message_id = Column(String(255), nullable=True)
+    accepted_at = Column(DateTime, nullable=True)
+    delivered_at = Column(DateTime, nullable=True)
+    bounced_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+
+class SystemSetting(Base):
+    __tablename__ = 'system_settings'
+
+    key = Column(String(128), primary_key=True, nullable=False, index=True)
+    encrypted_value = Column(String, nullable=True)
+    encryption_key_version = Column(Integer, default=1, nullable=False)
+    metadata_json = Column(JSONB, nullable=True)
+    is_secret = Column(Boolean, default=True, nullable=False)
+    description = Column(String(255), nullable=True)
+    updated_by_user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='SET NULL'), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

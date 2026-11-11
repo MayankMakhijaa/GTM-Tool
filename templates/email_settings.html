@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+{% block title %}Email Settings — Fameweb{% endblock %}
+{% block content %}
+<div class="w-full px-space-xl py-space-lg flex flex-col gap-space-lg">
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+    <div class="flex flex-col">
+      <div class="flex items-center gap-space-xs">
+        <span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Email Settings</span>
+        <span class="inline-flex items-center gap-1 ml-space-sm px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
+          <span class="material-symbols-outlined text-[14px]">security</span>
+          AES-256-GCM Encrypted
+        </span>
+      </div>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Connect your business email accounts to send high-deliverability bulk campaigns directly from your domain.</p>
+    </div>
+    <div class="flex items-center gap-space-sm">
+      <button onclick="openAddModal()" class="inline-flex items-center gap-space-xs bg-primary text-on-primary px-space-md py-space-sm rounded-lg shadow-sm hover:bg-secondary transition-colors font-label-md text-label-md" type="button">
+        <span class="material-symbols-outlined text-[18px]">add</span>
+        <span>Connect Account</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Connected Accounts List Card -->
+  <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+    <div class="flex items-center justify-between border-b border-surface-container pb-space-sm">
+      <div class="flex items-center gap-2">
+        <h2 class="font-headline-md text-headline-md text-on-surface">Connected Sending Accounts</h2>
+        <span id="account-count-badge" class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">0 Accounts</span>
+      </div>
+      <button onclick="loadAccounts()" class="inline-flex items-center gap-1 text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm transition-colors">
+        <span class="material-symbols-outlined text-[16px]">refresh</span>
+        <span>Refresh</span>
+      </button>
+    </div>
+
+    <!-- Accounts Container -->
+    <div id="accounts-loading" class="py-8 text-center text-on-surface-variant">
+      <span class="material-symbols-outlined animate-spin text-[28px] text-primary">progress_activity</span>
+      <p class="mt-2 font-body-sm text-body-sm">Loading connected accounts...</p>
+    </div>
+
+    <div id="accounts-empty" class="hidden py-12 text-center flex-col items-center justify-center">
+      <div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-outline mb-3 mx-auto">
+        <span class="material-symbols-outlined text-[28px]">forward_to_inbox</span>
+      </div>
+      <h3 class="font-headline-sm text-headline-sm text-on-surface">No Business Email Connected</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto mt-1 mb-4">
+        Connect your custom domain Google Workspace, Microsoft 365, or SMTP account to start sending outreach.
+      </p>
+      <button onclick="openAddModal()" class="inline-flex items-center gap-space-xs bg-primary text-on-primary px-space-md py-space-sm rounded-lg shadow-sm hover:bg-secondary transition-colors font-label-md text-label-md mx-auto">
+        <span class="material-symbols-outlined text-[18px]">add</span>
+        <span>Connect Your First Account</span>
+      </button>
+    </div>
+
+    <div id="accounts-list" class="hidden flex-col gap-space-sm"></div>
+  </div>
+
+  <!-- Security & Best Practices Bento -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-surface-container flex flex-col gap-1">
+      <div class="flex items-center gap-2 text-primary font-label-md font-semibold">
+        <span class="material-symbols-outlined text-[20px]">lock</span>
+        <span>Zero Plaintext Passwords</span>
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">
+        Credentials are encrypted at rest using AES-256-GCM with environment-managed keys and decrypted only in temporary memory at send time.
+      </p>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-surface-container flex flex-col gap-1">
+      <div class="flex items-center gap-2 text-tertiary font-label-md font-semibold">
+        <span class="material-symbols-outlined text-[20px]">verified_user</span>
+        <span>Business Domain Required</span>
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">
+        To protect reputation and prevent inbox spam penalties, consumer accounts (@gmail.com, @yahoo.com) cannot be used as sender accounts.
+      </p>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-surface-container flex flex-col gap-1">
+      <div class="flex items-center gap-2 text-primary font-label-md font-semibold">
+        <span class="material-symbols-outlined text-[20px]">shield</span>
+        <span>SSRF Network Protection</span>
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">
+        Connections to internal IPs, cloud instance metadata services, and non-standard ports are strictly blocked before connection attempts.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Add Account Modal -->
+<div id="add-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-lg border border-surface-container overflow-hidden flex flex-col">
+    <!-- Modal Header -->
+    <div class="px-space-lg py-space-md border-b border-surface-container flex items-center justify-between bg-surface-container-low">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[22px]">mail_lock</span>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">Connect Business Email</h3>
+      </div>
+      <button onclick="closeAddModal()" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="p-space-lg flex flex-col gap-space-md max-h-[80vh] overflow-y-auto">
+      <!-- Email Address Input -->
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface font-medium">Business Email Address *</label>
+        <div class="relative">
+          <input type="email" id="modal-email" onblur="handleEmailBlur()" placeholder="alex@yourcompany.com" class="w-full px-space-md py-2.5 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface pr-10">
+          <span id="provider-spinner" class="material-symbols-outlined animate-spin absolute right-3 top-3 text-[18px] text-primary hidden">progress_activity</span>
+        </div>
+        <span id="provider-hint" class="font-body-sm text-body-sm text-on-surface-variant">Enter your work email address to detect configuration.</span>
+      </div>
+
+      <!-- Sender Name -->
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface font-medium">Sender Display Name</label>
+        <input type="text" id="modal-name" placeholder="Alex Morgan" class="w-full px-space-md py-2.5 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface">
+      </div>
+
+      <!-- Detected Provider Banner -->
+      <div id="provider-banner" class="hidden p-3 rounded-lg bg-surface-container-low border border-surface-container flex items-start gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">info</span>
+        <div class="flex flex-col text-xs">
+          <span id="banner-title" class="font-semibold text-on-surface">Google Workspace Detected</span>
+          <span id="banner-desc" class="text-on-surface-variant mt-0.5">Standard SMTP host and TLS port pre-configured below.</span>
+        </div>
+      </div>
+
+      <!-- SMTP Host & Port -->
+      <div class="grid grid-cols-3 gap-space-sm">
+        <div class="col-span-2 flex flex-col gap-1">
+          <label class="font-label-md text-label-md text-on-surface font-medium">SMTP Server Host *</label>
+          <input type="text" id="modal-host" placeholder="smtp.gmail.com" class="w-full px-space-md py-2.5 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-md text-label-md text-on-surface font-medium">Port *</label>
+          <input type="number" id="modal-port" value="587" class="w-full px-space-md py-2.5 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface">
+        </div>
+      </div>
+
+      <!-- Username & Password -->
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface font-medium">SMTP Username</label>
+        <input type="text" id="modal-username" placeholder="alex@yourcompany.com" class="w-full px-space-md py-2.5 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface">
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface font-medium">Password or App Password *</label>
+        <input type="password" id="modal-password" placeholder="••••••••••••••••" class="w-full px-space-md py-2.5 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary font-body-md text-body-md text-on-surface">
+        <span class="font-body-sm text-[12px] text-outline">For Google or Microsoft accounts, generate a 16-character App Password.</span>
+      </div>
+
+      <!-- Security Protocol Toggles -->
+      <div class="flex items-center gap-space-lg pt-1">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="modal-tls" checked class="w-4 h-4 text-primary rounded accent-primary">
+          <span class="font-label-md text-label-md text-on-surface">STARTTLS (Recommended)</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="modal-ssl" onchange="toggleSSL(this)" class="w-4 h-4 text-primary rounded accent-primary">
+          <span class="font-label-md text-label-md text-on-surface">SSL (Port 465)</span>
+        </label>
+      </div>
+
+      <!-- Error / Success Alert Box -->
+      <div id="modal-feedback" class="hidden p-3 rounded-lg text-sm flex items-start gap-2"></div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-space-lg py-space-md border-t border-surface-container flex items-center justify-between bg-surface-container-low">
+      <button onclick="testConnection()" id="btn-test" type="button" class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors">
+        <span class="material-symbols-outlined text-[16px]">network_check</span>
+        <span>Test Connection</span>
+      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="closeAddModal()" type="button" class="px-space-md py-2 rounded-lg hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors">
+          Cancel
+        </button>
+        <button onclick="saveAccount()" id="btn-save" type="button" class="inline-flex items-center gap-1.5 bg-primary text-on-primary px-space-lg py-2 rounded-lg shadow-sm hover:bg-secondary font-label-md text-label-md transition-colors">
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          <span>Save Account</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+async function loadAccounts() {
+  const loading = document.getElementById('accounts-loading');
+  const empty = document.getElementById('accounts-empty');
+  const list = document.getElementById('accounts-list');
+  const badge = document.getElementById('account-count-badge');
+
+  loading.classList.remove('hidden');
+  empty.classList.add('hidden');
+  list.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/bulk-email/accounts');
+    const data = await res.json();
+    loading.classList.add('hidden');
+
+    if (data.success && data.accounts && data.accounts.length > 0) {
+      badge.textContent = `${data.accounts.length} Account${data.accounts.length > 1 ? 's' : ''}`;
+      renderAccountList(data.accounts);
+      list.classList.remove('hidden');
+    } else {
+      badge.textContent = '0 Accounts';
+      empty.classList.remove('hidden');
+    }
+  } catch (err) {
+    loading.classList.add('hidden');
+    empty.classList.remove('hidden');
+    console.error('Failed to load SMTP accounts:', err);
+  }
+}
+
+function renderAccountList(accounts) {
+  const list = document.getElementById('accounts-list');
+  list.innerHTML = '';
+
+  accounts.forEach(acc => {
+    const isPrimary = acc.is_primary;
+    const isConnected = acc.connection_status === 'CONNECTED';
+    
+    const card = document.createElement('div');
+    card.className = `p-space-md rounded-xl border ${isPrimary ? 'border-primary/40 bg-surface-container-low/50' : 'border-surface-container bg-surface-container-lowest'} flex flex-col md:flex-row md:items-center justify-between gap-space-md transition-all`;
+
+    card.innerHTML = `
+      <div class="flex items-start gap-space-md">
+        <div class="w-10 h-10 rounded-lg ${isConnected ? 'bg-tertiary-fixed/40 text-tertiary' : 'bg-error-container text-error'} flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-[22px]">${isConnected ? 'mark_email_read' : 'error'}</span>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-headline-sm text-headline-sm text-on-surface font-semibold">${acc.email_address}</span>
+            ${isPrimary ? '<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-semibold">Default Sender</span>' : ''}
+            <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-[11px]">${acc.provider ? acc.provider.toUpperCase() : 'SMTP'}</span>
+          </div>
+          <div class="flex items-center gap-space-md mt-1 font-body-sm text-body-sm text-on-surface-variant flex-wrap">
+            <span>Server: <strong class="text-on-surface">${acc.smtp_host}:${acc.smtp_port}</strong></span>
+            <span>Sender: <strong class="text-on-surface">${acc.sender_name || '—'}</strong></span>
+            <span>Security: <strong>${acc.use_ssl ? 'SSL' : (acc.use_tls ? 'STARTTLS' : 'Plain')}</strong></span>
+            ${acc.last_tested_at ? `<span>Verified: ${new Date(acc.last_tested_at).toLocaleDateString()}</span>` : ''}
+          </div>
+          ${acc.last_error_message ? `<p class="mt-1 text-xs text-error font-mono">${acc.last_error_message}</p>` : ''}
+        </div>
+      </div>
+      <div class="flex items-center gap-2 self-end md:self-center shrink-0">
+        ${!isPrimary ? `
+          <button onclick="setPrimaryAccount(${acc.id})" class="px-space-sm py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface font-label-sm text-label-sm transition-colors" title="Set as primary sending account">
+            Set Default
+          </button>
+        ` : ''}
+        <button onclick="disconnectAccount(${acc.id})" class="p-2 rounded-lg text-outline hover:text-error hover:bg-error-container/20 transition-colors" title="Disconnect Account">
+          <span class="material-symbols-outlined text-[20px]">delete</span>
+        </button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function openAddModal() {
+  document.getElementById('modal-email').value = '';
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-host').value = '';
+  document.getElementById('modal-port').value = '587';
+  document.getElementById('modal-username').value = '';
+  document.getElementById('modal-password').value = '';
+  document.getElementById('modal-tls').checked = true;
+  document.getElementById('modal-ssl').checked = false;
+  document.getElementById('provider-banner').classList.add('hidden');
+  hideFeedback();
+  document.getElementById('add-modal').classList.remove('hidden');
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal').classList.add('hidden');
+}
+
+function toggleSSL(checkbox) {
+  const portInput = document.getElementById('modal-port');
+  const tlsCheckbox = document.getElementById('modal-tls');
+  if (checkbox.checked) {
+    portInput.value = '465';
+    tlsCheckbox.checked = false;
+  } else {
+    portInput.value = '587';
+    tlsCheckbox.checked = true;
+  }
+}
+
+async function handleEmailBlur() {
+  const email = document.getElementById('modal-email').value.trim();
+  if (!email || !email.includes('@')) return;
+
+  const spinner = document.getElementById('provider-spinner');
+  const banner = document.getElementById('provider-banner');
+  const bannerTitle = document.getElementById('banner-title');
+  const bannerDesc = document.getElementById('banner-desc');
+  const hostInput = document.getElementById('modal-host');
+  const portInput = document.getElementById('modal-port');
+  const usernameInput = document.getElementById('modal-username');
+  const tlsCheckbox = document.getElementById('modal-tls');
+  const sslCheckbox = document.getElementById('modal-ssl');
+
+  if (!usernameInput.value) {
+    usernameInput.value = email;
+  }
+
+  spinner.classList.remove('hidden');
+
+  try {
+    const res = await fetch('/api/bulk-email/accounts/detect-provider', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({ email_address: email })
+    });
+    const result = await res.json();
+    spinner.classList.add('hidden');
+
+    if (result.success && result.data) {
+      const d = result.data;
+      if (d.is_free_domain) {
+        showFeedback(d.error, 'error');
+        return;
+      }
+      hideFeedback();
+
+      if (d.smtp_host && !hostInput.value) {
+        hostInput.value = d.smtp_host;
+      }
+      if (d.smtp_port) {
+        portInput.value = d.smtp_port;
+      }
+      if (d.use_ssl !== undefined) {
+        sslCheckbox.checked = d.use_ssl;
+      }
+      if (d.use_tls !== undefined) {
+        tlsCheckbox.checked = d.use_tls;
+      }
+
+      bannerTitle.textContent = `${d.name || 'Provider Detected'}`;
+      bannerDesc.textContent = d.auth_guide || 'Pre-filled recommended SMTP parameters.';
+      banner.classList.remove('hidden');
+    }
+  } catch (err) {
+    spinner.classList.add('hidden');
+  }
+}
+
+function showFeedback(msg, type = 'error') {
+  const box = document.getElementById('modal-feedback');
+  box.className = `p-3 rounded-lg text-xs flex items-start gap-2 ${type === 'error' ? 'bg-error-container text-on-error-container' : 'bg-status-success-bg text-status-success-text border border-status-success-border'}`;
+  box.innerHTML = `
+    <span class="material-symbols-outlined text-[18px] shrink-0">${type === 'error' ? 'error' : 'check_circle'}</span>
+    <span class="leading-relaxed">${msg}</span>
+  `;
+  box.classList.remove('hidden');
+}
+
+function hideFeedback() {
+  document.getElementById('modal-feedback').classList.add('hidden');
+}
+
+async function testConnection() {
+  const btn = document.getElementById('btn-test');
+  const email = document.getElementById('modal-email').value.trim();
+  const host = document.getElementById('modal-host').value.trim();
+  const port = parseInt(document.getElementById('modal-port').value || '587');
+  const username = document.getElementById('modal-username').value.trim();
+  const password = document.getElementById('modal-password').value;
+  const use_tls = document.getElementById('modal-tls').checked;
+  const use_ssl = document.getElementById('modal-ssl').checked;
+
+  if (!email || !host) {
+    showFeedback('Please enter business email and SMTP host.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span><span>Testing...</span>`;
+
+  try {
+    const res = await fetch('/api/bulk-email/accounts/test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        email_address: email,
+        smtp_host: host,
+        smtp_port: port,
+        smtp_username: username,
+        smtp_password: password,
+        use_tls: use_tls,
+        use_ssl: use_ssl
+      })
+    });
+    const data = await res.json();
+    btn.disabled = false;
+    btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">network_check</span><span>Test Connection</span>`;
+
+    if (data.success) {
+      showFeedback(data.message, 'success');
+    } else {
+      showFeedback(data.error || 'Connection failed.', 'error');
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">network_check</span><span>Test Connection</span>`;
+    showFeedback('Network error testing SMTP server.', 'error');
+  }
+}
+
+async function saveAccount() {
+  const btn = document.getElementById('btn-save');
+  const email = document.getElementById('modal-email').value.trim();
+  const name = document.getElementById('modal-name').value.trim();
+  const host = document.getElementById('modal-host').value.trim();
+  const port = parseInt(document.getElementById('modal-port').value || '587');
+  const username = document.getElementById('modal-username').value.trim();
+  const password = document.getElementById('modal-password').value;
+  const use_tls = document.getElementById('modal-tls').checked;
+  const use_ssl = document.getElementById('modal-ssl').checked;
+
+  if (!email || !host || !password) {
+    showFeedback('Email, SMTP host, and Password are required.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span><span>Verifying & Saving...</span>`;
+
+  try {
+    const res = await fetch('/api/bulk-email/accounts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        email_address: email,
+        sender_name: name,
+        smtp_host: host,
+        smtp_port: port,
+        smtp_username: username,
+        smtp_password: password,
+        use_tls: use_tls,
+        use_ssl: use_ssl
+      })
+    });
+    const data = await res.json();
+    btn.disabled = false;
+    btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">save</span><span>Save Account</span>`;
+
+    if (data.success) {
+      closeAddModal();
+      loadAccounts();
+    } else {
+      showFeedback(data.error || 'Failed to save account.', 'error');
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">save</span><span>Save Account</span>`;
+    showFeedback('Error submitting account to server.', 'error');
+  }
+}
+
+async function setPrimaryAccount(accountId) {
+  try {
+    const res = await fetch(`/api/bulk-email/accounts/${accountId}/primary`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCsrfToken() }
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadAccounts();
+    }
+  } catch (err) {
+    console.error('Failed to set primary account:', err);
+  }
+}
+
+async function disconnectAccount(accountId) {
+  if (!confirm('Are you sure you want to disconnect this business sending account?')) return;
+  try {
+    const res = await fetch(`/api/bulk-email/accounts/${accountId}`, {
+      method: 'DELETE',
+      headers: { 'X-CSRFToken': getCsrfToken() }
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadAccounts();
+    }
+  } catch (err) {
+    console.error('Failed to disconnect account:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadAccounts);
+</script>
+{% endblock %}

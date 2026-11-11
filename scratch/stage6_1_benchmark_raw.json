@@ -1,0 +1,538 @@
+{
+  "openserp": [
+    {
+      "success": true,
+      "status_code": 200,
+      "status": "SUCCESS",
+      "latency_ms": 5609.0,
+      "raw_count": 8,
+      "items": [
+        {
+          "id": "s_38784d27a9d65939",
+          "rank": 1,
+          "type": "organic",
+          "title": "Apu Thomas - CMO | VP Sales & Marketing | B2B SaaS & AI",
+          "url": "https://www.google.com/goto?url=CAESYQHEIkXXlwvF9sBOh8X10aDVS_xX3Ica_5JxRNPIF2Xgda9I5_LjNHiuoE937RWoly5e6_RGYYOasrXU9VWSsw1NPKD_ThP1Bf7lVpUTu8epmxeZIPtjaFUYQxixBCmD4aQ",
+          "display_url": "linkedin.com",
+          "snippet": "Bengaluru, Karnataka, India \u00b7 Director Strategic Marketing \u00b7 Scienaptic AI",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 1
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_4eaa782078dd886f",
+          "rank": 2,
+          "type": "organic",
+          "title": "Sirisha Naidu - Enterprise Sales Leader | Chief Sales Officer",
+          "url": "https://in.linkedin.com/in/sirisha-naidu",
+          "display_url": "in.linkedin.com \u203a in \u203a sirisha-naidu",
+          "snippet": "Sirisha Naidu. Enterprise Sales Leader | Chief Sales Officer | VP Sales | SaaS & Digital Transformation | Building High-Performing Teams Across Diverse Sectors|\u00a0...Read more",
+          "domain": "in.linkedin.com",
+          "favicon": "https://in.linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 2
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": ""
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_63c465b3b38c55e5",
+          "rank": 3,
+          "type": "organic",
+          "title": "Kurt S - VP Sales | Scaling revenue and sales teams",
+          "url": "https://www.google.com/goto?url=CAESawHEIkXXteL70_7oQrnRX3aQp-lie-_vi8TVcIuV3rCscTELeLcnGRm0Y4wIqi1eVyZ1J7cn7llp7xs5GkGjJVWPM7Roktrhmf3YUmyOfQkSwUXZOzT7X5ZtJXaIoWbgd0a9aJIcN3_6Sm1N",
+          "display_url": "linkedin.com",
+          "snippet": "Bengaluru, Karnataka, India \u00b7 VP of Sales \u00b7 Sprouts.ai",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 3
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_0d1e20096fbe7e2f",
+          "rank": 4,
+          "type": "organic",
+          "title": "Rohan Goel - VP Sales & Country Head | Enterprise B2B ...",
+          "url": "https://in.linkedin.com/in/rohangoel-aceyantraa",
+          "display_url": "in.linkedin.com \u203a in \u203a rohangoel-aceyantraa",
+          "snippet": "Rohan Goel \u00b7 VP Sales & Country Head | Enterprise B2B SaaS, AI/IoT & IT Services | India, US and APAC | Global Sales Leadership | \u20b9125 Cr+ New Revenue | GTM,\u00a0...Read more",
+          "domain": "in.linkedin.com",
+          "favicon": "https://in.linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 4
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": ""
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_4dc95bc514a66550",
+          "rank": 5,
+          "type": "organic",
+          "title": "Mohamed Rafiuddin, PhD. - VP \u2013 Sales | Director",
+          "url": "https://www.google.com/goto?url=CAESdQHEIkXXe6B3r6NaT_SnTsi_lLaO42H9OruRhAjP3GloTA1w65o0groAa1Blhgd3BzesOWql_CQaDpvoS0nomxIRh0zpsjE8acpEsXfYBlcrz_r67AeRsKclQBsP5r0nn7TygJHVOroFIdNQiQqiyWmUw4v9gg",
+          "display_url": "linkedin.com",
+          "snippet": "Mohamed Rafiuddin, PhD. VP \u2013 Sales | Director \u2013 Sales | Head of Sales | Chief Revenue Officer | B2B SaaS, Cloud, Cybersecurity & AI | 25+ Yrs Driving\u00a0...Read more",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 5
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_7eb627bc36181b4f",
+          "rank": 6,
+          "type": "organic",
+          "title": "Prasenjit Banerjee - VP Sales | Enterprise Technology & IT ...",
+          "url": "https://www.google.com/goto?url=CAESdAHEIkXXmi3thKbWtBKlELGHVds3WHvLH_bZotjivuGD5cxbwP8w6LRsfTI7RsGirr2olxVhT5Ef-qTLRx3FaZ7xyaE1QLqWtEE11shw76FYMFfPfR4R0FQqvBIN36eR05UC3GRMsgphB9abGZEK5Z3Mh_0j",
+          "display_url": "linkedin.com",
+          "snippet": "VP Sales | Enterprise Technology & IT Services | Global Business ... Managed full-cycle B2B SaaS sales \u2014 lead generation, pipeline governance\u00a0...Read more",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 6
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_9bb67e8fd05eb611",
+          "rank": 7,
+          "type": "organic",
+          "title": "Anubhav Sahay - VP Sales & Account Management",
+          "url": "https://www.google.com/goto?url=CAESZAHEIkXXE85qJRRlfrP5JY9veQMTehGsn0oWHP-y7kcgCWcDC7v32VJHkUBGBS_Wjjz9oIPyqgqKyey3lnM7c43hjR_RQ70Oqw_jv0PFwwahDEX_lb7O_IJ3PL5eWPafmzbe5ZI",
+          "display_url": "linkedin.com",
+          "snippet": "VP Sales & Account Management | $25M ARR Portfolio ... Commercial and Revenue Leader with 10+ years of experience building growth engines across B2B SaaS\u00a0...",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 7
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_bea55ba53348eb64",
+          "rank": 8,
+          "type": "organic",
+          "title": "Achal Chhajed - VP Sales & Marketing",
+          "url": "https://www.google.com/goto?url=CAESZAHEIkXX3g0RqvhqM_g98XeLgmENtK75XqpJdEGEeUAT_CYPkaGwNRQwoiOAk2tX0uMYpesuQ9Cx2kvbMxn90IvdaCONo_B2HuJEesRTMbS46CYFuiZe7FEDGU3zhLhadlAtoNI",
+          "display_url": "linkedin.com",
+          "snippet": "Bengaluru, Karnataka, India \u00b7 VP Sales and Marketing \u00b7 Cubic Logics (apps365.com)",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 8
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        }
+      ],
+      "error": null,
+      "normalized_candidates": [
+        {
+          "urn_id": "sirisha-naidu",
+          "name": "Sirisha Naidu",
+          "role": "Enterprise Sales Leader",
+          "company": null,
+          "location": null,
+          "profile_url": "https://in.linkedin.com/in/sirisha-naidu",
+          "raw_headline": "Sirisha Naidu - Enterprise Sales Leader | Chief Sales Officer",
+          "source_evidence": "Sirisha Naidu. Enterprise Sales Leader | Chief Sales Officer | VP Sales | SaaS & Digital Transformation | Building High-Performing Teams Across Diverse Sectors|\u00a0...Read more",
+          "source_query": "VP Sales",
+          "provider": "OPENSERP",
+          "distance": "PUBLIC_INDEX",
+          "validation_flags": {
+            "URL_FORMAT_VALID": true,
+            "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+            "ROLE_SUPPORTED": true,
+            "COMPANY_SUPPORTED": false,
+            "LOCATION_SUPPORTED": false
+          },
+          "adapter": "OpenSERP-Google"
+        },
+        {
+          "urn_id": "rohangoel-aceyantraa",
+          "name": "Rohan Goel",
+          "role": "VP Sales & Country Head",
+          "company": null,
+          "location": "India",
+          "profile_url": "https://in.linkedin.com/in/rohangoel-aceyantraa",
+          "raw_headline": "Rohan Goel - VP Sales & Country Head | Enterprise B2B ...",
+          "source_evidence": "Rohan Goel \u00b7 VP Sales & Country Head | Enterprise B2B SaaS, AI/IoT & IT Services | India, US and APAC | Global Sales Leadership | \u20b9125 Cr+ New Revenue | GTM,\u00a0...Read more",
+          "source_query": "VP Sales",
+          "provider": "OPENSERP",
+          "distance": "PUBLIC_INDEX",
+          "validation_flags": {
+            "URL_FORMAT_VALID": true,
+            "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+            "ROLE_SUPPORTED": true,
+            "COMPANY_SUPPORTED": false,
+            "LOCATION_SUPPORTED": true
+          },
+          "adapter": "OpenSERP-Google"
+        }
+      ]
+    },
+    {
+      "success": false,
+      "status_code": 429,
+      "status": "CAPTCHA_DETECTED",
+      "latency_ms": 2328.0,
+      "raw_count": 0,
+      "items": [],
+      "error": "{\"error\":\"captcha_detected\",\"code\":429,\"request_id\":\"01a1bf2d-de55-7045-8e7d-6ec6fe17db79\",\"message\":\"captcha detected\",\"meta\":{\"engine\":\"google\",\"proxy_used\":\"direct\"}}",
+      "normalized_candidates": []
+    },
+    {
+      "success": true,
+      "status_code": 200,
+      "status": "SUCCESS",
+      "latency_ms": 4672.0,
+      "raw_count": 8,
+      "items": [
+        {
+          "id": "s_ceb0949765c8a21a",
+          "rank": 1,
+          "type": "organic",
+          "title": "Prajakta Dumbre - Technical Lead @ Wipro | Ruby on Rails",
+          "url": "https://in.linkedin.com/in/prajakta-dumbre-b4bb15b9",
+          "display_url": "in.linkedin.com \u203a in \u203a prajakta-dumbre-b4bb15b9",
+          "snippet": "Pune Division, Maharashtra, India \u00b7 Technical Lead \u00b7 Wipro",
+          "domain": "in.linkedin.com",
+          "favicon": "https://in.linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 1
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": ""
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_314db29f2663574d",
+          "rank": 2,
+          "type": "organic",
+          "title": "Piyush Wani - Software Engineer | Backend Systems",
+          "url": "https://in.linkedin.com/in/piyush-wani",
+          "display_url": "in.linkedin.com \u203a in \u203a piyush-wani",
+          "snippet": "Pune Division, Maharashtra, India \u00b7 Software Engineer \u00b7 PhonePe",
+          "domain": "in.linkedin.com",
+          "favicon": "https://in.linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 2
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": ""
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_677fb74d94107651",
+          "rank": 3,
+          "type": "organic",
+          "title": "Gauri Nandokar - Ruby on Rails Developer",
+          "url": "https://www.google.com/goto?url=CAESZgHEIkXXSYodZinAc2Hd5xzg-smrFRIsmHHomer-_AzZyJ0UlwpWYSkxWyegHSzU6dHtP7yiK-li1BUYVplxmvS5wpoxe5mY0lu4HBlWEnRIEwGEJAw76gPyAryDUteat98s6W_g6g",
+          "display_url": "linkedin.com",
+          "snippet": "Pune District, Maharashtra, India \u00b7 Sr Developer \u00b7 Wipro",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 3
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_e923a11ebdf39f15",
+          "rank": 4,
+          "type": "organic",
+          "title": "Ashish Bedi - Head of Engineering @ Writesonic",
+          "url": "https://www.google.com/goto?url=CAESXgHEIkXX3lQScLq7L_kFEF_xj1pplJAzV4CKAcOo8JiLz0kSmqNJl4DgRsI2zSxF82Q_xwbDpxX1NYb_rPGoCAgMSZlzqfMqHUs-mryBTqdz4p1ciVla0yhq9dswFAk",
+          "display_url": "linkedin.com",
+          "snippet": "India \u00b7 Head of Engineering \u00b7 Writesonic",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 4
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_d4a33a391e649853",
+          "rank": 5,
+          "type": "organic",
+          "title": "Sneh Singh - 3D Design Manager @ Ctruh",
+          "url": "https://www.google.com/goto?url=CAESawHEIkXX_9fPtlg1-uWL8UOi4e0yQzUttLgd_g26EVOpDqekFVlgtB9eJfvMtY8Br5Pd9ij52ZgXsSGbW-_QjubIF_kBHPkgESofpw6AKUhNBLrxRU8gs_0an9aq3Qw3kWKTP7mzrUz-WYMn",
+          "display_url": "linkedin.com",
+          "snippet": "3D Design Manager specializing in 3D Environment Art, XR Production, and Real-Time Visualization with expertise in Blender, Maya, and modern AI-assisted 3D\u00a0...Read more",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 5
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_c7809266a82aa2a2",
+          "rank": 6,
+          "type": "organic",
+          "title": "Chris Lyons - Senior Engineering Leader | Full Stack & AI ...",
+          "url": "https://www.google.com/goto?url=CAESaAHEIkXXhqgrsI16e_yuyP1tDFIIV5IMSvLkMxtkfWfjJjbfYiZaZj3Jp8PfVjMTM0sZUvjQ-yA05EOVxyvtbCuxcMT30IikSP3Gy4ho7JAFqmjO6hmjcRmBLu9Dt5NMMfEC5lCm5uUP",
+          "display_url": "linkedin.com",
+          "snippet": "Greater Cleveland \u00b7 Staff Full Stack AI Engineer \u00b7 Radimal",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 6
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_006aac826e272a1d",
+          "rank": 7,
+          "type": "organic",
+          "title": "Jay Kistler - Lenox, Massachusetts, United States",
+          "url": "https://www.google.com/goto?url=CAESbAHEIkXXrN736c8aQMO1YmU5JcaubzOlAFTKI2AbjOQuhMs0FKMj5wYOJIIcFauHDA4uV9pLPw867SNmYqhWwibstlkX96eAmGPslA6w-exb8BmKveAUfRq2VSv0YjqRxd9e7tAwmZUE8qTRiw",
+          "display_url": "linkedin.com",
+          "snippet": "Location: Lenox \u00b7 500+ connections on LinkedIn. View Jay Kistler's profile on LinkedIn, a professional community of 1 billion members.",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 7
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        },
+        {
+          "id": "s_b3b9c6fce62be644",
+          "rank": 8,
+          "type": "organic",
+          "title": "Martin Aryee - TERRITORY MANAGEMENT || SALES AND ...",
+          "url": "https://www.google.com/goto?url=CAESbgHEIkXXFE-E5ikhMoJ4pOkLx2P2roatG6nwMgRnglo80yLzng6nluLwmqYfCXBK_lzld-z5PiCVwN7q_znaqLQCdBnjbytwU8dzxR3wOPPV2Qnsp2vdH_5P67beUVWVcN0l4RXs_s7G05lAMpEa",
+          "display_url": "linkedin.com",
+          "snippet": "Sekondi-Takoradi, Western Region, Ghana \u00b7 Area Sales Executive \u00b7 FanMilk PLC",
+          "domain": "linkedin.com",
+          "favicon": "https://linkedin.com/favicon.ico",
+          "position": {
+            "absolute": 8
+          },
+          "engine": "google",
+          "domain_info": {
+            "tld": "com",
+            "sld": "linkedin",
+            "category": "social"
+          },
+          "classification": {
+            "content_type": "webpage",
+            "source_hint": "professional_network"
+          }
+        }
+      ],
+      "error": null,
+      "normalized_candidates": [
+        {
+          "urn_id": "prajakta-dumbre-b4bb15b9",
+          "name": "Prajakta Dumbre",
+          "role": "Technical Lead @ Wipro",
+          "company": "Technical Lead",
+          "location": "Pune",
+          "profile_url": "https://in.linkedin.com/in/prajakta-dumbre-b4bb15b9",
+          "raw_headline": "Prajakta Dumbre - Technical Lead @ Wipro | Ruby on Rails",
+          "source_evidence": "Pune Division, Maharashtra, India \u00b7 Technical Lead \u00b7 Wipro",
+          "source_query": "Head of Engineering",
+          "provider": "OPENSERP",
+          "distance": "PUBLIC_INDEX",
+          "validation_flags": {
+            "URL_FORMAT_VALID": true,
+            "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+            "ROLE_SUPPORTED": true,
+            "COMPANY_SUPPORTED": true,
+            "LOCATION_SUPPORTED": true
+          },
+          "adapter": "OpenSERP-Google"
+        },
+        {
+          "urn_id": "piyush-wani",
+          "name": "Piyush Wani",
+          "role": "Software Engineer",
+          "company": "Software Engineer",
+          "location": "Pune",
+          "profile_url": "https://in.linkedin.com/in/piyush-wani",
+          "raw_headline": "Piyush Wani - Software Engineer | Backend Systems",
+          "source_evidence": "Pune Division, Maharashtra, India \u00b7 Software Engineer \u00b7 PhonePe",
+          "source_query": "Head of Engineering",
+          "provider": "OPENSERP",
+          "distance": "PUBLIC_INDEX",
+          "validation_flags": {
+            "URL_FORMAT_VALID": true,
+            "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+            "ROLE_SUPPORTED": true,
+            "COMPANY_SUPPORTED": true,
+            "LOCATION_SUPPORTED": true
+          },
+          "adapter": "OpenSERP-Google"
+        }
+      ]
+    }
+  ],
+  "ddgs": [
+    {
+      "success": true,
+      "status_code": 200,
+      "status": "EMPTY_RESPONSE",
+      "latency_ms": 484.0,
+      "raw_count": 0,
+      "items": [],
+      "error": null,
+      "normalized_candidates": []
+    },
+    {
+      "success": true,
+      "status_code": 200,
+      "status": "EMPTY_RESPONSE",
+      "latency_ms": 485.0,
+      "raw_count": 0,
+      "items": [],
+      "error": null,
+      "normalized_candidates": []
+    },
+    {
+      "success": true,
+      "status_code": 200,
+      "status": "EMPTY_RESPONSE",
+      "latency_ms": 453.0,
+      "raw_count": 0,
+      "items": [],
+      "error": null,
+      "normalized_candidates": []
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request
-from app.security.session import login_required
+from app.security.session import login_required, super_admin_required
 from app.repositories.user_repository import get_user_by_id
 from app.services.otp_service import is_user_email_verified
 
@@ -31,7 +31,8 @@ def enforce_onboarding(user, current_endpoint):
         
     # Mapping of state to the correct endpoint
     state_routes = {
-        "LINKEDIN": "pages.connect_linkedin",
+        "INTEGRATIONS": "pages.onboarding_integrations",
+        "LINKEDIN": "pages.onboarding_integrations",
         "COMPANY": "pages.company",
         "ICP": "pages.icp"
     }
@@ -45,7 +46,10 @@ def enforce_onboarding(user, current_endpoint):
 
 @pages_bp.route("/")
 def home():
-    if session.get("user_id"):
+    user = get_current_user()
+    if user:
+        if user.role in ("ADMIN", "SUPER_ADMIN"):
+            return redirect(url_for("pages.admin_dashboard"))
         return redirect(url_for("pages.dashboard"))
     return render_template("home.html")
 
@@ -73,6 +77,26 @@ def signup():
             return redirect(url_for("pages.verify_email"))
         return redirect(url_for("pages.dashboard"))
     return render_template("signup.html")
+
+@pages_bp.route("/onboarding/integrations")
+@login_required
+def onboarding_integrations():
+    user = get_current_user()
+    if redir := enforce_onboarding(user, "pages.onboarding_integrations"):
+        return redir
+        
+    from app.models.all_models import UsersLinkedinDetails, UserSMTPAccount
+    from app.database import db_session
+    linkedin_details = db_session.query(UsersLinkedinDetails).filter_by(user_id=user.user_id).first()
+    smtp_account = db_session.query(UserSMTPAccount).filter_by(user_id=user.user_id).order_by(UserSMTPAccount.is_primary.desc()).first()
+    
+    return render_template(
+        "onboarding_integrations.html",
+        user=user,
+        linkedin_details=linkedin_details,
+        smtp_account=smtp_account
+    )
+
 
 @pages_bp.route("/connect-linkedin")
 @login_required
@@ -153,6 +177,14 @@ def emails():
         return redir
     return render_template("emails.html", user=user)
 
+@pages_bp.route("/email-settings")
+@login_required
+def email_settings():
+    user = get_current_user()
+    if redir := enforce_onboarding(user, "pages.email_settings"):
+        return redir
+    return render_template("email_settings.html", user=user)
+
 @pages_bp.route("/history")
 @login_required
 def history():
@@ -160,4 +192,10 @@ def history():
     if redir := enforce_onboarding(user, "pages.history"):
         return redir
     return render_template("history.html", user=user)
+
+@pages_bp.route("/admin")
+@super_admin_required
+def admin_dashboard():
+    user = get_current_user()
+    return render_template("admin.html", user=user)
 

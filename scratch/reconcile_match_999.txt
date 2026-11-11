@@ -1,0 +1,32 @@
+Created At: 2026-11-10T15:25:25+05:30
+Completed At: 2026-11-10T15:25:25+05:30
+Command exited with code 0.
+
+Command output:
+=== Extracted reconcile_stale_research_jobs ===
+def reconcile_stale_research_jobs(
+    max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,
+    session: Optional[Any] = None
+) -> Dict[str, Any]:
+    """
+    Detects and safely reconciles abandoned/stale QUEUED or RUNNING research jobs.
+    Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to guarantee
+    safe concurrent execution across multiple worker/app processes.
+
+    Reconciliation rules:
+    1. Selects candidate jobs in QUEUED or RUNNING whose heartbe
+...
+r_id,
+                "billable_count": billable_count,
+                "credit_action": credit_action
+            })
+            logger.info(f"[GTM Recovery] Successfully reconciled stale job #{job_id}: {credit_action}, billable_count={billable_count}")
+
+        except Exception as e:
+            s.rollback()
+            stats["failed_to_reconcile"] += 1
+            logger.error(f"[GTM Recovery] Failed to reconcile candidate job #{candidate_id}: {e}", exc_info=True)
+
+    return stats
+
+Wrote to extracted_reconcile.py, length: 7780

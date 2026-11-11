@@ -1,0 +1,71 @@
+Created At: 2026-11-09T21:52:32+05:30
+Completed At: 2026-11-09T21:52:33+05:30
+Command exited with code 0.
+
+Command output:
+
+> {"step_index":889,"source":"MODEL","type":"GENERIC","status":"DONE","created_at":"2026-11-04T18:36:51Z","content":"Cr
+eated At: 2026-11-05T00:06:51+05:30\nCompleted At: 2026-11-05T00:06:51+05:30\nShowing lines 1730-1800 of 2056\n1730:   
+      finally:\r\n1731:             db_session.remove()\r\n1732: \r\n1733: \r\n1734: # 
+====================================================================\r\n1735: # STALE JOB RECONCILIATION & 
+RECOVERY\r\n1736: # ====================================================================\r\n1737: \r\n1738: 
+DEFAULT_STALE_THRESHOLD_MINUTES = 15\r\n1739: \r\n1740: \r\n1741: def reconcile_stale_research_jobs(\r\n1742:     
+max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,\r\n1743:     session: Optional[Any] = None\r\n1744: ) -> 
+Dict[str, Any]:\r\n1745:     \"\"\"\r\n1746:     Detects and safely reconciles abandoned/stale QUEUED or RUNNING 
+research jobs.\r\n1747:     Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to 
+guarantee\r\n1748:     safe concurrent execution across multiple worker/app processes.\r\n1749: \r\n1750:     
+Reconciliation rules:\r\n1751:     1. Selects candidate jobs in QUEUED or RUNNING whose heartbeat_at (or created_at if 
+heartbeat_at is NULL)\r\n1752:        is strictly older than max_stale_minutes.\r\n1753:     2. Re-validates job 
+status and timestamp under exclusive lock.\r\n1754:     3. Counts durably persisted, qualified leads attributable to 
+that exact job.\r\n1755:     4. If reservation is RESERVED:\r\n1756:        - If durable count > 0, settles Q leads 
+using captured pricing snapshot via stable key gtm_job_settle_{job_id}.\r\n1757:        - If durable count == 0, 
+releases reservation via stable key gtm_job_rel_{job_id}.\r\n1758:     5. If reservation is already SETTLED or 
+RELEASED:\r\n1759:        - Preserves the existing settlement/release outcome without duplicate charge or conflicting 
+mutation.\r\n1760:     6. If reservation is missing/unexpected:\r\n1761:        - Records a clear diagnostic and marks 
+the job failed without fabricating ledger entries.\r\n1762:     7. Sets terminal status FAILED with truthful 
+diagnostic explanation.\r\n1763:     \"\"\"\r\n1764:     s = session or db_session\r\n1765:     now = 
+datetime.utcnow()\r\n1766:     cutoff = now - timedelta(minutes=max_stale_minutes)\r\n1767: \r\n1768:     stats = 
+{\r\n1769:         \"examined\": 0,\r\n1770:         \"recovered\": 0,\r\n1771:         \"skipped\": 0,\r\n1772:       
+  \"failed_to_reconcile\": 0,\r\n1773:         \"details\": []\r\n1774:     }\r\n1775: \r\n1776:     # Query candidate 
+job IDs first\r\n1777:     candidate_ids = [\r\n1778:         row[0] for row in 
+s.query(ResearchJobs.id).filter(\r\n1779:             ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, 
+ResearchJobStatus.RUNNING.value]),\r\n1780:             or_(\r\n1781:                 
+and_(ResearchJobs.heartbeat_at.isnot(None), ResearchJobs.heartbeat_at < cutoff),\r\n1782:                 
+and_(ResearchJobs.heartbeat_at.is_(None), ResearchJobs.created_at < cutoff)\r\n1783:             )\r\n1784:         
+).all()\r\n1785:     ]\r\n1786: \r\n1787:     stats[\"examined\"] = len(candidate_ids)\r\n1788:     if not 
+candidate_ids:\r\n1789:         return stats\r\n1790: \r\n1791:     for candidate_id in candidate_ids:\r\n1792:        
+ try:\r\n1793:             # Acquire row lock with skip_locked=True for safe concurrency\r\n1794:             job = 
+s.query(ResearchJobs).filter_by(id=candidate_id).with_for_update(skip_locked=True).first()\r\n1795:             if not 
+job:\r\n1796:                 # Locked by another process or no longer exists\r\n1797:                 
+stats[\"skipped\"] += 1\r\n1798:                 continue\r\n1799: \r\n1800:             # Re-verify staleness and 
+status under lock\r"}
+  {"step_index":890,"source":"MODEL","type":"PLANNER_RESPONSE","status":"DONE","created_at":"2026-11-04T18:36:51Z","inp
+ut_tokens":3323,"cache_read_tokens":41010,"output_tokens":61,"tool_calls":[{"name":"read_file","args":{"EndLine":"1880"
+,"Path":"\"D:\\\\Programming\\\\FameWebs_Internship\\\\linkedin_lead_generator\\\\app\\\\services\\\\gtm_pipeline_servi
+ce.py\"","StartLine":"1801"}}]}
+> {"step_index":1740,"source":"MODEL","type":"GENERIC","status":"DONE","created_at":"2026-11-06T17:04:52Z","content":"C
+reated At: 2026-11-06T22:34:52+05:30\nCompleted At: 2026-11-06T22:34:52+05:30\nShowing lines 1-50 of 929\n1: from 
+flask import Flask, request, jsonify, render_template, send_from_directory, Response, stream_with_context, session, 
+send_file\r\n2: from flask_cors import CORS\r\n3: import os\r\n4: import time\r\n5: import json\r\n6: from typing 
+import List, Dict, Any\r\n7: from dotenv import load_dotenv\r\n8: \r\n9: from parser import 
+parse_pasted_comments\r\n10: from analyzer import analyze_comments\r\n11: from excel import generate_excel, 
+generate_excel_in_memory\r\n12: from legacy.historical import get_historical_email_leads, 
+get_all_historical_leads\r\n13: import legacy.leads_db as leads_db\r\n14: from legacy.profile_extractor import 
+(\r\n15:     extract_linkedin_profile,\r\n16:     extract_linkedin_profile_generator,\r\n17:     
+check_linkedin_session,\r\n18:     launch_interactive_linkedin_login,\r\n19:     logout_linkedin_session\r\n20: 
+)\r\n21: from profile_optimizer import optimize_linkedin_profile\r\n22: from legacy.gtm_engine import (\r\n23:     
+get_or_create_user,\r\n24:     save_user_gtm_context,\r\n25:     rewrite_gtm_context_field\r\n26: )\r\n27: from 
+app.services.gtm_pipeline_service import (\r\n28:     get_user_gtm_context,\r\n29:     start_gtm_research_job,\r\n30:  
+   get_user_opportunities,\r\n31:     reconcile_stale_research_jobs\r\n32: )\r\n33: from app.services.credit_service 
+import InsufficientCreditsError\r\n34: from app.models.all_models import ResearchJobs\r\n35: \r\n36: from config 
+import Config\r\n37: from app.security.csrf import init_csrf\r\n38: from app.security.limiter import init_limiter, 
+limiter\r\n39: from app.routes.auth import auth_bp\r\n40: from app.routes.onboarding import onboarding_bp\r\n41: from 
+app.routes.pages import pages_bp\r\n42: from app.routes.admin import admin_bp\r\n43: from app.routes.bulk_email import 
+bulk_email_bp\r\n44: from app.database import init_db, db_session\r\n45: \r\n46: load_dotenv()\r\n47: \r\n48: app = 
+Flask(__name__)\r\n49: app.config.from_object(Config)\r\n50: \r"}
+  {"step_index":1741,"source":"MODEL","type":"PLANNER_RESPONSE","status":"DONE","created_at":"2026-11-06T17:04:52Z","in
+put_tokens":2766,"cache_read_tokens":231156,"output_tokens":51,"tool_calls":[{"name":"read_file","args":{"EndLine":"50"
+,"Path":"\"d:\\\\Programming\\\\FameWebs_Internship\\\\linkedin_lead_generator\\\\linkedin_extension\\\\manifest.json\"
+","StartLine":"1"}}]}
+
+

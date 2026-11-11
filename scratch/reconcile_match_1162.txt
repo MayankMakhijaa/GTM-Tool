@@ -1,0 +1,153 @@
+Created At: 2026-11-10T15:33:50+05:30
+Completed At: 2026-11-10T15:33:50+05:30
+Showing lines 101-250 of 604
+101: 1612:                 job.heartbeat_at = datetime.utcnow()
+102: 1613:                 db_session.commit()
+103: 1614: 
+104: 1615:                 logger.info(f"[GTM Worker] Running Claude discovery for deficit of {deficit} leads (user {user_id})")
+105: 1616:                 claude_res = discover_candidates_with_claude(
+106: 1617:                     structured_icp=search_plan,
+107: 1618:                     user_company=context,
+108: 1619:                     count_needed=min(deficit * 2, 25),
+109: 1620:                     user_id=user_id,
+110: 1621:                     job_id=job_id
+111: 1622:                 )
+112: 1623:                 c_status = claude_res.get("status", "FAILED")
+113: 1624:                 provider_outcomes["CLAUDE"] = c_status
+114: 1625: 
+115: 1626:                 raw_discovered = claude_res.get("candidates", [])
+116: 1627:                 valid_candidates = []
+117: 1628: 
+118: 1629:                 if c_status == "SUCCESS" and raw_discovered:
+119: 1630:                     # Validate sources and evidence with SSRF protections
+120: 1631:                     for raw_c in raw_discovered:
+121: 1632:                         classification, sanitized_c, rej_reason = validate_and_classify_candidate(raw_c)
+122: 1633:                         if classification == "VERIFIED":
+123: 1634:                             valid_candidates.append(sanitized_c)
+124: 1635:                         else:
+125: 1636:                             logger.info(f"[GTM Worker] Rejected candidate: {rej_reason}")
+126: 1637: 
+127: 1638:                 if valid_candidates:
+128: 1639:                     discovery_mode = "CLAUDE_DISCOVERY"
+129: 1640:                     logger.info(f"[GTM Worker] Validated {len(valid_candidates)} candidates via Claude discovery.")
+130: 1641: 
+131: 1642:                     # Evidence-based Qualification & Scoring via Gemini
+132: 1643:                     job.progress = {"step": "QUALIFYING", "pct": 80, "message": "Evaluating prospects against ICP criteria with Gemini", "provider_outcomes": provider_outcomes}
+133: 1644:                     job.heartbeat_at = datetime.utcnow()
+134: 1645:                     db_session.commit()
+135: 1646: 
+136: 1647:                     qualified_discovered = qualify_candidates_with_gemini(valid_candidates, context, {})
+137: 1648:                     qualified_discovered_high = [c for c in qualified_discovered if c.get("fit_score", 0) >= 70]
+138: 1649: 
+139: 1650:                     # Persist up to remaining deficit
+140: ===
+141: Created At: 2026-11-09T13:45:14+05:30
+142: Completed At: 2026-11-09T13:45:14+05:30
+143: Showing lines 1730-1780 of 2322
+144: 1730:                 # Check if any leads were durably persisted before crash
+145: 1731:                 durable_on_err = db_session.query(UsersProfiles).filter(
+146: 1732:                     UsersProfiles.user_id == user_id,
+147: 1733:                     UsersProfiles.research_job_id == job_id,
+148: 1734:                     UsersProfiles.lead_status == LeadStatus.QUALIFIED.value,
+149: 1735:                     UsersProfiles.match_score >= 70
+150: 1736:                 ).count()
+151: 1737:                 billable_on_err = min(durable_on_err, target_leads)
+152: 1738:                 _safe_settle_or_release(billable_on_err, f"Pipeline exception: {err_msg}")
+153: 1739: 
+154: 1740:                 fail_job = db_session.query(ResearchJobs).filter_by(id=job_id).first()
+155: 1741:                 if fail_job:
+156: 1742:                     fail_job.status = ResearchJobStatus.FAILED.value
+157: 1743:                     fail_job.error_message = err_msg
+158: 1744:                     fail_job.results_count = billable_on_err
+159: 1745:                     fail_job.progress = {
+160: 1746:                         "step": "FAILED",
+161: 1747:                         "pct": 100,
+162: 1748:                         "message": f"Pipeline failure: {err_msg}",
+163: 1749:                         "provider_outcomes": provider_outcomes if 'provider_outcomes' in locals() else {}
+164: 1750:                     }
+165: 1751:                     fail_job.completed_at = datetime.utcnow()
+166: 1752:                     fail_job.heartbeat_at = datetime.utcnow()
+167: 1753:                     db_session.commit()
+168: 1754:             except Exception as commit_err:
+169: 1755:                 logger.error(f"[GTM Worker] Failed to persist failure status for job {job_id}: {commit_err}")
+170: 1756:                 db_session.rollback()
+171: 1757:         finally:
+172: 1758:             db_session.remove()
+173: 1759: 
+174: 1760: 
+175: 1761: # ====================================================================
+176: 1762: # STALE JOB RECONCILIATION & RECOVERY
+177: 1763: # ====================================================================
+178: 1764: 
+179: 1765: DEFAULT_STALE_THRESHOLD_MINUTES = 15
+180: 1766: 
+181: 1767: 
+182: 1768: def reconcile_stale_research_jobs(
+183: 1769:     max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,
+184: 1770:     session: Optional[Any] = None
+185: 1771: ) -> Dict[str, Any]:
+186: 1772:     """
+187: 1773:     Detects and safely reconciles abandoned/stale QUEUED or RUNNING research jobs.
+188: 1774:     Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to guarantee
+189: 1775:     safe concurrent execution across multiple worker/app processes.
+190: 1776: 
+191: 1777:     Reconciliation rules:
+192: 1778:     1. Selects candidate jobs in QUEUED or RUNNING whose heartbeat_at (or created_at if heartbeat_at is NULL)
+193: 1779:        is strictly older than max_stale_minutes.
+194: 1780:     2. Re-validates job status and timestamp under exclusive lock.
+195: ===
+196: Created At: 2026-11-09T13:45:18+05:30
+197: Completed At: 2026-11-09T13:45:18+05:30
+198: Showing lines 1800-1860 of 2322
+199: 1800:         "details": []
+200: 1801:     }
+201: 1802: 
+202: 1803:     # Query candidate job IDs first
+203: 1804:     candidate_ids = [
+204: 1805:         row[0] for row in s.query(ResearchJobs.id).filter(
+205: 1806:             ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value]),
+206: 1807:             or_(
+207: 1808:                 and_(ResearchJobs.heartbeat_at.isnot(None), ResearchJobs.heartbeat_at < cutoff),
+208: 1809:                 and_(ResearchJobs.heartbeat_at.is_(None), ResearchJobs.created_at < cutoff)
+209: 1810:             )
+210: 1811:         ).all()
+211: 1812:     ]
+212: 1813: 
+213: 1814:     stats["examined"] = len(candidate_ids)
+214: 1815:     if not candidate_ids:
+215: 1816:         return stats
+216: 1817: 
+217: 1818:     for candidate_id in candidate_ids:
+218: 1819:         try:
+219: 1820:             # Acquire row lock with skip_locked=True for safe concurrency
+220: 1821:             job = s.query(ResearchJobs).filter_by(id=candidate_id).with_for_update(skip_locked=True).first()
+221: 1822:             if not job:
+222: 1823:                 # Locked by another process or no longer exists
+223: 1824:                 stats["skipped"] += 1
+224: 1825:                 continue
+225: 1826: 
+226: 1827:             # Re-verify staleness and status under lock
+227: 1828:             if job.status not in (ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value):
+228: 1829:                 stats["skipped"] += 1
+229: 1830:                 continue
+230: 1831: 
+231: 1832:             effective_ts = job.heartbeat_at or job.created_at
+232: 1833:             if effective_ts and effective_ts >= cutoff:
+233: 1834:                 stats["skipped"] += 1
+234: 1835:                 continue
+235: 1836: 
+236: 1837:             job_id = job.id
+237: 1838:             user_id = job.user_id
+238: 1839:             target_leads = (job.budget or {}).get("target_leads", 25)
+239: 1840: 
+240: 1841:             # Query durable billable results created by this exact job
+241: 1842:             durable_count = s.query(UsersProfiles).filter(
+242: 1843:                 UsersProfiles.user_id == user_id,
+243: 1844:                 UsersProfiles.research_job_id == job_id,
+244: 1845:                 UsersProfiles.lead_status == LeadStatus.QUALIFIED.value,
+245: 1846:                 UsersProfiles.match_score >= 70
+246: 1847:             ).count()
+247: 1848: 
+248: 1849:             billable_count = min(durable_count, target_leads)
+249: 1850: 
+250: 1851:             # Locate reservation

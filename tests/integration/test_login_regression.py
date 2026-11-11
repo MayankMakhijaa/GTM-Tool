@@ -7,9 +7,19 @@ from app.database import db_session
 
 @pytest.fixture
 def client(flask_app):
+    orig_testing = flask_app.config.get('TESTING')
+    orig_csrf = flask_app.config.get('WTF_CSRF_ENABLED')
+    orig_ratelimit = flask_app.config.get('RATELIMIT_ENABLED')
+
     flask_app.config['TESTING'] = True
+    flask_app.config['WTF_CSRF_ENABLED'] = True
     flask_app.config['RATELIMIT_ENABLED'] = False
-    return flask_app.test_client()
+    with flask_app.test_client() as test_client:
+        yield test_client
+
+    flask_app.config['TESTING'] = orig_testing
+    flask_app.config['WTF_CSRF_ENABLED'] = orig_csrf
+    flask_app.config['RATELIMIT_ENABLED'] = orig_ratelimit
 
 @pytest.fixture
 def existing_user():
@@ -114,3 +124,83 @@ def test_csrf_token_preserved_after_login(client, existing_user):
     res_logout = client.post('/api/auth/logout', headers={'X-CSRFToken': csrf_token})
     assert res_logout.status_code == 200
     assert res_logout.get_json()["success"] is True
+
+
+# ====================================================================
+# TICKET 3G.1: CSRF EXPIRATION & CONFIGURATION REGRESSION TESTS
+# ====================================================================
+
+def test_csrf_time_limit_configuration_is_finite_and_24h(flask_app):
+    """
+    Ticket 3G.1 Requirement 6:
+    Verify that WTF_CSRF_TIME_LIMIT is explicitly set to 86400 (24 hours),
+    finite, and matches the permanent session lifetime.
+    """
+    assert flask_app.config.get('WTF_CSRF_TIME_LIMIT') == 86400
+    assert flask_app.config.get('PERMANENT_SESSION_LIFETIME') == 86400
+
+
+def test_login_without_csrf_token_is_rejected_with_csrf_error(client, existing_user):
+    """
+    Ticket 3G.1 Requirement 5:
+    Verify request without CSRF token is rejected with status 400 and structured CSRF_ERROR.
+    """
+    res = client.post('/api/auth/login', json={
+        "identifier": existing_user["email"],
+        "password": existing_user["password"]
+    })
+    assert res.status_code == 400
+    data = res.get_json()
+    assert data["success"] is False
+    assert data["error"] == "CSRF_ERROR"
+    assert "The CSRF token is missing." in data["message"]
+
+
+def test_login_with_expired_csrf_token_returns_structured_csrf_error(client, existing_user, flask_app):
+    """
+    Ticket 3G.1 Requirements 1, 2, 5:
+    Simulate an expired token by setting WTF_CSRF_TIME_LIMIT to a 1-second window.
+    Verify that Flask-WTF catches expiration and returns 400 {"success": False, "error": "CSRF_ERROR", "message": "The CSRF token has expired."}.
+    """
+    import time
+
+    # Initialize a valid session and get current token
+    csrf_token = get_csrf_token(client)
+    assert csrf_token
+
+    # Temporarily set time limit to -1 to simulate token expiration
+    old_time_limit = flask_app.config.get('WTF_CSRF_TIME_LIMIT')
+    try:
+        flask_app.config['WTF_CSRF_TIME_LIMIT'] = -1
+
+        res_expired = client.post('/api/auth/login', json={
+            "identifier": existing_user["email"],
+            "password": existing_user["password"]
+        }, headers={'X-CSRFToken': csrf_token})
+
+        assert res_expired.status_code == 400
+        data = res_expired.get_json()
+        assert data["success"] is False
+        assert data["error"] == "CSRF_ERROR"
+        assert data["message"] == "The CSRF token has expired."
+    finally:
+        flask_app.config['WTF_CSRF_TIME_LIMIT'] = old_time_limit
+
+
+def test_invalid_credentials_not_confused_with_csrf_error(client, existing_user):
+    """
+    Ticket 3G.1 Requirement 4:
+    Verify normal invalid credential handling remains HTTP 401 INVALID_CREDENTIALS.
+    """
+    csrf_token = get_csrf_token(client)
+    res = client.post('/api/auth/login', json={
+        "identifier": existing_user["email"],
+        "password": "IncorrectPassword123!"
+    }, headers={'X-CSRFToken': csrf_token})
+
+    assert res.status_code == 401
+    data = res.get_json()
+    assert data["success"] is False
+    assert data["error"] == "INVALID_CREDENTIALS"
+    assert data["message"] == "Invalid credentials"
+

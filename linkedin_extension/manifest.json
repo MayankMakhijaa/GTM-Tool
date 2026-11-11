@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "FameWeb LinkedIn Integrator",
+  "version": "1.0.3",
+  "description": "Locally connects FameWeb to your active LinkedIn session securely without sharing passwords or raw cookies.",
+  "permissions": [
+    "cookies",
+    "tabs",
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "http://localhost:5000/*",
+    "http://127.0.0.1:5000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.linkedin.com/*"
+      ],
+      "js": [
+        "content_linkedin.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "http://localhost:5000/*",
+        "http://127.0.0.1:5000/*"
+      ],
+      "js": [
+        "content_fameweb.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "FameWeb LinkedIn Integrator"
+  }
+}
+

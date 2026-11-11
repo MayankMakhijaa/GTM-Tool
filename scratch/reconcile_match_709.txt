@@ -1,0 +1,426 @@
+Created At: 2026-11-09T22:17:26+05:30
+Completed At: 2026-11-09T22:17:26+05:30
+Command exited with code 0.
+
+Command output:
+        finally:
+
+            db_session.remove()
+
+
+
+
+
+# ====================================================================
+
+# STALE JOB RECONCILIATION & RECOVERY
+
+# ====================================================================
+
+
+
+DEFAULT_STALE_THRESHOLD_MINUTES = 15
+
+
+
+
+
+def reconcile_stale_research_jobs(
+
+    max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,
+
+    session: Optional[Any] = None
+
+) -> Dict[str, Any]:
+
+    """
+
+    Detects and safely reconciles abandoned/stale QUEUED or RUNNING research jobs.
+
+    Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to guarantee
+
+    safe concurrent execution across multiple worker/app processes.
+
+
+
+    Reconciliation rules:
+
+    1. Selects candidate jobs in QUEUED or RUNNING whose heartbeat_at (or created_at if heartbeat_at is NULL)
+
+       is strictly older than max_stale_minutes.
+
+    2. Re-validates job status and timestamp under exclusive lock.
+
+    3. Counts durably persisted, qualified leads attributable to that exact job.
+
+    4. If reservation is RESERVED:
+
+       - If durable count > 0, settles Q leads using captured pricing snapshot via stable key gtm_job_settle_{job_id}.
+
+       - If durable count == 0, releases reservation via stable key gtm_job_rel_{job_id}.
+
+    5. If reservation is already SETTLED or RELEASED:
+
+       - Preserves the existing settlement/release outcome without duplicate charge or conflicting mutation.
+
+    6. If reservation is missing/unexpected:
+
+       - Records a clear diagnostic and marks the job failed without fabricating ledger entries.
+
+    7. Sets terminal status FAILED with truthful diagnostic explanation.
+
+    """
+
+    s = session or db_session
+
+    now = datetime.utcnow()
+
+    cutoff = now - timedelta(minutes=max_stale_minutes)
+
+
+
+    stats = {
+
+        "examined": 0,
+
+        "recovered": 0,
+
+        "skipped": 0,
+
+        "failed_to_reconcile": 0,
+
+        "details": []
+
+    }
+
+
+
+    # Query candidate job IDs first
+
+    candidate_ids = [
+
+        row[0] for row in s.query(ResearchJobs.id).filter(
+
+            ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value]),
+
+            or_(
+
+                and_(ResearchJobs.heartbeat_at.isnot(None), ResearchJobs.heartbeat_at < cutoff),
+
+                and_(ResearchJobs.heartbeat_at.is_(None), ResearchJobs.created_at < cutoff)
+
+            )
+
+        ).all()
+
+    ]
+
+
+
+    stats["examined"] = len(candidate_ids)
+
+    if not candidate_ids:
+
+        return stats
+
+
+
+    for candidate_id in candidate_ids:
+
+        try:
+
+            # Acquire row lock with skip_locked=True for safe concurrency
+
+            job = s.query(ResearchJobs).filter_by(id=candidate_id).with_for_update(skip_locked=True).first()
+
+            if not job:
+
+                # Locked by another process or no longer exists
+
+                stats["skipped"] += 1
+
+                continue
+
+
+
+            # Re-verify staleness and status under lock
+
+            if job.status not in (ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value):
+
+                stats["skipped"] += 1
+
+                continue
+
+
+
+            effective_ts = job.heartbeat_at or job.created_at
+
+            if effective_ts and effective_ts >= cutoff:
+
+                stats["skipped"] += 1
+
+                continue
+
+
+
+            job_id = job.id
+
+            user_id = job.user_id
+
+            target_leads = (job.budget or {}).get("target_leads", 25)
+
+
+
+            # Query durable billable results created by this exact job
+
+            durable_count = s.query(UsersProfiles).filter(
+
+                UsersProfiles.user_id == user_id,
+
+                UsersProfiles.research_job_id == job_id,
+
+                UsersProfiles.lead_status == LeadStatus.QUALIFIED.value,
+
+                UsersProfiles.match_score >= 70
+
+            ).count()
+
+
+
+            billable_count = min(durable_count, target_leads)
+
+
+
+            # Locate reservation
+
+            reservation_id = (job.budget or {}).get("reservation_id")
+
+            res_rec = None
+
+            if reservation_id:
+
+                res_rec = s.query(CreditReservation).filter_by(id=reservation_id).first()
+
+            if not res_rec:
+
+                res_rec = s.query(CreditReservation).filter_by(job_id=job_id).first()
+
+
+
+            credit_action = "NONE"
+
+            if res_rec:
+
+                if res_rec.status == ReservationStatus.RESERVED.value:
+
+                    if billable_count > 0:
+
+                        CreditService.settle_reservation(
+
+                            reservation_id=res_rec.id,
+
+                            actual_quantity=billable_count,
+
+                            idempotency_key=f"gtm_job_settle_{job_id}",
+
+                            reason=f"Recovery: Settled {billable_count} durable qualified lead(s) for stale job #{job_id}",
+
+                            session=s
+
+                        )
+
+                        credit_action = f"SETTLED_{billable_count}"
+
+                    else:
+
+                        CreditService.release_reservation(
+
+                            reservation_id=res_rec.id,
+
+                            idempotency_key=f"gtm_job_rel_{job_id}",
+
+                            reason=f"Recovery: Released uncharged reserved credits for stale job #{job_id}",
+
+                            session=s
+
+                        )
+
+                        credit_action = "RELEASED"
+
+                elif res_rec.status == ReservationStatus.SETTLED.value:
+
+                    credit_action = "PRESERVED_SETTLED"
+
+                elif res_rec.status == ReservationStatus.RELEASED.value:
+
+                    credit_action = "PRESERVED_RELEASED"
+
+                else:
+
+                    credit_action = f"UNEXPECTED_STATUS_{res_rec.status}"
+
+            else:
+
+                credit_action = "NO_RESERVATION_FOUND"
+
+
+
+            # Transition job to terminal FAILED status
+
+            job.status = ResearchJobStatus.FAILED.value
+
+            job.results_count = billable_count
+
+            job.completed_at = datetime.utcnow()
+
+            job.heartbeat_at = datetime.utcnow()
+
+
+
+            if credit_action.startswith("SETTLED"):
+
+                msg = f"Job interrupted: stale worker heartbeat; recovery settled {billable_count} durable qualified lead(s) and released unused credits."
+
+            elif credit_action == "RELEASED":
+
+                msg = "Job interrupted: stale worker heartbeat; recovery released reserved credits (0 qualified leads persisted)."
+
+            elif credit_action == "PRESERVED_SETTLED":
+
+                msg = f"Job interrupted: recovery reconciled terminal state; previous settlement of {billable_count} lead(s) preserved."
+
+            elif credit_action == "PRESERVED_RELEASED":
+
+                msg = "Job interrupted: recovery reconciled terminal state; previous release preserved."
+
+            else:
+
+                msg = f"Job interrupted: stale worker heartbeat; recovery completed with reservation state '{credit_action}'."
+
+
+
+            job.error_message = msg
+
+            job.progress = {
+
+                "step": "FAILED",
+
+                "pct": 100,
+
+                "message": msg,
+
+                "recovery": {
+
+                    "reconciled_at": now.isoformat(),
+
+                    "durable_leads": billable_count,
+
+                    "credit_action": credit_action
+
+                }
+
+            }
+
+            s.commit()
+
+
+
+            stats["recovered"] += 1
+
+            stats["details"].append({
+
+                "job_id": job_id,
+
+                "user_id": user_id,
+
+                "billable_count": billable_count,
+
+                "credit_action": credit_action
+
+            })
+
+            logger.info(f"[GTM Recovery] Successfully reconciled stale job #{job_id}: {credit_action}, billable_count={billable_count}")
+
+
+
+        except Exception as e:
+
+            s.rollback()
+
+            stats["failed_to_reconcile"] += 1
+
+            logger.error(f"[GTM Recovery] Failed to reconcile candidate job #{candidate_id}: {e}", exc_info=True)
+
+
+
+    return stats
+
+
+
+
+
+def start_gtm_research_job(
+
+    app,
+
+    user_id: int,
+
+    target_leads: int = 25,
+
+    persona_filter: Optional[str] = None
+
+) -> Dict[str, Any]:
+
+    """
+
+    Public entry point to initiate an asynchronous GTM research job.
+
+    Enforces active job singularity, validates required context and credit balances,
+
+    and atomically creates the research job with a durable credit reservation.
+
+    """
+
+    if not isinstance(target_leads, int) or target_leads < 5 or target_leads > 50:
+
+        raise ValueError("target_leads must be an integer between 5 and 50.")
+
+
+
+    # Check for active existing job
+
+    existing = db_session.query(ResearchJobs).filter(
+
+        ResearchJobs.user_id == user_id,
+
+        ResearchJobs.status.in_([ResearchJobStatus.QUEUED.value, ResearchJobStatus.RUNNING.value])
+
+    ).first()
+
+
+
+    if existing:
+
+        return {
+
+            "job_id": existing.id,
+
+            "status": existing.status,
+
+            "is_existing": True,
+
+            "message": "A research run is already in progress."
+
+        }
+
+
+
+    # Verify context
+
+    context = get_user_gtm_context(user_id)
+
+    if not context.get("onboarding_completed"):
+
+        raise ValueError("Onboarding not completed. Please complete company and ICP setup first.")
+
+

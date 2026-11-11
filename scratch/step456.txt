@@ -1,0 +1,78 @@
+Created At: 2026-11-05T00:02:36+05:30
+Completed At: 2026-11-05T00:02:37+05:30
+Command exited with code 0.
+
+Command output:
+
+> app\services\gtm_pipeline_service.py:1048:def find_existing_global_candidates(
+  app\services\gtm_pipeline_service.py:1049:    user_id: int,
+  app\services\gtm_pipeline_service.py:1050:    user_context: Dict[str, Any],
+  app\services\gtm_pipeline_service.py:1051:    limit: int = 25
+  app\services\gtm_pipeline_service.py:1052:) -> List[Dict[str, Any]]:
+  app\services\gtm_pipeline_service.py:1053:    """
+  app\services\gtm_pipeline_service.py:1054:    Finds existing GlobalProfiles matching user's ICP that do NOT already 
+have
+  app\services\gtm_pipeline_service.py:1055:    an association in UsersProfiles for this user.
+  app\services\gtm_pipeline_service.py:1056:    Adheres to:
+  app\services\gtm_pipeline_service.py:1057:    - Reuse existing global profile records without creating duplicates.
+  app\services\gtm_pipeline_service.py:1058:    - Exclude (user_id, global_id) associations that already exist.
+  app\services\gtm_pipeline_service.py:1059:    - Query based on ICP target roles, keywords, and industry.
+  app\services\gtm_pipeline_service.py:1060:    """
+  app\services\gtm_pipeline_service.py:1061:    if limit <= 0:
+  app\services\gtm_pipeline_service.py:1062:        return []
+  app\services\gtm_pipeline_service.py:1063:
+  app\services\gtm_pipeline_service.py:1064:    # Get all global_ids already associated with this user
+  app\services\gtm_pipeline_service.py:1065:    existing_assoc_ids = [
+  app\services\gtm_pipeline_service.py:1066:        row[0] for row in 
+db_session.query(UsersProfiles.global_id).filter_by(user_id=user_id).all()
+  app\services\gtm_pipeline_service.py:1067:    ]
+  app\services\gtm_pipeline_service.py:1068:
+> app\services\gtm_pipeline_service.py:1194:def qualify_candidates_with_gemini(
+  app\services\gtm_pipeline_service.py:1195:    candidates: List[Dict[str, Any]],
+  app\services\gtm_pipeline_service.py:1196:    user_context: Dict[str, Any],
+  app\services\gtm_pipeline_service.py:1197:    web_enrichment_cache: Dict[str, Any]
+  app\services\gtm_pipeline_service.py:1198:) -> List[Dict[str, Any]]:
+  app\services\gtm_pipeline_service.py:1199:    """
+  app\services\gtm_pipeline_service.py:1200:    Evaluates discovered prospects against the user's saved ICP using 
+concrete evidence.
+  app\services\gtm_pipeline_service.py:1201:    Applies deterministic exclusion filters first, then calls Gemini for 
+evidence-based fit scoring.
+  app\services\gtm_pipeline_service.py:1202:    """
+  app\services\gtm_pipeline_service.py:1203:    if not candidates:
+  app\services\gtm_pipeline_service.py:1204:        return []
+  app\services\gtm_pipeline_service.py:1205:
+  app\services\gtm_pipeline_service.py:1206:    offer = user_context.get("offer", "")
+  app\services\gtm_pipeline_service.py:1207:    target_icp = user_context.get("target_icp", "")
+  app\services\gtm_pipeline_service.py:1208:    icp = user_context.get("icp_raw", {})
+  app\services\gtm_pipeline_service.py:1209:    user_id = user_context.get("user_id")
+  app\services\gtm_pipeline_service.py:1210:    job_id = user_context.get("job_id")
+  app\services\gtm_pipeline_service.py:1211:
+  app\services\gtm_pipeline_service.py:1212:    exclusions_str = icp.get("exclusions") or ""
+  app\services\gtm_pipeline_service.py:1213:    raw_exclusions = [e.strip().lower() for e in re.split(r"[,;|\n]", 
+exclusions_str) if e.strip()]
+  app\services\gtm_pipeline_service.py:1214:    default_negatives = ["intern", "student", "freelance", "contractor"]
+> app\services\gtm_pipeline_service.py:1343:def persist_qualified_opportunities(
+  app\services\gtm_pipeline_service.py:1344:    user_id: int,
+  app\services\gtm_pipeline_service.py:1345:    job_id: Optional[int],
+  app\services\gtm_pipeline_service.py:1346:    qualified_candidates: List[Dict[str, Any]],
+  app\services\gtm_pipeline_service.py:1347:    icp_version: int = 1
+  app\services\gtm_pipeline_service.py:1348:) -> int:
+  app\services\gtm_pipeline_service.py:1349:    """
+  app\services\gtm_pipeline_service.py:1350:    Persists qualified prospects to PostgreSQL:
+  app\services\gtm_pipeline_service.py:1351:    1. Upserts into GlobalProfiles (deduplicated by linkedin_id).
+  app\services\gtm_pipeline_service.py:1352:    2. Upserts into UsersProfiles (tenant-isolated for user_id).
+  app\services\gtm_pipeline_service.py:1353:    """
+  app\services\gtm_pipeline_service.py:1354:    saved_count = 0
+  app\services\gtm_pipeline_service.py:1355:    now = datetime.utcnow()
+  app\services\gtm_pipeline_service.py:1356:
+  app\services\gtm_pipeline_service.py:1357:    valid_job = 
+db_session.query(ResearchJobs).filter_by(id=job_id).first() if job_id else None
+  app\services\gtm_pipeline_service.py:1358:    actual_job_id = valid_job.id if valid_job else None
+  app\services\gtm_pipeline_service.py:1359:
+  app\services\gtm_pipeline_service.py:1360:    for c in qualified_candidates:
+  app\services\gtm_pipeline_service.py:1361:        norm_urn = normalize_linkedin_identifier(c.get("profile_url"), 
+c.get("urn_id"))
+  app\services\gtm_pipeline_service.py:1362:        if not norm_urn:
+  app\services\gtm_pipeline_service.py:1363:            continue
+
+

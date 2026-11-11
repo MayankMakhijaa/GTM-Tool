@@ -29,29 +29,29 @@
       <div class="lg:col-span-4 flex flex-col gap-space-lg">
 
         <!-- PROFILE SUMMARY -->
-        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md" data-saved-profile-url="{{ linkedin_profile.profile_url if linkedin_profile and linkedin_profile.profile_url else '' }}">
           <div class="flex items-start gap-space-md">
             <div class="relative shrink-0">
               {% set p_img = (linkedin_profile.profile_data.get('profile_photo_url') if linkedin_profile and linkedin_profile.profile_data else None) or '/static/img/default-avatar.png' %}
-              <img alt="Profile Photo" class="w-20 h-20 rounded-full object-cover shadow-sm ring-4 ring-surface-container-low" src="{{ p_img }}" onerror="this.src='/static/img/default-avatar.png'"/>
+              <img id="profile-summary-photo" alt="Profile Photo" class="w-20 h-20 rounded-full object-cover shadow-sm ring-4 ring-surface-container-low" src="{{ p_img }}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='/static/img/default-avatar.png';"/>
               <span class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-tertiary flex items-center justify-center text-on-tertiary shadow-sm">
                 <span class="material-symbols-outlined text-[12px]">check</span>
               </span>
             </div>
             <div class="flex flex-col min-w-0">
               <div class="flex items-center gap-space-xs">
-                <h2 class="font-headline-md text-headline-md text-on-surface truncate">{{ linkedin_profile.name if linkedin_profile else "Not Connected" }}</h2>
+                <h2 id="profile-summary-name" class="font-headline-md text-headline-md text-on-surface truncate">{{ linkedin_profile.name if linkedin_profile else "Not Connected" }}</h2>
               </div>
-              <span class="font-label-md text-label-md text-primary font-semibold truncate">{{ linkedin_profile.current_position if linkedin_profile and linkedin_profile.current_position else (linkedin_profile.headline if linkedin_profile else "No position") }}</span>
+              <span id="profile-summary-position" class="font-label-md text-label-md text-primary font-semibold truncate">{{ linkedin_profile.current_position if linkedin_profile and linkedin_profile.current_position else (linkedin_profile.headline if linkedin_profile else "No position") }}</span>
               <div class="flex items-center gap-1 text-on-surface-variant mt-1">
                 <span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
-                <span class="font-body-sm text-body-sm">{{ linkedin_profile.location if linkedin_profile and linkedin_profile.location else "Location unknown" }}</span>
+                <span id="profile-summary-location" class="font-body-sm text-body-sm">{{ linkedin_profile.location if linkedin_profile and linkedin_profile.location else "Location unknown" }}</span>
               </div>
             </div>
           </div>
           <div class="bg-surface-container-low p-space-md rounded-lg flex flex-col gap-space-xs">
             <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Current Headline</span>
-            <p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+            <p id="profile-summary-headline" class="font-body-sm text-body-sm text-on-surface leading-relaxed">
               {{ linkedin_profile.headline if linkedin_profile else "No headline available." }}
             </p>
           </div>
@@ -153,18 +153,37 @@
           {% endif %}
         </div>
 
-        <!-- ACTIONS -->
+        <!-- ACTIONS & IMPORT -->
         <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div class="flex items-center justify-between pb-2 border-b border-border-default">
+            <div class="flex items-center gap-1.5">
+              <span id="ext-status-icon" class="material-symbols-outlined text-[18px] text-outline">extension</span>
+              <span id="ext-status-text" class="text-xs font-medium text-outline">Extension detecting...</span>
+            </div>
+            <button id="btn-recheck-ext" type="button" class="text-xs text-primary hover:underline flex items-center gap-0.5">
+              <span class="material-symbols-outlined text-[14px]">refresh</span> Check
+            </button>
+          </div>
+
           <div class="flex flex-col gap-space-sm">
+            <button class="w-full flex items-center justify-center gap-space-sm px-space-md py-2.5 bg-[#0a66c2] hover:bg-[#004182] text-white rounded-lg font-label-md text-label-md transition-all shadow-sm active:scale-[0.98] cursor-pointer" id="btn-import-profile">
+              <span class="material-symbols-outlined text-[18px]">download_for_offline</span>
+              <span id="import-btn-text">Import My LinkedIn Profile</span>
+            </button>
+
+            <!-- Import feedback container -->
+            <div id="import-feedback-box" class="hidden p-3 rounded-lg text-xs flex flex-col gap-1.5 transition-all"></div>
+
             <button class="w-full flex items-center justify-center gap-space-sm px-space-md py-3 bg-primary-container text-on-primary rounded-lg font-label-md text-label-md hover:bg-secondary transition-all shadow-sm active:scale-[0.98]" id="generate-suggestions-btn">
               <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
               <span>{{ "Regenerate Analysis" if opt else "Generate Analysis" }}</span>
             </button>
           </div>
+
           <div class="flex items-start gap-space-sm p-space-sm bg-surface-container-low rounded-lg">
             <span class="material-symbols-outlined text-[18px] text-outline shrink-0 mt-0.5">info</span>
             <p class="font-body-sm text-body-sm text-on-surface-variant leading-snug">
-              Fameweb analyzes your copy against high-converting executive profiles in your ICP. No automated changes are pushed to LinkedIn.
+              Click <strong>Import My LinkedIn Profile</strong> with an open LinkedIn tab to automatically find your profile, extract your information, and optimize with Gemini.
             </p>
           </div>
         </div>

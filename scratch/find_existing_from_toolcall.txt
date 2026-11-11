@@ -1,0 +1,17 @@
+python -c "
+import glob, json
+
+for fpath in glob.glob(r'C:\Users\mdkaa\.gemini\antigravity\brain\*\.system_generated\logs\transcript_full.jsonl'):
+    with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
+        for idx, line in enumerate(f):
+            if 'def find_existing_global_candidates' in line:
+                data = json.loads(line)
+                tcs = data.get('tool_calls') or []
+                for tc in tcs:
+                    args = tc.get('arguments') or tc.get('args') or {}
+                    for v in args.values():
+                        if isinstance(v, str) and 'def find_existing_global_candidates' in v:
+                            print('Found tool call edit in', fpath, 'at line', idx)
+                            with open(r'scratch\find_existing_from_toolcall.txt', 'w', encoding='utf-8') as out:
+                                out.write(v)
+"

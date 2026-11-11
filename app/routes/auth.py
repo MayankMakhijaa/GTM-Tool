@@ -83,14 +83,17 @@ def login():
         }), 403
         
     set_user_session(user.user_id)
+    redirect_url = "/admin" if user.role in ("ADMIN", "SUPER_ADMIN") else "/dashboard"
     return jsonify({
         "success": True,
         "message": "Login successful",
+        "redirect": redirect_url,
         "user": {
             "user_id": user.user_id,
             "name": user.name,
             "email_id": user.email_id,
             "phone_no": user.phone_no,
+            "role": user.role,
             "onboarding_step": user.onboarding_step,
             "optimization_status": user.optimization_status,
             "is_active": user.is_active
@@ -122,7 +125,7 @@ def verify_otp():
     return jsonify({
         "success": True,
         "message": message,
-        "redirect": "/connect-linkedin",
+        "redirect": "/onboarding/integrations",
         "user": {
             "user_id": user.user_id,
             "name": user.name,
@@ -188,6 +191,7 @@ def get_current_user():
             "name": user.name,
             "email_id": user.email_id,
             "phone_no": user.phone_no,
+            "role": user.role,
             "onboarding_step": user.onboarding_step,
             "optimization_status": user.optimization_status,
             "is_active": user.is_active

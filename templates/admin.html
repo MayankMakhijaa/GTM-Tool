@@ -1,0 +1,913 @@
+{% extends "base.html" %}
+{% block title %}Super Admin | Fameweb{% endblock %}
+
+{% block content %}
+<div class="flex flex-col w-full p-space-xl gap-space-xl">
+  <!-- Top Header & Breadcrumb -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+    <div class="flex flex-col">
+      <div class="flex items-center gap-space-xs font-code-sm text-code-sm text-primary uppercase tracking-wider mb-1">
+        <span class="material-symbols-outlined text-[16px]">security</span>
+        <span>SYSTEM COMMAND // SUPER ADMIN SUITE</span>
+      </div>
+      <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">System & User Management</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Control center for users, account security, global lead metrics, and ICP configurations.</p>
+    </div>
+    <div class="flex items-center gap-space-sm">
+      <button id="btnRefreshOverview" class="inline-flex items-center gap-space-xs bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded-lg shadow-sm hover:bg-surface-container transition-colors font-label-md text-label-md border border-border-default" type="button">
+        <span class="material-symbols-outlined text-[18px]">refresh</span>
+        <span>Refresh Metrics</span>
+      </button>
+      <button id="btnOpenCreateUserModal" class="inline-flex items-center gap-space-xs bg-primary text-on-primary px-space-md py-space-sm rounded-lg shadow-sm hover:bg-secondary transition-colors font-label-md text-label-md" type="button">
+        <span class="material-symbols-outlined text-[18px]">person_add</span>
+        <span>Provision User</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Row 1: KPI Metric Scorecards (Overview Stats) -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-lg">
+    <!-- Total Registered Users -->
+    <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-border-default flex flex-col justify-between">
+      <div class="flex items-start justify-between">
+        <div class="flex flex-col">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Registered Accounts</span>
+          <div class="flex items-baseline gap-space-sm mt-space-xs">
+            <span id="metricTotalUsers" class="font-headline-xl text-headline-xl text-on-surface font-semibold">--</span>
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined text-[22px]">group</span>
+        </div>
+      </div>
+      <div class="mt-space-md font-body-sm text-body-sm text-outline">Total users registered on platform</div>
+    </div>
+
+    <!-- Active Users -->
+    <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-border-default flex flex-col justify-between">
+      <div class="flex items-start justify-between">
+        <div class="flex flex-col">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Active Accounts</span>
+          <div class="flex items-baseline gap-space-sm mt-space-xs">
+            <span id="metricActiveUsers" class="font-headline-xl text-headline-xl text-tertiary font-semibold">--</span>
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-tertiary-fixed/30 flex items-center justify-center text-tertiary">
+          <span class="material-symbols-outlined text-[22px]">check_circle</span>
+        </div>
+      </div>
+      <div class="mt-space-md font-body-sm text-body-sm text-outline">Currently active & verified accounts</div>
+    </div>
+
+    <!-- Global Registry Leads -->
+    <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-border-default flex flex-col justify-between">
+      <div class="flex items-start justify-between">
+        <div class="flex flex-col">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Credit Pool</span>
+          <div class="flex items-baseline gap-space-sm mt-space-xs">
+            <span id="metricTotalCredits" class="font-headline-xl text-headline-xl text-primary font-semibold">--</span>
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+        </div>
+      </div>
+      <div class="mt-space-md font-body-sm text-body-sm text-outline">
+        <span id="metricWalletsCount">--</span> active wallets
+      </div>
+    </div>
+
+    <!-- User-Lead Associations -->
+    <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-border-default flex flex-col justify-between">
+      <div class="flex items-start justify-between">
+        <div class="flex flex-col">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Available / Reserved</span>
+          <div class="flex items-baseline gap-space-sm mt-space-xs">
+            <span id="metricAvailableCredits" class="font-headline-xl text-headline-xl text-tertiary font-semibold">--</span>
+            <span class="text-xs text-outline font-normal">/</span>
+            <span id="metricReservedCredits" class="text-sm text-error font-semibold">--</span>
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined text-[22px]">lock_clock</span>
+        </div>
+      </div>
+      <div class="mt-space-md font-body-sm text-body-sm text-outline">Free credits vs held reservations</div>
+    </div>
+  </div>
+
+  <!-- Feature Pricing Management Card -->
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-default flex flex-col overflow-hidden">
+    <div class="p-space-lg border-b border-border-default flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-low/30">
+      <div class="flex flex-col">
+        <div class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-primary text-[20px]">sell</span>
+          <h2 class="font-headline-sm text-headline-sm text-on-surface">Feature Pricing Schema</h2>
+        </div>
+        <span class="font-body-sm text-body-sm text-on-surface-variant">Baseline credit costs per qualified lead generation and system operations.</span>
+      </div>
+      <button id="btnRefreshPricing" class="inline-flex items-center gap-space-xs bg-surface-container-lowest text-on-surface px-space-md py-space-xs rounded-lg border border-border-default hover:bg-surface-container transition-colors text-xs font-semibold">
+        <span class="material-symbols-outlined text-[16px]">refresh</span>
+        <span>Reload Pricing</span>
+      </button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-container-low text-on-surface-variant border-b border-border-default font-table-header text-table-header">
+            <th class="py-3 px-4">Feature Code</th>
+            <th class="py-3 px-4">Name & Description</th>
+            <th class="py-3 px-4">Unit Name</th>
+            <th class="py-3 px-4">Cost (Credits)</th>
+            <th class="py-3 px-4">Status</th>
+            <th class="py-3 px-4">Version</th>
+            <th class="py-3 px-4">Last Updated</th>
+            <th class="py-3 px-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="pricingTableBody" class="divide-y divide-border-default font-table-cell text-table-cell text-on-surface">
+          <tr>
+            <td colspan="8" class="py-6 text-center text-on-surface-variant">Loading feature pricing...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Row 2: Users Management Data Table -->
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-default flex flex-col overflow-hidden">
+    <!-- Table Toolbar -->
+    <div class="p-space-lg border-b border-border-default flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-low/30">
+      <div class="flex flex-col">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">Registered User Directory</h2>
+        <span class="font-body-sm text-body-sm text-on-surface-variant">Inspect, audit, manage activation, and configure ICPs for tenant accounts.</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-space-sm">
+        <div class="relative min-w-[240px]">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+          <input id="userSearchInput" type="text" placeholder="Search name, email, phone..." class="w-full pl-9 pr-3 py-1.5 rounded-lg border border-border-default bg-surface text-body-md text-on-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <select id="roleFilterSelect" class="py-1.5 px-3 rounded-lg border border-border-default bg-surface text-body-md text-on-surface focus:outline-none focus:border-border-focus">
+          <option value="">All Roles</option>
+          <option value="CUSTOMER">Customer</option>
+          <option value="ADMIN">Admin</option>
+          <option value="SUPER_ADMIN">Super Admin</option>
+        </select>
+        <select id="statusFilterSelect" class="py-1.5 px-3 rounded-lg border border-border-default bg-surface text-body-md text-on-surface focus:outline-none focus:border-border-focus">
+          <option value="">All Statuses</option>
+          <option value="true">Active Only</option>
+          <option value="false">Deactivated</option>
+        </select>
+        <label class="inline-flex items-center gap-1.5 text-xs text-on-surface-variant cursor-pointer ml-1">
+          <input id="chkNonzeroOnly" type="checkbox" class="rounded border-border-default text-primary focus:ring-0" />
+          <span>Nonzero Credits</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-container-low text-on-surface-variant border-b border-border-default font-table-header text-table-header">
+            <th class="py-3 px-4">User</th>
+            <th class="py-3 px-4">Role</th>
+            <th class="py-3 px-4">Account Status</th>
+            <th class="py-3 px-4">Total Credits</th>
+            <th class="py-3 px-4">Reserved</th>
+            <th class="py-3 px-4">Available</th>
+            <th class="py-3 px-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody" class="divide-y divide-border-default font-table-cell text-table-cell text-on-surface">
+          <!-- Rendered dynamically via admin.js -->
+          <tr>
+            <td colspan="7" class="py-8 text-center text-on-surface-variant">Loading user directory...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div class="p-space-md border-t border-border-default flex items-center justify-between text-body-sm text-on-surface-variant">
+      <div id="paginationSummary">Showing 0 of 0 users</div>
+      <div class="flex items-center gap-space-xs">
+        <button id="btnPrevPage" class="px-3 py-1 rounded border border-border-default hover:bg-surface-container disabled:opacity-50" disabled>Previous</button>
+        <span id="pageIndicator" class="px-2 font-semibold">1</span>
+        <button id="btnNextPage" class="px-3 py-1 rounded border border-border-default hover:bg-surface-container disabled:opacity-50" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Centralized AI Provider Configuration (Claude & Gemini) -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+    <!-- 1. Claude API Configuration Card -->
+    <div id="claudeConfigSection" class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-default flex flex-col overflow-hidden">
+      <div class="p-space-lg border-b border-border-default flex flex-col sm:flex-row sm:items-center justify-between gap-space-md bg-surface-container-low/30">
+        <div class="flex flex-col">
+          <div class="flex items-center gap-space-xs">
+            <span class="material-symbols-outlined text-primary text-[20px]">psychology</span>
+            <h2 class="font-headline-sm text-headline-sm text-on-surface">Anthropic Claude API</h2>
+          </div>
+          <span class="font-body-sm text-body-sm text-on-surface-variant">Candidate web search & grounded discovery engine</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnTestClaudeConnection" type="button" class="inline-flex items-center gap-space-xs bg-primary text-on-primary px-space-md py-space-xs rounded-lg hover:bg-primary/90 transition-colors text-xs font-semibold cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">bolt</span>
+            <span>Test Connection</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-space-lg flex flex-col gap-space-md">
+        <form id="claudeConfigForm" class="flex flex-col gap-space-md">
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1">Claude API Key</label>
+            <input id="claudeApiKeyInput" type="password" placeholder="Enter new API key (e.g. sk-ant-...)" autocomplete="off" class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus font-mono" />
+            <div id="claudeKeyStatusText" class="text-[11px] text-outline mt-1 font-mono">Checking status...</div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-semibold text-on-surface-variant">Active Model</label>
+                <button id="btnDiscoverClaudeModels" type="button" class="text-[11px] text-primary hover:underline inline-flex items-center gap-0.5 cursor-pointer">
+                  <span class="material-symbols-outlined text-[14px]">sync</span>
+                  <span>Discover Models</span>
+                </button>
+              </div>
+              <select id="claudeModelSelect" class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus">
+                <option value="claude-sonnet-5-5">claude-sonnet-5-5 (Preferred Default)</option>
+                <option value="claude-sonnet-5">claude-sonnet-5</option>
+                <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+                <option value="claude-haiku-4-5-20251001">claude-haiku-4-5-20251001</option>
+                <option value="claude-opus-5">claude-opus-5</option>
+              </select>
+              <div id="claudeModelDiscoveryStatus" class="text-[11px] text-outline mt-1 font-mono"></div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Timeout (seconds)</label>
+              <input id="claudeTimeoutInput" type="number" min="5" max="60" value="15" class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus font-mono" />
+            </div>
+          </div>
+          <div class="flex justify-end pt-2">
+            <button id="btnSaveClaudeConfig" type="submit" class="bg-surface-container text-on-surface border border-border-default px-4 py-2 rounded text-xs font-semibold hover:bg-surface-container-high transition-colors cursor-pointer">
+              Save Claude Settings
+            </button>
+          </div>
+        </form>
+
+        <!-- Connection Test Output Box -->
+        <div id="claudeTestResultBox" class="hidden p-space-md rounded-lg border text-xs flex flex-col gap-1 transition-all">
+          <div class="flex items-center justify-between">
+            <span id="claudeTestBadge" class="font-bold px-2 py-0.5 rounded text-[11px]"></span>
+            <span id="claudeTestLatency" class="text-outline font-mono"></span>
+          </div>
+          <div id="claudeTestMessage" class="text-on-surface mt-1"></div>
+          <div id="claudeTestTimestamp" class="text-[10px] text-outline mt-1 font-mono"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Google Gemini Configuration Card -->
+    <div id="geminiConfigSection" class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-default flex flex-col overflow-hidden">
+      <div class="p-space-lg border-b border-border-default flex flex-col sm:flex-row sm:items-center justify-between gap-space-md bg-surface-container-low/30">
+        <div class="flex flex-col">
+          <div class="flex items-center gap-space-xs">
+            <span class="material-symbols-outlined text-secondary text-[20px]">cognition</span>
+            <h2 class="font-headline-sm text-headline-sm text-on-surface">Google Gemini API</h2>
+          </div>
+          <span class="font-body-sm text-body-sm text-on-surface-variant">ICP structuring & candidate lead qualification engine</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnTestGeminiConnection" type="button" class="inline-flex items-center gap-space-xs bg-secondary text-on-secondary px-space-md py-space-xs rounded-lg hover:bg-secondary/90 transition-colors text-xs font-semibold cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">bolt</span>
+            <span>Test Connection</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-space-lg flex flex-col gap-space-md">
+        <form id="geminiConfigForm" class="flex flex-col gap-space-md">
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1">Gemini API Key</label>
+            <input id="geminiApiKeyInput" type="password" placeholder="Enter new API key (e.g. AIzaSy...)" autocomplete="off" class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus font-mono" />
+            <div id="geminiKeyStatusText" class="text-[11px] text-outline mt-1 font-mono">Checking status...</div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-semibold text-on-surface-variant">Active Model</label>
+                <button id="btnDiscoverGeminiModels" type="button" class="text-[11px] text-secondary hover:underline inline-flex items-center gap-0.5 cursor-pointer">
+                  <span class="material-symbols-outlined text-[14px]">sync</span>
+                  <span>Discover Models</span>
+                </button>
+              </div>
+              <select id="geminiModelSelect" class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus">
+                <option value="gemini-2.5-flash">gemini-2.5-flash (Standard Default)</option>
+                <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite</option>
+                <option value="gemini-3.8-flash">gemini-3.8-flash</option>
+                <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+              </select>
+              <div id="geminiModelDiscoveryStatus" class="text-[11px] text-outline mt-1 font-mono"></div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Timeout (seconds)</label>
+              <input id="geminiTimeoutInput" type="number" min="5" max="60" value="15" class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus font-mono" />
+            </div>
+          </div>
+          <div class="flex justify-end pt-2">
+            <button id="btnSaveGeminiConfig" type="submit" class="bg-surface-container text-on-surface border border-border-default px-4 py-2 rounded text-xs font-semibold hover:bg-surface-container-high transition-colors cursor-pointer">
+              Save Gemini Settings
+            </button>
+          </div>
+        </form>
+
+        <!-- Connection Test Output Box -->
+        <div id="geminiTestResultBox" class="hidden p-space-md rounded-lg border text-xs flex flex-col gap-1 transition-all">
+          <div class="flex items-center justify-between">
+            <span id="geminiTestBadge" class="font-bold px-2 py-0.5 rounded text-[11px]"></span>
+            <span id="geminiTestLatency" class="text-outline font-mono"></span>
+          </div>
+          <div id="geminiTestMessage" class="text-on-surface mt-1"></div>
+          <div id="geminiTestTimestamp" class="text-[10px] text-outline mt-1 font-mono"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: AI Provider Cost & Usage Dashboard (Ticket 3F) -->
+  <div id="aiUsageSection" class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-default flex flex-col overflow-hidden">
+    <!-- Header & Controls Toolbar -->
+    <div class="p-space-lg border-b border-border-default flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-low/30">
+      <div class="flex flex-col">
+        <div class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-primary text-[22px]">smart_toy</span>
+          <h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">AI Provider Cost & Usage Telemetry</h2>
+        </div>
+        <span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+          Real-time operational tracking of external LLM requests, token consumption, latency, and estimated provider costs (USD).
+        </span>
+      </div>
+      <div class="flex flex-wrap items-center gap-space-sm">
+        <!-- Date Presets -->
+        <div class="inline-flex rounded-lg border border-border-default bg-surface p-0.5 text-xs font-medium">
+          <button id="btnAiRange24h" class="px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">24h</button>
+          <button id="btnAiRange7d" class="px-2.5 py-1 rounded-md bg-primary text-on-primary font-semibold transition-colors" type="button">7d</button>
+          <button id="btnAiRange30d" class="px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">30d</button>
+          <button id="btnAiRangeCustom" class="px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Custom</button>
+        </div>
+        <div id="customDateRangeInputs" class="hidden flex items-center gap-1 text-xs">
+          <input id="aiCustomStartDate" type="date" class="px-2 py-1 rounded border border-border-default bg-surface text-on-surface text-xs" />
+          <span class="text-outline">to</span>
+          <input id="aiCustomEndDate" type="date" class="px-2 py-1 rounded border border-border-default bg-surface text-on-surface text-xs" />
+          <button id="btnApplyCustomDate" class="px-2 py-1 rounded bg-surface-container text-on-surface border border-border-default hover:bg-surface-container-high text-xs font-semibold" type="button">Apply</button>
+        </div>
+        <button id="btnRefreshAiUsage" class="inline-flex items-center gap-space-xs bg-surface-container-lowest text-on-surface px-space-md py-space-xs rounded-lg border border-border-default hover:bg-surface-container transition-colors text-xs font-semibold" type="button">
+          <span class="material-symbols-outlined text-[16px]">refresh</span>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- AI Summary Scorecards -->
+    <div class="p-space-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-space-md bg-surface-container-low/10 border-b border-border-default">
+      <!-- Card 1: Estimated Cost -->
+      <div class="bg-surface-container-lowest p-3 rounded-lg border border-border-default flex flex-col justify-between">
+        <span class="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider">Estimated Cost</span>
+        <div class="flex items-baseline gap-1 my-1">
+          <span id="aiMetricTotalCost" class="font-headline-md text-headline-md font-bold text-primary">$0.00</span>
+          <span class="text-[10px] text-outline uppercase">USD</span>
+        </div>
+        <span class="text-[10px] text-outline leading-tight">Configured rate estimate</span>
+      </div>
+
+      <!-- Card 2: Total Attempts -->
+      <div class="bg-surface-container-lowest p-3 rounded-lg border border-border-default flex flex-col justify-between">
+        <span class="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider">Total Attempts</span>
+        <div class="flex items-baseline gap-1 my-1">
+          <span id="aiMetricTotalAttempts" class="font-headline-md text-headline-md font-bold text-on-surface">--</span>
+        </div>
+        <span class="text-[10px] text-outline leading-tight">Physical HTTP calls</span>
+      </div>
+
+      <!-- Card 3: Total Tokens -->
+      <div class="bg-surface-container-lowest p-3 rounded-lg border border-border-default flex flex-col justify-between">
+        <span class="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider">Total Tokens</span>
+        <div class="flex items-baseline gap-1 my-1">
+          <span id="aiMetricTotalTokens" class="font-headline-md text-headline-md font-bold text-on-surface">--</span>
+        </div>
+        <span class="text-[10px] text-outline leading-tight"><span id="aiMetricPromptTokens">--</span> in / <span id="aiMetricCompTokens">--</span> out</span>
+      </div>
+
+      <!-- Card 4: Success Rate -->
+      <div class="bg-surface-container-lowest p-3 rounded-lg border border-border-default flex flex-col justify-between">
+        <span class="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider">Success Rate</span>
+        <div class="flex items-baseline gap-1 my-1">
+          <span id="aiMetricSuccessRate" class="font-headline-md text-headline-md font-bold text-tertiary">--%</span>
+        </div>
+        <span class="text-[10px] text-outline leading-tight"><span id="aiMetricSuccessCount">--</span> succeeded</span>
+      </div>
+
+      <!-- Card 5: Failed Attempts -->
+      <div class="bg-surface-container-lowest p-3 rounded-lg border border-border-default flex flex-col justify-between">
+        <span class="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider">Failed Attempts</span>
+        <div class="flex items-baseline gap-1 my-1">
+          <span id="aiMetricFailedAttempts" class="font-headline-md text-headline-md font-bold text-error">--</span>
+        </div>
+        <span class="text-[10px] text-outline leading-tight">Handled via fallback</span>
+      </div>
+
+      <!-- Card 6: Unknown Cost Records -->
+      <div class="bg-surface-container-lowest p-3 rounded-lg border border-border-default flex flex-col justify-between">
+        <span class="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider">Unknown Cost</span>
+        <div class="flex items-baseline gap-1 my-1">
+          <span id="aiMetricUnknownCostCount" class="font-headline-md text-headline-md font-bold text-outline">--</span>
+        </div>
+        <span class="text-[10px] text-outline leading-tight">Unverified rates / missing usage</span>
+      </div>
+    </div>
+
+    <!-- Visual Breakdown Cards (HTML/CSS Bar Visualizations) -->
+    <div class="p-space-lg grid grid-cols-1 lg:grid-cols-2 gap-space-lg border-b border-border-default bg-surface-container-low/20">
+      <!-- Cost & Usage by Model -->
+      <div class="bg-surface-container-lowest p-space-md rounded-lg border border-border-default flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">Usage & Estimated Cost by Model</span>
+          <span class="text-[11px] text-outline">Tokens (In / Out)</span>
+        </div>
+        <div id="aiModelBreakdownContainer" class="flex flex-col gap-2 mt-1">
+          <div class="text-xs text-on-surface-variant py-2 text-center">Loading model metrics...</div>
+        </div>
+      </div>
+
+      <!-- Attempts by Operation -->
+      <div class="bg-surface-container-lowest p-space-md rounded-lg border border-border-default flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">Requests by Pipeline Operation</span>
+          <span class="text-[11px] text-outline">Success / Failure</span>
+        </div>
+        <div id="aiOperationBreakdownContainer" class="flex flex-col gap-2 mt-1">
+          <div class="text-xs text-on-surface-variant py-2 text-center">Loading operation metrics...</div>
+        </div>
+      </div>
+
+      <!-- Cost Over Time (Daily Trends) -->
+      <div class="bg-surface-container-lowest p-space-md rounded-lg border border-border-default flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">Estimated Cost Over Time</span>
+          <span class="text-[11px] text-outline">USD / Day (UTC)</span>
+        </div>
+        <div id="aiCostTrendsContainer" class="flex flex-col gap-2 mt-1">
+          <div class="text-xs text-on-surface-variant py-2 text-center">Loading daily cost trends...</div>
+        </div>
+      </div>
+
+      <!-- Token Usage Over Time (Daily Trends) -->
+      <div class="bg-surface-container-lowest p-space-md rounded-lg border border-border-default flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">Token Usage & Requests Over Time</span>
+          <span class="text-[11px] text-outline">Prompt / Comp / Total Tokens</span>
+        </div>
+        <div id="aiTokensTrendsContainer" class="flex flex-col gap-2 mt-1">
+          <div class="text-xs text-on-surface-variant py-2 text-center">Loading daily token trends...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Bar for Telemetry Records -->
+    <div class="p-space-md border-b border-border-default bg-surface-container-low/40 flex flex-wrap items-center justify-between gap-space-sm">
+      <div class="flex flex-wrap items-center gap-2">
+        <select id="aiFilterProvider" class="py-1 px-2 rounded-lg border border-border-default bg-surface text-xs text-on-surface focus:outline-none">
+          <option value="">All Providers</option>
+        </select>
+        <select id="aiFilterModel" class="py-1 px-2 rounded-lg border border-border-default bg-surface text-xs text-on-surface focus:outline-none">
+          <option value="">All Models</option>
+        </select>
+        <select id="aiFilterOperation" class="py-1 px-2 rounded-lg border border-border-default bg-surface text-xs text-on-surface focus:outline-none">
+          <option value="">All Operations</option>
+        </select>
+        <select id="aiFilterStatus" class="py-1 px-2 rounded-lg border border-border-default bg-surface text-xs text-on-surface focus:outline-none">
+          <option value="">All Statuses</option>
+          <option value="SUCCESS">SUCCESS</option>
+          <option value="FAILED">FAILED</option>
+        </select>
+        <input id="aiFilterUserId" type="number" placeholder="User ID" class="w-24 py-1 px-2 rounded-lg border border-border-default bg-surface text-xs text-on-surface focus:outline-none" />
+        <input id="aiFilterJobId" type="number" placeholder="Job ID" class="w-24 py-1 px-2 rounded-lg border border-border-default bg-surface text-xs text-on-surface focus:outline-none" />
+        <input id="aiFilterCorrelationId" type="text" placeholder="Correlation ID..." class="w-36 py-1 px-2 rounded-lg border border-border-default bg-surface text-xs text-on-surface focus:outline-none" />
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnAiResetFilters" class="px-2.5 py-1 text-xs text-on-surface-variant hover:text-on-surface border border-border-default rounded-lg hover:bg-surface-container transition-colors" type="button">Reset Filters</button>
+      </div>
+    </div>
+
+    <!-- Usage Records Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-container-low text-on-surface-variant border-b border-border-default font-table-header text-table-header">
+            <th class="py-2.5 px-3">Timestamp (UTC)</th>
+            <th class="py-2.5 px-3">Provider / Model</th>
+            <th class="py-2.5 px-3">Operation</th>
+            <th class="py-2.5 px-3">Status</th>
+            <th class="py-2.5 px-3">Tokens (Prompt / Comp)</th>
+            <th class="py-2.5 px-3">Latency</th>
+            <th class="py-2.5 px-3">Est. Cost (USD)</th>
+            <th class="py-2.5 px-3">User / Job</th>
+            <th class="py-2.5 px-3">Correlation ID</th>
+          </tr>
+        </thead>
+        <tbody id="aiUsageTableBody" class="divide-y divide-border-default font-table-cell text-table-cell text-on-surface">
+          <tr>
+            <td colspan="9" class="py-6 text-center text-on-surface-variant">Loading AI provider usage telemetry...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Usage Records Pagination Footer -->
+    <div class="p-space-md border-t border-border-default flex items-center justify-between text-body-sm text-on-surface-variant bg-surface-container-low/20">
+      <div id="aiPaginationSummary">Showing 0 of 0 records</div>
+      <div class="flex items-center gap-space-xs">
+        <button id="btnAiPrevPage" class="px-3 py-1 rounded border border-border-default hover:bg-surface-container disabled:opacity-50 text-xs font-semibold" disabled>Previous</button>
+        <span id="aiPageIndicator" class="px-2 font-semibold text-xs">1</span>
+        <button id="btnAiNextPage" class="px-3 py-1 rounded border border-border-default hover:bg-surface-container disabled:opacity-50 text-xs font-semibold" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide-Over Drawer for User Inspection & ICP Editing -->
+<div id="userDetailDrawer" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+  <div class="absolute inset-0 bg-on-surface/30 backdrop-blur-sm transition-opacity" id="drawerBackdrop"></div>
+  <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+    <div class="w-screen max-w-2xl bg-surface-container-lowest shadow-2xl border-l border-border-default flex flex-col">
+      <!-- Drawer Header -->
+      <div class="p-space-lg border-b border-border-default flex items-center justify-between bg-surface-container-low">
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <h3 id="drawerUserName" class="font-headline-md text-headline-md text-on-surface font-semibold">User Details</h3>
+            <span id="drawerUserRoleBadge" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-primary-fixed text-primary">CUSTOMER</span>
+          </div>
+          <span id="drawerUserEmail" class="font-body-sm text-body-sm text-on-surface-variant">user@example.com</span>
+        </div>
+        <button id="btnCloseDrawer" class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-[24px]">close</span>
+        </button>
+      </div>
+
+      <!-- Drawer Tabs -->
+      <div class="flex border-b border-border-default px-space-lg bg-surface-container-low/50">
+        <button id="tabBtnAccount" class="py-3 px-4 font-label-md text-label-md border-b-2 border-primary text-primary font-semibold">Account Info</button>
+        <button id="tabBtnWallet" class="py-3 px-4 font-label-md text-label-md border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-semibold">Credit Wallet & Ledger</button>
+        <button id="tabBtnCompany" class="py-3 px-4 font-label-md text-label-md border-b-2 border-transparent text-on-surface-variant hover:text-on-surface">Company Profile</button>
+        <button id="tabBtnIcp" class="py-3 px-4 font-label-md text-label-md border-b-2 border-transparent text-on-surface-variant hover:text-on-surface">ICP Configuration</button>
+      </div>
+
+      <!-- Drawer Body -->
+      <div class="flex-1 overflow-y-auto p-space-lg flex flex-col gap-space-lg">
+        <!-- Tab 1: Account -->
+        <div id="tabContentAccount" class="flex flex-col gap-space-md">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-3 rounded-lg bg-surface-container-low">
+              <span class="text-xs text-outline uppercase font-semibold">User ID</span>
+              <div id="drawerUserIdVal" class="text-sm font-medium mt-0.5">--</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-container-low">
+              <span class="text-xs text-outline uppercase font-semibold">Phone</span>
+              <div id="drawerUserPhoneVal" class="text-sm font-medium mt-0.5">--</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-container-low">
+              <span class="text-xs text-outline uppercase font-semibold">Email Verified</span>
+              <div id="drawerUserVerifiedVal" class="text-sm font-medium mt-0.5">--</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-container-low">
+              <span class="text-xs text-outline uppercase font-semibold">Onboarding Step</span>
+              <div id="drawerUserOnboardingVal" class="text-sm font-medium mt-0.5">--</div>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-border-default flex flex-col gap-2">
+            <h4 class="font-headline-sm text-headline-sm text-on-surface">Account Control</h4>
+            <div class="flex items-center justify-between p-3 rounded-lg border border-border-default bg-surface-container-lowest">
+              <div>
+                <div class="font-medium text-sm">Account Status</div>
+                <div id="drawerAccountStatusDesc" class="text-xs text-outline">Active and authorized to sign in.</div>
+              </div>
+              <button id="btnToggleAccountStatus" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors">
+                Toggle Status
+              </button>
+            </div>
+            <div class="flex items-center justify-between p-3 rounded-lg border border-error/30 bg-error/5">
+              <div>
+                <div class="font-medium text-sm text-error">Danger Zone</div>
+                <div class="text-xs text-outline">Permanently delete user account and clean up associated records.</div>
+              </div>
+              <button id="btnDeleteUserAccount" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-error text-white hover:bg-error/90 transition-colors">
+                Delete User
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Credit Wallet & Transactions -->
+        <div id="tabContentWallet" class="flex flex-col gap-space-md hidden">
+          <!-- Wallet Balance Cards -->
+          <div class="grid grid-cols-3 gap-3">
+            <div class="p-3 rounded-lg bg-surface-container-low border border-border-default">
+              <span class="text-[11px] text-outline uppercase font-semibold">Total Balance</span>
+              <div id="drawerWalletTotal" class="text-lg font-bold text-primary mt-0.5">0.00</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-container-low border border-border-default">
+              <span class="text-[11px] text-outline uppercase font-semibold">Reserved Hold</span>
+              <div id="drawerWalletReserved" class="text-lg font-bold text-error mt-0.5">0.00</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-container-low border border-border-default">
+              <span class="text-[11px] text-outline uppercase font-semibold">Available</span>
+              <div id="drawerWalletAvailable" class="text-lg font-bold text-tertiary mt-0.5">0.00</div>
+            </div>
+          </div>
+
+          <!-- Action Buttons: Grant & Adjust -->
+          <div class="flex items-center gap-2 pt-2 border-t border-border-default">
+            <button id="btnOpenGrantModal" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary text-on-primary text-xs font-semibold rounded-lg hover:bg-secondary transition-colors">
+              <span class="material-symbols-outlined text-[16px]">add_circle</span>
+              <span>Grant Credits</span>
+            </button>
+            <button id="btnOpenAdjustModal" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 bg-surface-container-lowest text-on-surface border border-border-default text-xs font-semibold rounded-lg hover:bg-surface-container transition-colors">
+              <span class="material-symbols-outlined text-[16px]">tune</span>
+              <span>Adjust Balance</span>
+            </button>
+            <button id="btnRefreshTransactions" type="button" class="ml-auto inline-flex items-center gap-1 text-xs text-outline hover:text-on-surface">
+              <span class="material-symbols-outlined text-[16px]">refresh</span>
+              <span>Refresh Ledger</span>
+            </button>
+          </div>
+
+          <!-- Transaction Ledger Table -->
+          <div class="flex flex-col gap-2 mt-2">
+            <div class="flex items-center justify-between">
+              <h5 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Immutable Transaction Ledger</h5>
+              <select id="txTypeFilterSelect" class="text-xs border border-border-default rounded bg-surface px-2 py-0.5">
+                <option value="">All Types</option>
+                <option value="ADMIN_GRANT">Grant</option>
+                <option value="ADMIN_ADJUSTMENT">Adjustment</option>
+                <option value="RESERVATION">Reservation</option>
+                <option value="SETTLEMENT">Settlement</option>
+                <option value="RELEASE">Release</option>
+                <option value="REFUND">Refund</option>
+              </select>
+            </div>
+            <div class="overflow-x-auto border border-border-default rounded-lg max-h-72">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-surface-container-low text-on-surface-variant border-b border-border-default font-semibold sticky top-0">
+                    <th class="py-2 px-3">Date</th>
+                    <th class="py-2 px-3">Type</th>
+                    <th class="py-2 px-3">Amount</th>
+                    <th class="py-2 px-3">Reserved Delta</th>
+                    <th class="py-2 px-3">Balance After</th>
+                    <th class="py-2 px-3">Reason</th>
+                  </tr>
+                </thead>
+                <tbody id="drawerTransactionsBody" class="divide-y divide-border-default">
+                  <tr>
+                    <td colspan="6" class="py-4 text-center text-outline">No transaction history.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Company -->
+        <div id="tabContentCompany" class="flex flex-col gap-space-md hidden">
+          <div id="companyEmptyMessage" class="p-6 text-center text-outline hidden">No company details registered for this user yet.</div>
+          <div id="companyDetailsContent" class="grid grid-cols-1 gap-3">
+            <div class="p-3 rounded-lg bg-surface-container-low">
+              <span class="text-xs text-outline uppercase font-semibold">Company Name</span>
+              <div id="drawerCompanyName" class="text-sm font-medium mt-0.5">--</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-container-low">
+              <span class="text-xs text-outline uppercase font-semibold">Website</span>
+              <div id="drawerCompanyWebsite" class="text-sm font-medium mt-0.5">--</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-container-low">
+              <span class="text-xs text-outline uppercase font-semibold">Industry & Location</span>
+              <div id="drawerCompanyIndustryLoc" class="text-sm font-medium mt-0.5">--</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-container-low">
+              <span class="text-xs text-outline uppercase font-semibold">Description</span>
+              <div id="drawerCompanyDesc" class="text-sm mt-0.5">--</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: ICP Editor -->
+        <div id="tabContentIcp" class="flex flex-col gap-space-md hidden">
+          <div class="flex items-center justify-between bg-primary-fixed/20 p-3 rounded-lg border border-primary/20">
+            <div>
+              <span class="text-xs text-primary font-bold uppercase">Configured ICP</span>
+              <div class="text-xs text-on-surface-variant">Version: <span id="drawerIcpVersionVal" class="font-bold">1</span></div>
+            </div>
+            <span class="text-xs text-outline" id="drawerIcpUpdatedVal">Updated: --</span>
+          </div>
+
+          <form id="adminIcpForm" class="flex flex-col gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Target Customer / Persona</label>
+              <textarea id="icpFieldTargetCustomer" rows="2" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-on-surface-variant mb-1">Target Job Roles</label>
+                <input id="icpFieldTargetRoles" type="text" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-on-surface-variant mb-1">Industry</label>
+                <input id="icpFieldIndustry" type="text" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-on-surface-variant mb-1">Location</label>
+                <input id="icpFieldLocation" type="text" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-on-surface-variant mb-1">Company Size</label>
+                <input id="icpFieldCompanySize" type="text" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Keywords</label>
+              <input id="icpFieldKeywords" type="text" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Exclusions</label>
+              <input id="icpFieldExclusions" type="text" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+            </div>
+
+            <div class="pt-3 border-t border-border-default flex items-center justify-end gap-2">
+              <span id="icpSaveFeedback" class="text-xs mr-auto font-medium hidden">Saved successfully.</span>
+              <button id="btnSaveIcp" type="submit" class="px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:bg-secondary transition-colors">
+                Save & Bump ICP Version
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Provision User Modal -->
+<div id="createUserModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm transition-opacity" id="createUserBackdrop"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+    <div class="inline-block align-bottom bg-surface-container-lowest rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-border-default">
+      <div class="p-space-lg border-b border-border-default bg-surface-container-low flex justify-between items-center">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Provision Customer Account</h3>
+        <button id="btnCloseCreateUserModal" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form id="adminCreateUserForm" class="p-space-lg flex flex-col gap-space-md">
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Full Name</label>
+          <input id="createUserName" type="text" required placeholder="John Doe" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Business Email</label>
+          <input id="createUserEmail" type="email" required placeholder="name@company.com" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Phone Number (E.164)</label>
+          <input id="createUserPhone" type="text" required placeholder="+12025550192" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Temporary Initial Password</label>
+          <input id="createUserPassword" type="password" required placeholder="Minimum 9 characters with upper, lower, number, special" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <div id="createUserError" class="text-xs text-error font-medium hidden"></div>
+        <div class="pt-3 border-t border-border-default flex justify-end gap-2">
+          <button id="btnCancelCreateUser" type="button" class="px-4 py-2 border border-border-default rounded-lg text-sm text-on-surface hover:bg-surface-container">Cancel</button>
+          <button id="btnSubmitCreateUser" type="submit" class="px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:bg-secondary">Provision Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Grant Credits Modal -->
+<div id="grantCreditsModal" class="fixed inset-0 z-50 overflow-y-auto hidden" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm transition-opacity" id="grantCreditsBackdrop"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+    <div class="inline-block align-bottom bg-surface-container-lowest rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-border-default">
+      <div class="p-space-lg border-b border-border-default bg-surface-container-low flex justify-between items-center">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Grant Credits</h3>
+        <button id="btnCloseGrantModal" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form id="grantCreditsForm" class="p-space-lg flex flex-col gap-space-md">
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Target Account</label>
+          <div id="grantModalUserLabel" class="text-sm font-medium text-on-surface">--</div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Credit Amount</label>
+          <input id="grantAmountInput" type="number" step="0.01" min="0.01" required placeholder="50.00" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Mandatory Business Reason</label>
+          <input id="grantReasonInput" type="text" required placeholder="e.g., Enterprise Starter Tier Grant" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <div id="grantError" class="text-xs text-error font-medium hidden"></div>
+        <div class="pt-3 border-t border-border-default flex justify-end gap-2">
+          <button id="btnCancelGrant" type="button" class="px-4 py-2 border border-border-default rounded-lg text-sm text-on-surface hover:bg-surface-container">Cancel</button>
+          <button id="btnSubmitGrant" type="submit" class="px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:bg-secondary">Confirm Grant</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Adjust Credits Modal -->
+<div id="adjustCreditsModal" class="fixed inset-0 z-50 overflow-y-auto hidden" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm transition-opacity" id="adjustCreditsBackdrop"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+    <div class="inline-block align-bottom bg-surface-container-lowest rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-border-default">
+      <div class="p-space-lg border-b border-border-default bg-surface-container-low flex justify-between items-center">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Adjust Wallet Balance</h3>
+        <button id="btnCloseAdjustModal" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form id="adjustCreditsForm" class="p-space-lg flex flex-col gap-space-md">
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Target Account</label>
+          <div id="adjustModalUserLabel" class="text-sm font-medium text-on-surface">--</div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Adjustment Delta (Signed Number)</label>
+          <input id="adjustAmountInput" type="number" step="0.01" required placeholder="Use positive or negative, e.g., -10.00" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+          <p class="text-[11px] text-outline mt-1">Negative adjustments cannot drop total balance below current reserved holds.</p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Mandatory Justification Reason</label>
+          <input id="adjustReasonInput" type="text" required placeholder="e.g., Billing Correction for over-grant" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <div id="adjustError" class="text-xs text-error font-medium hidden"></div>
+        <div class="pt-3 border-t border-border-default flex justify-end gap-2">
+          <button id="btnCancelAdjust" type="button" class="px-4 py-2 border border-border-default rounded-lg text-sm text-on-surface hover:bg-surface-container">Cancel</button>
+          <button id="btnSubmitAdjust" type="submit" class="px-4 py-2 bg-error text-on-error rounded-lg text-sm font-semibold hover:opacity-90">Confirm Adjustment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Feature Pricing Modal -->
+<div id="editPricingModal" class="fixed inset-0 z-50 overflow-y-auto hidden" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm transition-opacity" id="editPricingBackdrop"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+    <div class="inline-block align-bottom bg-surface-container-lowest rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-border-default">
+      <div class="p-space-lg border-b border-border-default bg-surface-container-low flex justify-between items-center">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Edit Feature Pricing</h3>
+        <button id="btnClosePricingModal" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form id="editPricingForm" class="p-space-lg flex flex-col gap-space-md">
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Feature Code</label>
+          <input id="pricingModalCode" type="text" readonly class="w-full p-2 text-sm rounded border border-border-default bg-surface-container-low text-outline font-mono cursor-not-allowed" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Unit Cost (Credits)</label>
+          <input id="pricingModalCost" type="number" step="0.01" min="0.00" required class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-on-surface-variant mb-1">Description</label>
+          <input id="pricingModalDesc" type="text" class="w-full p-2 text-sm rounded border border-border-default bg-surface focus:outline-none focus:border-border-focus" />
+        </div>
+        <div class="flex items-center gap-2">
+          <input id="pricingModalActive" type="checkbox" class="rounded border-border-default text-primary" />
+          <label for="pricingModalActive" class="text-xs font-semibold text-on-surface">Feature Active for Customers</label>
+        </div>
+        <div id="pricingError" class="text-xs text-error font-medium hidden"></div>
+        <div class="pt-3 border-t border-border-default flex justify-end gap-2">
+          <button id="btnCancelPricing" type="button" class="px-4 py-2 border border-border-default rounded-lg text-sm text-on-surface hover:bg-surface-container">Cancel</button>
+          <button id="btnSubmitPricing" type="submit" class="px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:bg-secondary">Save Pricing Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/admin.js"></script>
+{% endblock %}

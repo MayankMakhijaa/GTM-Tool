@@ -1,0 +1,113 @@
+Created At: 2026-11-09T21:22:56+05:30
+Completed At: 2026-11-09T21:22:56+05:30
+Command exited with code 0.
+
+Command output:
+
+> @@ -1057,8 +1536,17 @@ def _execute_gtm_pipeline_worker(
+       persona_filter: Optional[str]
+   ):
+       """
+  -    Background worker that runs the full dual-discovery GTM pipeline within app context.
+  -    Executes Voyager and Public-Web independently, merges candidates, qualifies, and persists.
+  +    Continuous Gojiberry-style Background Prospecting Worker.
+  +    Executes a rolling multi-engine discovery loop across Google, Bing, DuckDuckGo, and Yandex:
+  +    1. Loads the user's authentic ICP and Company Details.
+  +    2. Checks existing directory profiles for instant relevant matches.
+  +    3. Dynamically generates search queries using Gemini based on ICP and query history.
+  +    4. Dispatches queries to all available providers in FederatedDiscoveryOrchestrator.
+  +    5. Deduplicates candidates and validates public profile URLs (rejecting anonymous cards).
+  +    6. Automatically qualifies candidates using Gemini against ICP and company offering.
+  +    7. Persists qualified leads immediately to GlobalProfiles and UsersProfiles.
+  +    8. Enforces credit checks, pauses if credits are exhausted, or terminates on cooperative stop.
+  +    9. Settles credit reservations for newly qualified opportunities only.
+       """
+       with app.app_context():
+           job = db_session.query(ResearchJobs).filter_by(id=job_id).first()
+> @@ -1066,135 +1554,303 @@ def _execute_gtm_pipeline_worker(
+               logger.error(f"[GTM Worker] Job {job_id} not found.")
+               return
+   
+  +        reservation_id = (job.budget or {}).get("reservation_id")
+  +        if not reservation_id:
+  +            res_rec = db_session.query(CreditReservation).filter_by(job_id=job_id).first()
+  +            if res_rec:
+  +                reservation_id = res_rec.id
+  +
+  +        def _safe_settle_or_release(actual_billable_qty: int, outcome_reason: str):
+  +            """Helper to ensure reservation is reliably settled or released."""
+  +            if not reservation_id:
+  +                return
+  +            try:
+  +                res_check = db_session.query(CreditReservation).filter_by(id=reservation_id).first()
+  +                if not res_check or res_check.status != ReservationStatus.RESERVED.value:
+  +                    return
+  +
+  +                if actual_billable_qty > 0:
+  +                    CreditService.settle_reservation(
+  +                        reservation_id=reservation_id,
+  +                        actual_quantity=actual_billable_qty,
+  +                        idempotency_key=f"gtm_job_settle_{job_id}",
+  +                        reason=f"GTM Research Job #{job_id}: Settled for {actual_billable_qty} qualified newly 
+delivered lead(s)",
+  +                        session=db_session
+  +                    )
+  +                else:
+  +                    CreditService.release_reservation(
+  +                        reservation_id=reservation_id,
+  +                        idempotency_key=f"gtm_job_rel_{job_id}",
+  +                        reason=f"GTM Research Job #{job_id}: Released reservation ({outcome_reason})",
+  +                        session=db_session
+  +                    )
+  +            except Exception as e_settle:
+  +                logger.error(f"[GTM Worker] Error settling/releasing reservation {reservation_id} for job {job_id}: 
+{e_settle}")
+  +
+  +        def _check_job_cancelled() -> bool:
+  +            """Inspects if user requested stop or job was marked CANCELLED."""
+  +            try:
+  +                refreshed_job = db_session.query(ResearchJobs).filter_by(id=job_id).first()
+> @@ -1211,6 +1867,180 @@ def _execute_gtm_pipeline_worker(
+               db_session.remove()
+   
+   
+  +# ====================================================================
+  +# STALE JOB RECONCILIATION & RECOVERY
+  +# ====================================================================
+  +
+  +DEFAULT_STALE_THRESHOLD_MINUTES = 15
+  +
+  +
+  +def reconcile_stale_research_jobs(
+  +    max_stale_minutes: int = DEFAULT_STALE_THRESHOLD_MINUTES,
+  +    session: Optional[Any] = None
+  +) -> Dict[str, Any]:
+  +    """
+  +    Detects and safely reconciles abandoned/stale QUEUED or RUNNING research jobs.
+  +    Uses pessimistic row-level locking (with_for_update(skip_locked=True)) to guarantee
+  +    safe concurrent execution across multiple worker/app processes.
+  +
+  +    Reconciliation rules:
+  +    1. Selects candidate jobs in QUEUED or RUNNING whose heartbeat_at (or created_at if heartbeat_at is NULL)
+  +       is strictly older than max_stale_minutes.
+  +    2. Re-validates job status and timestamp under exclusive lock.
+  +    3. Counts durably persisted, qualified leads attributable to that exact job.
+  +    4. If reservation is RESERVED:
+  +       - If durable count > 0, settles Q leads using captured pricing snapshot via stable key 
+gtm_job_settle_{job_id}.
+  +       - If durable count == 0, releases reservation via stable key gtm_job_rel_{job_id}.
+  +    5. If reservation is already SETTLED or RELEASED:
+  +       - Preserves the existing settlement/release outcome without duplicate charge or conflicting mutation.
+  +    6. If reservation is missing/unexpected:
+  +       - Records a clear diagnostic and marks the job failed without fabricating ledger entries.
+  +    7. Sets terminal status FAILED with truthful diagnostic explanation.
+  +    """
+  +    s = session or db_session
+  +    now = datetime.utcnow()
+  +    cutoff = now - timedelta(minutes=max_stale_minutes)
+  +
+  +    stats = {
+  +        "examined": 0,
+  +        "recovered": 0,
+
+

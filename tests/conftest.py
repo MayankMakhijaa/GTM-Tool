@@ -2,6 +2,7 @@ import os
 import sys
 import pytest
 import importlib.util
+from decimal import Decimal
 from urllib.parse import urlparse
 
 # Ensure project root is in sys.path
@@ -93,7 +94,16 @@ def clean_db():
     assert_safe_test_db(str(engine.url))
     # Clean up test database before test
     db_session.rollback()
-    from app.models.all_models import UsersProfiles, GlobalProfiles, ResearchJobs, ConnectAndMessage
+    from app.models.all_models import (
+        UsersProfiles, GlobalProfiles, ResearchJobs, ConnectAndMessage, AuditLog,
+        CreditTransaction, CreditReservation, UserCreditWallet, AIProviderUsageLog,
+        FeaturePricing
+    )
+    db_session.query(CreditTransaction).delete(synchronize_session=False)
+    db_session.query(CreditReservation).delete(synchronize_session=False)
+    db_session.query(UserCreditWallet).delete(synchronize_session=False)
+    db_session.query(AIProviderUsageLog).delete(synchronize_session=False)
+    db_session.query(AuditLog).delete(synchronize_session=False)
     db_session.query(ConnectAndMessage).delete(synchronize_session=False)
     db_session.query(UsersProfiles).delete(synchronize_session=False)
     db_session.query(ResearchJobs).delete(synchronize_session=False)
@@ -102,6 +112,19 @@ def clean_db():
     db_session.query(UsersLinkedinDetails).delete(synchronize_session=False)
     db_session.query(UsersICP).delete(synchronize_session=False)
     db_session.query(UsersCompanyDetails).delete(synchronize_session=False)
+    from app.models.all_models import TenantMembership, Tenant, UserSMTPAccount, EmailBatch, EmailRecipient
+    db_session.query(EmailRecipient).delete(synchronize_session=False)
+    db_session.query(EmailBatch).delete(synchronize_session=False)
+    db_session.query(UserSMTPAccount).delete(synchronize_session=False)
+    db_session.query(TenantMembership).delete(synchronize_session=False)
+    db_session.query(Tenant).delete(synchronize_session=False)
+    # Clear updated_by_user_id FK references on feature_pricing before clearing user_table, and reset defaults
+    db_session.query(FeaturePricing).update({
+        FeaturePricing.updated_by_user_id: None,
+        FeaturePricing.credit_cost: Decimal("2.00"),
+        FeaturePricing.version: 1,
+        FeaturePricing.is_active: True
+    }, synchronize_session=False)
     db_session.query(UserTable).delete(synchronize_session=False)
     db_session.commit()
     try:

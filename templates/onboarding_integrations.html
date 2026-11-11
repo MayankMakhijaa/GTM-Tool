@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Authentication & Integrations — FameWeb{% endblock %}
+{% block content %}
+<div class="w-full px-space-xl py-space-lg flex flex-col gap-space-lg max-w-5xl mx-auto">
+  <!-- Top Onboarding Stepper Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-border-default">
+    <div class="flex flex-col">
+      <div class="flex items-center gap-space-xs">
+        <span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Authentication &amp; Integrations</span>
+        <span class="inline-flex items-center gap-1 ml-space-sm px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
+          Step 1 of Onboarding
+        </span>
+      </div>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+        Configure your sender business email and verify your LinkedIn session to power AI lead generation and multi-channel outreach.
+      </p>
+    </div>
+    <div class="flex items-center gap-space-sm">
+      <button id="btn-continue-dashboard" onclick="continueToNextStep()" class="inline-flex items-center gap-space-xs bg-primary text-on-primary px-space-lg py-space-sm rounded-lg shadow-sm hover:bg-primary/90 transition-all font-label-md text-label-md font-semibold cursor-pointer">
+        <span>Continue to Dashboard</span>
+        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Notification Banner -->
+  <div id="integrations-banner" class="hidden p-space-md rounded-lg border text-sm font-medium transition-all"></div>
+
+  <!-- Two Column Integration Bento Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+    
+    <!-- ============================================================== -->
+    <!-- CARD A: SENDER EMAIL / SMTP CONFIGURATION                     -->
+    <!-- ============================================================== -->
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-default flex flex-col overflow-hidden">
+      <!-- Card Header -->
+      <div class="p-space-lg border-b border-border-default flex items-center justify-between bg-surface-container-low/40">
+        <div class="flex items-center gap-space-xs">
+          <div class="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-[22px]">mail</span>
+          </div>
+          <div class="flex flex-col">
+            <h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">1. Business Email (SMTP)</h2>
+            <span class="text-[11px] text-on-surface-variant font-medium">AES-256-GCM Encrypted at rest</span>
+          </div>
+        </div>
+        <div id="smtp-status-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant">
+          Checking...
+        </div>
+      </div>
+
+      <!-- Card Body -->
+      <div class="p-space-lg flex flex-col gap-space-md flex-1">
+        <p class="text-xs text-on-surface-variant leading-relaxed">
+          Connect your custom domain Google Workspace, Microsoft 365, or standard SMTP account. Consumer accounts (@gmail.com, @yahoo.com) are rejected by default for bulk deliverability.
+        </p>
+
+        <form id="smtp-form" class="flex flex-col gap-3">
+          <!-- Sender Email -->
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1">Sender Email Address *</label>
+            <input type="email" id="smtp-email" placeholder="you@yourcompany.com" required class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus font-mono" />
+            <div id="smtp-provider-hint" class="text-[11px] text-primary mt-1 font-mono hidden"></div>
+          </div>
+
+          <!-- SMTP Host & Port -->
+          <div class="grid grid-cols-3 gap-2">
+            <div class="col-span-2">
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">SMTP Host *</label>
+              <input type="text" id="smtp-host" placeholder="smtp.yourcompany.com" required class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus font-mono" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Port *</label>
+              <input type="number" id="smtp-port" value="587" required class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus font-mono" />
+            </div>
+          </div>
+
+          <!-- Username -->
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1">SMTP Username</label>
+            <input type="text" id="smtp-username" placeholder="Defaults to sender email" class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus font-mono" />
+          </div>
+
+          <!-- App Password / Password -->
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1">SMTP Password / App Password *</label>
+            <input type="password" id="smtp-password" placeholder="••••••••••••••••" required autocomplete="off" class="w-full p-2 text-sm rounded border border-border-default bg-surface text-on-surface focus:outline-none focus:border-border-focus font-mono" />
+            <span class="text-[10px] text-outline mt-0.5 block">Stored with AES-256-GCM. Plaintext is never exposed.</span>
+          </div>
+
+          <!-- Encryption Flags -->
+          <div class="flex items-center gap-4 py-1">
+            <label class="inline-flex items-center gap-1.5 text-xs text-on-surface cursor-pointer">
+              <input type="checkbox" id="smtp-tls" checked class="rounded border-border-default text-primary focus:ring-0" />
+              <span>Use TLS / STARTTLS (Port 587)</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5 text-xs text-on-surface cursor-pointer">
+              <input type="checkbox" id="smtp-ssl" class="rounded border-border-default text-primary focus:ring-0" />
+              <span>Implicit SSL (Port 465)</span>
+            </label>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-between pt-2 border-t border-surface-container mt-2">
+            <button type="button" id="btn-test-smtp" onclick="testSmtpConnection()" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-surface-container text-on-surface border border-border-default hover:bg-surface-container-high transition-colors text-xs font-semibold cursor-pointer">
+              <span class="material-symbols-outlined text-[16px]">network_check</span>
+              <span>Test Connection</span>
+            </button>
+            <button type="submit" id="btn-save-smtp" class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-primary text-on-primary hover:bg-primary/90 transition-colors text-xs font-semibold shadow-sm cursor-pointer">
+              <span class="material-symbols-outlined text-[16px]">save</span>
+              <span>Save &amp; Connect SMTP</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- SMTP Test Output Box -->
+        <div id="smtp-test-result" class="hidden p-space-md rounded-lg text-xs flex flex-col gap-1 transition-all"></div>
+      </div>
+    </div>
+
+
+    <!-- ============================================================== -->
+    <!-- CARD B: LINKEDIN EXTENSION INTEGRATION                         -->
+    <!-- ============================================================== -->
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-default flex flex-col overflow-hidden">
+      <!-- Card Header -->
+      <div class="p-space-lg border-b border-border-default flex items-center justify-between bg-surface-container-low/40">
+        <div class="flex items-center gap-space-xs">
+          <div class="w-9 h-9 rounded-lg bg-[#0a66c2]/10 text-[#0a66c2] flex items-center justify-center font-bold text-lg">
+            in
+          </div>
+          <div class="flex flex-col">
+            <h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">2. LinkedIn Verification</h2>
+            <span class="text-[11px] text-on-surface-variant font-medium">Local Chrome Extension &bull; Zero Raw Cookie Sharing</span>
+          </div>
+        </div>
+        <div id="linkedin-status-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant">
+          Checking...
+        </div>
+      </div>
+
+      <!-- Card Body -->
+      <div class="p-space-lg flex flex-col gap-space-md flex-1 justify-between">
+        <div class="flex flex-col gap-3">
+          <p class="text-xs text-on-surface-variant leading-relaxed">
+            FameWeb verifies your active LinkedIn session using our locally developed Chrome Extension. In accordance with zero-trust security standards, FameWeb <strong>never</strong> extracts, stores, or transmits your LinkedIn password or raw session cookies (<code class="font-mono bg-surface-container px-1 py-0.5 rounded">li_at</code>).
+          </p>
+
+          <!-- Extension Detection Status Pill -->
+          <div id="ext-detection-box" class="p-3 rounded-lg border border-border-default bg-surface flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="ext-status-icon" class="material-symbols-outlined text-outline text-[20px]">extension</span>
+              <div class="flex flex-col">
+                <span class="text-xs font-semibold text-on-surface">FameWeb Integrator Extension</span>
+                <span id="ext-status-text" class="text-[11px] text-outline font-mono">Detecting local extension...</span>
+              </div>
+            </div>
+            <button type="button" onclick="detectExtension(true)" class="text-xs text-primary hover:underline font-semibold inline-flex items-center gap-0.5 cursor-pointer">
+              <span class="material-symbols-outlined text-[14px]">refresh</span>
+              <span>Re-check</span>
+            </button>
+          </div>
+
+          <!-- Unpacked Installation Instructions (Shown if missing) -->
+          <div id="ext-install-guide" class="p-3.5 rounded-lg border border-warning/40 bg-warning-container/20 flex flex-col gap-2 text-xs">
+            <div class="flex items-center gap-1.5 font-bold text-warning-content">
+              <span class="material-symbols-outlined text-[18px]">build</span>
+              <span>Local Extension Installation Required:</span>
+            </div>
+            <ol class="list-decimal pl-4 space-y-1 text-on-surface leading-normal text-[11px]">
+              <li>Open Chrome and navigate to <code class="bg-surface-container font-mono px-1 rounded">chrome://extensions</code>.</li>
+              <li>Toggle <strong>Developer mode</strong> in the top-right corner.</li>
+              <li>Click <strong>Load unpacked</strong> and select this repository's directory:
+                <div class="font-mono bg-surface p-1 rounded border border-border-default mt-1 break-all select-all font-semibold text-[10px]">
+                  D:\Programming\FameWebs_Internship\linkedin_lead_generator\linkedin_extension
+                </div>
+              </li>
+              <li>Return here and click <strong>"Re-check Extension"</strong> below.</li>
+            </ol>
+          </div>
+
+          <!-- Verification Feedback Message -->
+          <div id="linkedin-feedback-box" class="hidden p-3 rounded-lg text-xs flex flex-col gap-1 transition-all"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center gap-2 pt-3 border-t border-surface-container">
+          <button type="button" id="btn-open-linkedin" onclick="openLinkedInTab()" class="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-[#0a66c2] text-white hover:bg-[#004182] transition-colors text-xs font-semibold shadow-sm cursor-pointer">
+            <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+            <span>1. Open LinkedIn</span>
+          </button>
+          <button type="button" id="btn-verify-linkedin" onclick="requestExtensionVerification()" class="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-surface-container text-on-surface border border-border-default hover:bg-surface-container-high transition-colors text-xs font-semibold cursor-pointer">
+            <span class="material-symbols-outlined text-[18px]">verified</span>
+            <span>2. Verify Session</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Help Link -->
+  <div class="flex items-center justify-between text-xs text-outline px-1">
+    <span>Need help configuring your integrations? View FameWeb Setup Docs.</span>
+    <span class="font-mono text-[11px]">FameWeb Secure Bridge v1.0</span>
+  </div>
+</div>
+
+<script src="/static/js/onboarding_integrations.js"></script>
+{% endblock %}
+

@@ -3,8 +3,12 @@ from flask_cors import CORS
 import os
 import time
 import json
+import logging
+import threading
 from typing import List, Dict, Any
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 from parser import parse_pasted_comments
 from analyzer import analyze_comments
@@ -31,7 +35,8 @@ from legacy.gtm_engine import (
 from app.services.gtm_pipeline_service import (
     get_user_gtm_context,
     start_gtm_research_job,
-    get_user_opportunities
+    get_user_opportunities,
+    reconcile_stale_research_jobs
 )
 from app.models.all_models import ResearchJobs
 
@@ -39,8 +44,9 @@ from config import Config
 from app.security.csrf import init_csrf
 from app.security.limiter import init_limiter, limiter
 from app.routes.auth import auth_bp
-from app.routes.onboarding import onboarding_bp
+from app.routes.onboarding import onboarding_bp, import_extension_profile
 from app.routes.pages import pages_bp
+from app.routes.admin import admin_bp
 from app.database import init_db, db_session
 
 load_dotenv()
@@ -56,6 +62,97 @@ init_limiter(app)
 app.register_blueprint(auth_bp)
 app.register_blueprint(onboarding_bp)
 app.register_blueprint(pages_bp)
+app.register_blueprint(admin_bp)
+
+# Register profile optimization extension import endpoint alias
+app.add_url_rule(
+    "/api/profile-optimization/import-extension-profile",
+    endpoint="profile_optimization_import_extension_profile",
+    view_func=import_extension_profile,
+    methods=["POST"],
+)
+
+# Application startup recovery state flag
+_startup_recovery_completed = False
+_startup_recovery_lock = threading.Lock()
+
+STARTUP_RECOVERY_ADVISORY_LOCK_KEY = 3367990968  # Deterministic CRC32 key for fameweb_startup_recovery
+
+
+def run_startup_recovery(app_instance=None, force: bool = False):
+    """
+    Explicit application startup reconciliation for abandoned/stale research jobs.
+    Coordinates across concurrent WSGI processes using Postgres session-level advisory locks
+    (`pg_try_advisory_lock`), ensuring only one worker performs startup recovery while
+    other workers safely pass without blocking or duplicate execution.
+
+    Guarantees:
+    - Thread-safe and process-safe across multi-worker WSGI deployments (Gunicorn/uWSGI/Waitress).
+    - Idempotent within the current process lifetime via `_startup_recovery_completed`.
+    - Does NOT execute on module import (e.g. by CLI, Alembic, or tests).
+    - Can still be explicitly invoked for testing and maintenance routines (pass force=True to bypass process-level cache).
+    """
+    global _startup_recovery_completed
+    target_app = app_instance or app
+
+    with _startup_recovery_lock:
+        if _startup_recovery_completed and not force:
+            return {"recovered": 0, "skipped": True, "reason": "already_executed_in_process"}
+
+        try:
+            with target_app.app_context():
+                from app.database import engine
+                from sqlalchemy import text
+
+                with engine.connect() as conn:
+                    # Check if Postgres advisory locking is supported
+                    is_pg = conn.dialect.name == "postgresql"
+                    got_lock = True
+                    if is_pg:
+                        got_lock = bool(
+                            conn.execute(
+                                text("SELECT pg_try_advisory_lock(:k)"),
+                                {"k": STARTUP_RECOVERY_ADVISORY_LOCK_KEY}
+                            ).scalar()
+                        )
+
+                    if not got_lock:
+                        logger.info("[STARTUP RECOVERY] Another process is running or has run startup recovery. Passing.")
+                        return {"recovered": 0, "skipped": True, "reason": "advisory_lock_held_by_peer"}
+
+                    try:
+                        startup_stats = reconcile_stale_research_jobs()
+                        recovered = startup_stats.get("recovered", 0)
+                        if recovered > 0:
+                            logger.info(f"[STARTUP RECOVERY] Reconciled {recovered} stale research job(s).")
+                        _startup_recovery_completed = True
+                        return startup_stats
+                    finally:
+                        if is_pg:
+                            try:
+                                conn.execute(
+                                    text("SELECT pg_advisory_unlock(:k)"),
+                                    {"k": STARTUP_RECOVERY_ADVISORY_LOCK_KEY}
+                                )
+                            except Exception as unlock_err:
+                                logger.warning(f"[STARTUP RECOVERY] Error unlocking advisory lock: {unlock_err}")
+
+        except Exception as _startup_rec_err:
+            logger.warning(f"[STARTUP RECOVERY] Stale job reconciliation skipped on startup: {_startup_rec_err}")
+            return {"recovered": 0, "error": str(_startup_rec_err)}
+
+
+@app.before_request
+def ensure_production_startup_recovery():
+    """
+    Ensures startup recovery runs exactly once per cluster startup upon the first incoming request
+    in production WSGI environments (Gunicorn, uWSGI, Waitress) without executing at module import.
+    Bypasses execution during pytest test suites (FLASK_TESTING=1) to preserve test isolation.
+    """
+    if os.environ.get("FLASK_TESTING") == "1":
+        return
+    if not _startup_recovery_completed:
+        run_startup_recovery(app)
 
 # Close session at end of request
 @app.teardown_appcontext
@@ -811,4 +908,5 @@ if __name__ == "__main__":
     print("[FLASK DEBUG] Registered routes:", flush=True)
     for rule in app.url_map.iter_rules():
         print(f"[FLASK DEBUG] {rule} -> {rule.methods}", flush=True)
+    run_startup_recovery(app)
     app.run(debug=True, port=5000)

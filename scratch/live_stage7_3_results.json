@@ -1,0 +1,101 @@
+{
+  "success": true,
+  "status": "SUCCESS",
+  "provider": "FEDERATED_MULTI_ENGINE",
+  "results": [
+    {
+      "urn_id": "kurt-srivastava-02s",
+      "name": "Kurt S",
+      "role": "VP Sales",
+      "company": null,
+      "location": "India",
+      "profile_url": "https://in.linkedin.com/in/kurt-srivastava-02s",
+      "raw_headline": "Kurt S - VP Sales | Scaling revenue and sales teams | B2B SaaS, Finance ... | Scaling revenue and sales teams | , Finance Automation | NA, India, and APAC \u00b7 I scale  revenue and the teams behind it. 16+ years selling to CFOs and finance leaders, mostly in AR/AP, order-to-cash and CFO-office automation. At HighRadius I closed $35M+ in ARR over five years, with teams closing 550+ deals. I led a 25-person sales org through four managers and made ...",
+      "source_evidence": "Kurt S - VP Sales | Scaling revenue and sales teams | B2B SaaS, Finance ... | Scaling revenue and sales teams | , Finance Automation | NA, India, and APAC \u00b7 I scale  revenue and the teams behind it. 16+ years selling to CFOs and finance leaders, mostly in AR/AP, order-to-cash and CFO-office automation. At HighRadius I closed $35M+ in ARR over five years, with teams closing 550+ deals. I led a 25-person sales org through four managers and made ...",
+      "source_query": "VP Sales",
+      "provider": "FEDERATED_SEARCH",
+      "distance": "PUBLIC_INDEX",
+      "validation_flags": {
+        "URL_FORMAT_VALID": true,
+        "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+        "ROLE_SUPPORTED": true,
+        "COMPANY_SUPPORTED": false,
+        "LOCATION_SUPPORTED": true
+      },
+      "sources": [
+        "duckduckgo"
+      ],
+      "queries": [
+        "site:linkedin.com/in \"VP Sales\" \"B2B SaaS\" Bengaluru"
+      ],
+      "discovered_at": "2026-11-09T07:59:02.535161"
+    },
+    {
+      "urn_id": "aputhomas",
+      "name": "Apu Thomas",
+      "role": "CMO",
+      "company": null,
+      "location": "India",
+      "profile_url": "https://in.linkedin.com/in/aputhomas",
+      "raw_headline": "Apu Thomas - CMO | VP Sales & Marketing | B2B SaaS & AI | GTM | Demand ...CMO |  & Marketing |  & AI | GTM | Demand Gen | Growth | ISB MBA | 15+ Yrs \u00b7 Experience: Scienaptic AI \u00b7 Education: Indian School of Business \u00b7 Location:  \u00b7 500+ connections on LinkedIn. View Apu Thomas' profile on LinkedIn, a professional community of 1 billion members.",
+      "source_evidence": "Apu Thomas - CMO | VP Sales & Marketing | B2B SaaS & AI | GTM | Demand ...CMO |  & Marketing |  & AI | GTM | Demand Gen | Growth | ISB MBA | 15+ Yrs \u00b7 Experience: Scienaptic AI \u00b7 Education: Indian School of Business \u00b7 Location:  \u00b7 500+ connections on LinkedIn. View Apu Thomas' profile on LinkedIn, a professional community of 1 billion members.",
+      "source_query": "VP Sales",
+      "provider": "FEDERATED_SEARCH",
+      "distance": "PUBLIC_INDEX",
+      "validation_flags": {
+        "URL_FORMAT_VALID": true,
+        "NAME_SUPPORTED_BY_TITLE_OR_SNIPPET": true,
+        "ROLE_SUPPORTED": true,
+        "COMPANY_SUPPORTED": false,
+        "LOCATION_SUPPORTED": true
+      },
+      "sources": [
+        "duckduckgo"
+      ],
+      "queries": [
+        "site:linkedin.com/in \"VP Sales\" \"B2B SaaS\" Bengaluru"
+      ],
+      "discovered_at": "2026-11-09T07:59:02.535161"
+    }
+  ],
+  "count": 2,
+  "raw_results_total": 18,
+  "unique_profiles_count": 2,
+  "duplicates_count": 0,
+  "provider_telemetry": {
+    "google": {
+      "name": "Google (OpenSERP)",
+      "status": "SUCCESS",
+      "queries_dispatched": 1,
+      "raw_results_count": 8,
+      "error": null,
+      "cooldown_remaining": 0.0
+    },
+    "bing": {
+      "name": "Bing (OpenSERP)",
+      "status": "SUCCESS",
+      "queries_dispatched": 1,
+      "raw_results_count": 8,
+      "error": null,
+      "cooldown_remaining": 0.0
+    },
+    "duckduckgo": {
+      "name": "DuckDuckGo (Native)",
+      "status": "SUCCESS",
+      "queries_dispatched": 1,
+      "raw_results_count": 2,
+      "error": null,
+      "cooldown_remaining": 0.0
+    },
+    "yandex": {
+      "name": "Yandex (OpenSERP)",
+      "status": "CAPTCHA_DETECTED",
+      "queries_dispatched": 1,
+      "raw_results_count": 0,
+      "error": "Yandex rate limit / CAPTCHA detected (HTTP 429)",
+      "cooldown_remaining": 300.0
+    }
+  },
+  "started_at": "2026-11-09T07:58:50.589418",
+  "completed_at": "2026-11-09T07:59:11.664019"
+}

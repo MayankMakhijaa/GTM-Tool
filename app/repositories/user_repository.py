@@ -1,5 +1,13 @@
 from app.database import db_session
-from app.models.all_models import UserTable, OnboardingStep
+from app.models.all_models import (
+    UserTable,
+    OnboardingStep,
+    Tenant,
+    TenantMembership,
+    TenantRole,
+    TenantStatus,
+    TenantMembershipStatus
+)
 from sqlalchemy.exc import IntegrityError
 from typing import Optional
 
@@ -24,8 +32,31 @@ def create_user(name: str, email: str, phone: str, password_hash: str) -> Option
     )
     try:
         db_session.add(user)
+        db_session.flush()  # Flush to populate user.user_id within the transaction
+
+        tenant_name = f"{name.strip()}'s Workspace" if name and name.strip() else f"Workspace {user.user_id}"
+        tenant = Tenant(
+            name=tenant_name,
+            slug=f"tenant-{user.user_id}",
+            status=TenantStatus.ACTIVE.value,
+            is_deleted=False
+        )
+        db_session.add(tenant)
+        db_session.flush()  # Flush to populate tenant.id
+
+        membership = TenantMembership(
+            tenant_id=tenant.id,
+            user_id=user.user_id,
+            role=TenantRole.OWNER.value,
+            status=TenantMembershipStatus.ACTIVE.value
+        )
+        db_session.add(membership)
         db_session.commit()
         return user
     except IntegrityError:
         db_session.rollback()
         return None
+    except Exception:
+        db_session.rollback()
+        raise
+

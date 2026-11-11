@@ -58,8 +58,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 if (res.ok && data.success) {
-                    window.location.href = '/dashboard';
+                    sessionStorage.removeItem('fameweb_csrf_retry');
+                    window.location.href = data.redirect || '/dashboard';
+                } else if (data && data.error === 'CSRF_ERROR') {
+                    // Recover from expired or invalid CSRF token without treating as credential error
+                    signInBtn.disabled = false;
+                    signInBtn.innerHTML = originalBtnText;
+
+                    const hasRetried = sessionStorage.getItem('fameweb_csrf_retry');
+                    if (!hasRetried) {
+                        sessionStorage.setItem('fameweb_csrf_retry', '1');
+                        alert('Your security session has expired. The page will reload with a fresh security token.');
+                        window.location.reload();
+                    } else {
+                        sessionStorage.removeItem('fameweb_csrf_retry');
+                        alert('Security session verification failed. Please refresh the page and try again.');
+                    }
+                    return;
                 } else if (data && data.error === 'EMAIL_NOT_VERIFIED') {
+                    sessionStorage.removeItem('fameweb_csrf_retry');
                     const emailForVerify = data.email || (identifier.includes('@') ? identifier.trim().toLowerCase() : '');
                     if (emailForVerify) {
                         sessionStorage.setItem('fameweb_pending_verification_email', emailForVerify);
@@ -68,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = data.redirect ? `${data.redirect}?email=${encodeURIComponent(emailForVerify)}` : '/verify-email';
                     return;
                 } else {
+                    sessionStorage.removeItem('fameweb_csrf_retry');
                     throw new Error(data.message || 'Invalid credentials');
                 }
             } catch (err) {

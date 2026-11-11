@@ -5,290 +5,569 @@
 {% endblock %}
 {% block content %}
 <div class="flex flex-col w-full px-space-xl py-space-lg gap-space-lg">
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
-<div class="flex flex-col gap-space-xs">
-<div class="flex items-center gap-space-xs">
-<span class="font-code-sm text-code-sm text-primary uppercase tracking-wider">Audit &amp; Archive</span>
-<span class="text-outline-variant font-body-sm text-body-sm">•</span>
-<span class="font-code-sm text-code-sm text-on-surface-variant">Continuous Sync (v3.4.2)</span>
-</div>
-<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">History</h1>
-<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-        Review previously generated leads and GTM research activity. Inspect autonomous pipeline telemetry, enrichment logs, and conversion velocity across accounts.
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+    <div class="flex flex-col gap-space-xs">
+      <div class="flex items-center gap-space-xs">
+        <span class="font-code-sm text-code-sm text-primary uppercase tracking-wider">Audit &amp; Archive</span>
+        <span class="text-outline-variant font-body-sm text-body-sm">•</span>
+        <span class="font-code-sm text-code-sm text-on-surface-variant">Continuous Sync (v3.4.2)</span>
+      </div>
+      <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">History</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+        Review previously generated leads and GTM research activity. Inspect autonomous pipeline telemetry, enrichment
+        logs, and conversion velocity across accounts.
       </p>
-</div>
-<div class="flex items-center gap-space-sm self-start md:self-auto">
-<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container-lowest text-on-surface hover:bg-surface-container shadow-sm rounded-lg font-label-md text-label-md transition-colors" type="button">
-<span class="material-symbols-outlined text-[18px] text-outline">tune</span>
-<span>View Presets</span>
-</button>
-<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm bg-primary text-on-primary hover:bg-secondary shadow-sm rounded-lg font-label-md text-label-md transition-all active:scale-[0.98]" type="button">
-<span class="material-symbols-outlined text-[18px]">download</span>
-<span>Export CSV / JSON</span>
-</button>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
-<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Researched</span>
-<span class="p-1 rounded-full bg-surface-container text-primary">
-<span class="material-symbols-outlined text-[18px]">query_stats</span>
-</span>
-</div>
-<div class="mt-space-md flex items-baseline justify-between">
-<span class="font-headline-lg text-headline-lg text-on-surface font-bold">148</span>
-<span class="font-label-sm text-label-sm text-tertiary flex items-center font-semibold">
-<span class="material-symbols-outlined text-[14px]">arrow_upward</span> +14.2%
+    </div>
+    <div class="flex items-center gap-space-sm self-start md:self-auto">
+      <button
+        class="inline-flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container-lowest text-on-surface hover:bg-surface-container shadow-sm rounded-lg font-label-md text-label-md transition-colors"
+        type="button">
+        <span class="material-symbols-outlined text-[18px] text-outline">tune</span>
+        <span>View Presets</span>
+      </button>
+      <button
+        class="inline-flex items-center gap-space-xs px-space-md py-space-sm bg-primary text-on-primary hover:bg-secondary shadow-sm rounded-lg font-label-md text-label-md transition-all active:scale-[0.98]"
+        type="button">
+        <span class="material-symbols-outlined text-[18px]">download</span>
+        <span>Export CSV / JSON</span>
+      </button>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
+    <div
+      class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total
+          Researched</span>
+        <span class="p-1 rounded-full bg-surface-container text-primary">
+          <span class="material-symbols-outlined text-[18px]">query_stats</span>
         </span>
-</div>
-<div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
-<div class="bg-primary h-full rounded-full" style="width: 72%;"></div>
-</div>
-</div>
-<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Outreach Ready</span>
-<span class="p-1 rounded-full bg-surface-container text-tertiary">
-<span class="material-symbols-outlined text-[18px]">verified</span>
-</span>
-</div>
-<div class="mt-space-md flex items-baseline justify-between">
-<span class="font-headline-lg text-headline-lg text-on-surface font-bold">64</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">43.2% ratio</span>
-</div>
-<div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
-<div class="bg-tertiary h-full rounded-full" style="width: 43%;"></div>
-</div>
-</div>
-<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Avg Lead Score</span>
-<span class="p-1 rounded-full bg-surface-container text-secondary">
-<span class="material-symbols-outlined text-[18px]">speed</span>
-</span>
-</div>
-<div class="mt-space-md flex items-baseline justify-between">
-<span class="font-headline-lg text-headline-lg text-on-surface font-bold">87.4%</span>
-<span class="font-label-sm text-label-sm text-secondary font-semibold">Tier-1 Fit</span>
-</div>
-<div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
-<div class="bg-secondary h-full rounded-full" style="width: 87%;"></div>
-</div>
-</div>
-<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Meeting Conversion</span>
-<span class="p-1 rounded-full bg-surface-container text-primary">
-<span class="material-symbols-outlined text-[18px]">trending_up</span>
-</span>
-</div>
-<div class="mt-space-md flex items-baseline justify-between">
-<span class="font-headline-lg text-headline-lg text-on-surface font-bold">18.2%</span>
-<span class="font-label-sm text-label-sm text-tertiary flex items-center font-semibold">
-<span class="material-symbols-outlined text-[14px]">trending_up</span> 27 meetings
+      </div>
+      <div class="mt-space-md flex items-baseline justify-between">
+        <span class="font-headline-lg text-headline-lg text-on-surface font-bold">148</span>
+        <span class="font-label-sm text-label-sm text-tertiary flex items-center font-semibold">
+          <span class="material-symbols-outlined text-[14px]">arrow_upward</span> +14.2%
         </span>
-</div>
-<div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
-<div class="bg-primary-container h-full rounded-full" style="width: 18.2%;"></div>
-</div>
-</div>
-</div>
-<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-md">
-<div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm items-center">
-<div class="md:col-span-4 relative flex items-center">
-<span class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">search</span>
-<input class="w-full pl-9 pr-space-md py-space-sm bg-surface-container-low text-on-surface placeholder:text-outline text-body-md font-body-md rounded-lg focus:outline-none focus:bg-surface-container-lowest focus:shadow-[0_0_0_2px_rgba(37,99,235,0.2)] transition-all" placeholder="Search by lead name, company, or domain..." type="text"/>
-</div>
-<div class="md:col-span-8 flex flex-wrap items-center justify-start md:justify-end gap-space-xs">
-<div class="relative">
-<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
-<option>Last 30 Days ▼</option>
-<option>Today</option>
-<option>Last 7 Days</option>
-<option>Last 90 Days</option>
-<option>Year to Date</option>
-</select>
-<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
-</div>
-<div class="relative">
-<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
-<option>All Statuses (Qualified, Reached, Closed) ▼</option>
-<option>Outreach Ready</option>
-<option>Contacted</option>
-<option>Meeting Booked</option>
-<option>Qualified</option>
-<option>Disqualified</option>
-</select>
-<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
-</div>
-<div class="relative">
-<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
-<option>Score &gt; 80% ▼</option>
-<option>All Scores</option>
-<option>Score &gt; 90% (Elite)</option>
-<option>Score 70% - 80%</option>
-<option>Score &lt; 70%</option>
-</select>
-<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
-</div>
-<div class="relative">
-<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
-<option>All Companies ▼</option>
-<option>Nordix Cloud Systems</option>
-<option>Veloce Security AI</option>
-<option>Aethelgard Logistics</option>
-<option>Datastream IO</option>
-<option>Hyperion Data Labs</option>
-</select>
-<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
-</div>
-<button class="p-space-sm text-outline hover:text-on-surface hover:bg-surface-container rounded-lg transition-colors" title="Reset Filters" type="button">
-<span class="material-symbols-outlined text-[18px]">filter_alt_off</span>
-</button>
-</div>
-</div>
-<div class="flex items-center gap-space-xs flex-wrap pt-space-xs">
-<span class="font-label-sm text-label-sm text-on-surface-variant mr-1">Active Filters:</span>
-<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded-full text-on-surface font-code-sm text-code-sm">
+      </div>
+      <div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
+        <div class="bg-primary h-full rounded-full" style="width: 72%;"></div>
+      </div>
+    </div>
+    <div
+      class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Outreach Ready</span>
+        <span class="p-1 rounded-full bg-surface-container text-tertiary">
+          <span class="material-symbols-outlined text-[18px]">verified</span>
+        </span>
+      </div>
+      <div class="mt-space-md flex items-baseline justify-between">
+        <span class="font-headline-lg text-headline-lg text-on-surface font-bold">64</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">43.2% ratio</span>
+      </div>
+      <div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
+        <div class="bg-tertiary h-full rounded-full" style="width: 43%;"></div>
+      </div>
+    </div>
+    <div
+      class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Avg Lead Score</span>
+        <span class="p-1 rounded-full bg-surface-container text-secondary">
+          <span class="material-symbols-outlined text-[18px]">speed</span>
+        </span>
+      </div>
+      <div class="mt-space-md flex items-baseline justify-between">
+        <span class="font-headline-lg text-headline-lg text-on-surface font-bold">87.4%</span>
+        <span class="font-label-sm text-label-sm text-secondary font-semibold">Tier-1 Fit</span>
+      </div>
+      <div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
+        <div class="bg-secondary h-full rounded-full" style="width: 87%;"></div>
+      </div>
+    </div>
+    <div
+      class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Meeting
+          Conversion</span>
+        <span class="p-1 rounded-full bg-surface-container text-primary">
+          <span class="material-symbols-outlined text-[18px]">trending_up</span>
+        </span>
+      </div>
+      <div class="mt-space-md flex items-baseline justify-between">
+        <span class="font-headline-lg text-headline-lg text-on-surface font-bold">18.2%</span>
+        <span class="font-label-sm text-label-sm text-tertiary flex items-center font-semibold">
+          <span class="material-symbols-outlined text-[14px]">trending_up</span> 27 meetings
+        </span>
+      </div>
+      <div class="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">
+        <div class="bg-primary-container h-full rounded-full" style="width: 18.2%;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-md">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm items-center">
+      <div class="md:col-span-4 relative flex items-center">
+        <span
+          class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">search</span>
+        <input
+          class="w-full pl-9 pr-space-md py-space-sm bg-surface-container-low text-on-surface placeholder:text-outline text-body-md font-body-md rounded-lg focus:outline-none focus:bg-surface-container-lowest focus:shadow-[0_0_0_2px_rgba(37,99,235,0.2)] transition-all"
+          placeholder="Search by lead name, company, or domain..." type="text" />
+      </div>
+      <div class="md:col-span-8 flex flex-wrap items-center justify-start md:justify-end gap-space-xs">
+        <div class="relative">
+          <select
+            class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
+            <option>Last 30 Days ▼</option>
+            <option>Today</option>
+            <option>Last 7 Days</option>
+            <option>Last 90 Days</option>
+            <option>Year to Date</option>
+          </select>
+          <span
+            class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
+        </div>
+        <div class="relative">
+          <select
+            class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
+            <option>All Statuses (Qualified, Reached, Closed) ▼</option>
+            <option>Outreach Ready</option>
+            <option>Contacted</option>
+            <option>Meeting Booked</option>
+            <option>Qualified</option>
+            <option>Disqualified</option>
+          </select>
+          <span
+            class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
+        </div>
+        <div class="relative">
+          <select
+            class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
+            <option>Score &gt; 80% ▼</option>
+            <option>All Scores</option>
+            <option>Score &gt; 90% (Elite)</option>
+            <option>Score 70% - 80%</option>
+            <option>Score &lt; 70%</option>
+          </select>
+          <span
+            class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
+        </div>
+        <div class="relative">
+          <select
+            class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md py-space-sm pl-space-md pr-8 rounded-lg cursor-pointer hover:bg-surface-container focus:outline-none transition-colors">
+            <option>All Companies ▼</option>
+            <option>Nordix Cloud Systems</option>
+            <option>Veloce Security AI</option>
+            <option>Aethelgard Logistics</option>
+            <option>Datastream IO</option>
+            <option>Hyperion Data Labs</option>
+          </select>
+          <span
+            class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline pointer-events-none">expand_more</span>
+        </div>
+        <button
+          class="p-space-sm text-outline hover:text-on-surface hover:bg-surface-container rounded-lg transition-colors"
+          title="Reset Filters" type="button">
+          <span class="material-symbols-outlined text-[18px]">filter_alt_off</span>
+        </button>
+      </div>
+    </div>
+    <div class="flex items-center gap-space-xs flex-wrap pt-space-xs">
+      <span class="font-label-sm text-label-sm text-on-surface-variant mr-1">Active Filters:</span>
+      <span
+        class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded-full text-on-surface font-code-sm text-code-sm">
         Time: 30D
-        <button class="hover:text-error flex items-center"><span class="material-symbols-outlined text-[14px]">close</span></button>
-</span>
-<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded-full text-on-surface font-code-sm text-code-sm">
+        <button class="hover:text-error flex items-center"><span
+            class="material-symbols-outlined text-[14px]">close</span></button>
+      </span>
+      <span
+        class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded-full text-on-surface font-code-sm text-code-sm">
         Score &gt;= 80%
-        <button class="hover:text-error flex items-center"><span class="material-symbols-outlined text-[14px]">close</span></button>
-</span>
-<button class="font-label-sm text-label-sm text-primary hover:underline ml-space-xs">Clear all</button>
-</div>
-</div>
-<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider select-none">
-<th class="py-space-md pl-space-lg pr-space-sm font-semibold">Date Researched</th>
-<th class="py-space-md px-space-md font-semibold">Lead Name</th>
-<th class="py-space-md px-space-md font-semibold">Company</th>
-<th class="py-space-md px-space-md font-semibold">Role</th>
-<th class="py-space-md px-space-md font-semibold text-center">Lead Score</th>
-<th class="py-space-md px-space-md font-semibold">Intent Level</th>
-<th class="py-space-md px-space-md font-semibold">Status</th>
-<th class="py-space-md px-space-md font-semibold">Source</th>
-<th class="py-space-md pr-space-lg pl-space-md font-semibold text-right">Actions</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-surface-container-low font-body-md text-body-md" id="history-table-body">
-</tbody>
-</table>
-</div>
-<div class="px-space-lg py-space-md bg-surface-container-low flex flex-col md:flex-row items-center justify-between gap-space-md select-none">
-<div class="flex items-center gap-space-xs">
-<span class="font-body-sm text-body-sm text-on-surface-variant">Showing</span>
-<span class="font-label-md text-label-md text-on-surface font-semibold" id="pagination-range">0 to 0</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant" id="pagination-total">of 0 historical prospects</span>
-</div>
-<div class="inline-flex items-center gap-1" id="pagination-controls">
-</div>
-<div class="inline-flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-full shadow-sm">
-<span class="font-label-sm text-label-sm text-on-surface-variant">Total Outreach Drafts:</span>
-<span class="font-code-sm text-code-sm text-primary font-bold">64</span>
-<span class="text-outline-variant font-label-sm text-label-sm">|</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">Conversion:</span>
-<span class="font-code-sm text-code-sm text-tertiary font-bold">18.2%</span>
-</div>
-</div>
-</div>
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
-<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between mb-space-sm">
-<div class="flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-primary text-[20px]">schedule</span>
-<span class="font-label-md text-label-md text-on-surface font-semibold">Autonomous Ingest Frequency</span>
-</div>
-<span class="font-code-sm text-code-sm text-tertiary">Realtime</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-        The research scheduler crawls verified domains every 15 minutes. High Surge accounts trigger automated executive email drafting immediately upon ingest.
+        <button class="hover:text-error flex items-center"><span
+            class="material-symbols-outlined text-[14px]">close</span></button>
+      </span>
+      <button class="font-label-sm text-label-sm text-primary hover:underline ml-space-xs">Clear all</button>
+    </div>
+  </div>
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr
+            class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider select-none">
+            <th class="py-space-md pl-space-lg pr-space-sm font-semibold">Date Researched</th>
+            <th class="py-space-md px-space-md font-semibold">Lead Name</th>
+            <th class="py-space-md px-space-md font-semibold">Company</th>
+            <th class="py-space-md px-space-md font-semibold">Role</th>
+            <th class="py-space-md px-space-md font-semibold text-center">Lead Score</th>
+            <th class="py-space-md px-space-md font-semibold">Intent Level</th>
+            <th class="py-space-md px-space-md font-semibold">Status</th>
+            <th class="py-space-md px-space-md font-semibold">Source</th>
+            <th class="py-space-md pr-space-lg pl-space-md font-semibold text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container-low font-body-md text-body-md" id="history-table-body">
+        </tbody>
+      </table>
+    </div>
+    <div
+      class="px-space-lg py-space-md bg-surface-container-low flex flex-col md:flex-row items-center justify-between gap-space-md select-none">
+      <div class="flex items-center gap-space-xs">
+        <span class="font-body-sm text-body-sm text-on-surface-variant">Showing</span>
+        <span class="font-label-md text-label-md text-on-surface font-semibold" id="pagination-range">0 to 0</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant" id="pagination-total">of 0 historical
+          prospects</span>
+      </div>
+      <div class="inline-flex items-center gap-1" id="pagination-controls">
+      </div>
+      <div
+        class="inline-flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-full shadow-sm">
+        <span class="font-label-sm text-label-sm text-on-surface-variant">Total Outreach Drafts:</span>
+        <span class="font-code-sm text-code-sm text-primary font-bold">64</span>
+        <span class="text-outline-variant font-label-sm text-label-sm">|</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">Conversion:</span>
+        <span class="font-code-sm text-code-sm text-tertiary font-bold">18.2%</span>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-space-sm">
+        <div class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-primary text-[20px]">schedule</span>
+          <span class="font-label-md text-label-md text-on-surface font-semibold">Autonomous Ingest Frequency</span>
+        </div>
+        <span class="font-code-sm text-code-sm text-tertiary">Realtime</span>
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">
+        The research scheduler crawls verified domains every 15 minutes. High Surge accounts trigger automated executive
+        email drafting immediately upon ingest.
       </p>
-<div class="mt-space-md flex items-center justify-between text-on-surface-variant font-code-sm text-code-sm">
-<span>Next Batch: <strong class="text-on-surface font-semibold">03m 42s</strong></span>
-<span>Queue: <strong class="text-on-surface font-semibold">12 targets</strong></span>
-</div>
-</div>
-<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between mb-space-sm">
-<div class="flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-secondary text-[20px]">hub</span>
-<span class="font-label-md text-label-md text-on-surface font-semibold">Intent Signal Distribution</span>
-</div>
-<span class="font-code-sm text-code-sm text-outline">Historical Avg</span>
-</div>
-<div class="flex items-center gap-space-sm py-space-xs">
-<div class="flex-1 flex flex-col gap-1">
-<div class="flex justify-between font-label-sm text-label-sm">
-<span>High Surge</span>
-<span class="font-code-sm text-code-sm text-on-surface">42%</span>
-</div>
-<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
-<div class="bg-primary h-full" style="width: 42%;"></div>
-</div>
-</div>
-<div class="flex-1 flex flex-col gap-1">
-<div class="flex justify-between font-label-sm text-label-sm">
-<span>Funded</span>
-<span class="font-code-sm text-code-sm text-on-surface">31%</span>
-</div>
-<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
-<div class="bg-secondary h-full" style="width: 31%;"></div>
-</div>
-</div>
-<div class="flex-1 flex flex-col gap-1">
-<div class="flex justify-between font-label-sm text-label-sm">
-<span>Hiring</span>
-<span class="font-code-sm text-code-sm text-on-surface">27%</span>
-</div>
-<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
-<div class="bg-tertiary h-full" style="width: 27%;"></div>
-</div>
-</div>
-</div>
-<div class="mt-space-sm font-body-sm text-body-sm text-on-surface-variant flex items-center justify-between">
-<span>Signal Quality Index</span>
-<span class="font-label-md text-label-md text-tertiary font-bold">98.4 / 100</span>
-</div>
-</div>
-<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between mb-space-sm">
-<div class="flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-tertiary text-[20px]">verified_user</span>
-<span class="font-label-md text-label-md text-on-surface font-semibold">Compliance &amp; Privacy Log</span>
-</div>
-<span class="font-label-sm text-label-sm text-tertiary bg-tertiary/10 px-2 py-0.5 rounded">GDPR / CCPA</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-        All 148 crawled records maintain opt-out and provenance hashes. Autonomous email generations follow verified enterprise deliverability quotas.
+      <div class="mt-space-md flex items-center justify-between text-on-surface-variant font-code-sm text-code-sm">
+        <span>Next Batch: <strong class="text-on-surface font-semibold">03m 42s</strong></span>
+        <span>Queue: <strong class="text-on-surface font-semibold">12 targets</strong></span>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-space-sm">
+        <div class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-secondary text-[20px]">hub</span>
+          <span class="font-label-md text-label-md text-on-surface font-semibold">Intent Signal Distribution</span>
+        </div>
+        <span class="font-code-sm text-code-sm text-outline">Historical Avg</span>
+      </div>
+      <div class="flex items-center gap-space-sm py-space-xs">
+        <div class="flex-1 flex flex-col gap-1">
+          <div class="flex justify-between font-label-sm text-label-sm">
+            <span>High Surge</span>
+            <span class="font-code-sm text-code-sm text-on-surface">42%</span>
+          </div>
+          <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+            <div class="bg-primary h-full" style="width: 42%;"></div>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col gap-1">
+          <div class="flex justify-between font-label-sm text-label-sm">
+            <span>Funded</span>
+            <span class="font-code-sm text-code-sm text-on-surface">31%</span>
+          </div>
+          <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+            <div class="bg-secondary h-full" style="width: 31%;"></div>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col gap-1">
+          <div class="flex justify-between font-label-sm text-label-sm">
+            <span>Hiring</span>
+            <span class="font-code-sm text-code-sm text-on-surface">27%</span>
+          </div>
+          <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+            <div class="bg-tertiary h-full" style="width: 27%;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-space-sm font-body-sm text-body-sm text-on-surface-variant flex items-center justify-between">
+        <span>Signal Quality Index</span>
+        <span class="font-label-md text-label-md text-tertiary font-bold">98.4 / 100</span>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-space-sm">
+        <div class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-tertiary text-[20px]">verified_user</span>
+          <span class="font-label-md text-label-md text-on-surface font-semibold">Compliance &amp; Privacy Log</span>
+        </div>
+        <span class="font-label-sm text-label-sm text-tertiary bg-tertiary/10 px-2 py-0.5 rounded">GDPR / CCPA</span>
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">
+        All 148 crawled records maintain opt-out and provenance hashes. Autonomous email generations follow verified
+        enterprise deliverability quotas.
       </p>
-<div class="mt-space-md flex items-center justify-between">
-<a class="font-label-sm text-label-sm text-primary hover:underline flex items-center gap-0.5" href="javascript:void(0)">
-<span>Download Audit Trail</span>
-<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-</a>
-<span class="font-code-sm text-code-sm text-outline">SHA-256 Validated</span>
-</div>
-</div>
-</div>
-</div>
-<script>
-  (function() {
-    const navLinks = document.querySelectorAll('aside nav a');
-    navLinks.forEach(link => {
-      const path = link.getAttribute('data-path');
-      if (path === 'history') {
-        link.className = 'flex items-center gap-space-md px-space-md py-space-sm rounded-lg bg-primary-container text-on-primary font-label-md text-label-md shadow-sm transition-colors';
-      } else {
-        link.className = 'flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors';
+      <div class="mt-space-md flex items-center justify-between">
+        <a class="font-label-sm text-label-sm text-primary hover:underline flex items-center gap-0.5"
+          href="javascript:void(0)">
+          <span>Download Audit Trail</span>
+          <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+        </a>
+        <span class="font-code-sm text-code-sm text-outline">SHA-256 Validated</span>
+      </div>
+    </div>
+  </div>
+  <!-- ============================================================================== -->
+  <!-- Bulk Email Sending History Section -->
+  <!-- ============================================================================== -->
+  <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md mt-space-lg">
+    <div class="flex items-center justify-between border-b border-surface-container pb-space-sm flex-wrap gap-2">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[24px]">forward_to_inbox</span>
+        <h2 class="font-headline-md text-headline-md text-on-surface">Bulk Email Sending History</h2>
+        <span id="bulk-batch-count"
+          class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">0
+          Campaigns</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="loadEmailBatches()"
+          class="inline-flex items-center gap-1 px-space-sm py-1 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface font-label-sm text-label-sm transition-colors">
+          <span class="material-symbols-outlined text-[16px]">refresh</span>
+          <span>Refresh</span>
+        </button>
+        <a href="/emails"
+          class="inline-flex items-center gap-1 bg-primary text-on-primary px-space-md py-1.5 rounded-lg shadow-sm hover:bg-secondary font-label-sm text-label-sm transition-colors">
+          <span class="material-symbols-outlined text-[16px]">add</span>
+          <span>New Campaign</span>
+        </a>
+      </div>
+    </div>
+
+    <div id="bulk-loading" class="py-6 text-center text-on-surface-variant">
+      <span class="material-symbols-outlined animate-spin text-[24px] text-primary">progress_activity</span>
+      <p class="mt-1 font-body-sm text-body-sm">Loading campaign history...</p>
+    </div>
+
+    <div id="bulk-empty" class="hidden py-8 text-center flex-col items-center justify-center">
+      <p class="font-body-md text-body-md text-on-surface-variant">No bulk email campaigns dispatched yet.</p>
+    </div>
+
+    <div id="bulk-batches-table-wrap" class="hidden overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr
+            class="border-b border-surface-container font-table-header text-table-header text-on-surface-variant uppercase tracking-wider">
+            <th class="py-3 px-4">Campaign Name</th>
+            <th class="py-3 px-4">Subject</th>
+            <th class="py-3 px-4">Mode</th>
+            <th class="py-3 px-4">Recipients</th>
+            <th class="py-3 px-4">Accepted</th>
+            <th class="py-3 px-4">Failed</th>
+            <th class="py-3 px-4">Status</th>
+            <th class="py-3 px-4">Date</th>
+            <th class="py-3 px-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="bulk-batches-tbody"
+          class="divide-y divide-surface-container font-table-cell text-table-cell text-on-surface"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recipient Status Drilldown Modal -->
+  <div id="batch-detail-modal"
+    class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div
+      class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-4xl border border-surface-container overflow-hidden flex flex-col max-h-[85vh]">
+      <div
+        class="px-space-lg py-space-md border-b border-surface-container flex items-center justify-between bg-surface-container-low">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[22px]">format_list_bulleted</span>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface" id="modal-batch-title">Campaign Recipients</h3>
+        </div>
+        <button onclick="closeBatchDetailModal()"
+          class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <!-- Batch Summary Metrics Banner -->
+      <div
+        class="p-space-md border-b border-surface-container flex items-center justify-between flex-wrap gap-2 bg-surface-container-lowest">
+        <div class="flex items-center gap-space-lg text-xs">
+          <span>Total: <strong id="modal-metric-total" class="font-semibold text-on-surface">0</strong></span>
+          <span>Accepted: <strong id="modal-metric-accepted" class="font-semibold text-tertiary">0</strong></span>
+          <span>Failed: <strong id="modal-metric-failed" class="font-semibold text-error">0</strong></span>
+        </div>
+        <button id="modal-btn-retry" onclick="retryFailedBatchRecipients()"
+          class="hidden inline-flex items-center gap-1 px-space-md py-1.5 rounded-lg bg-error-container text-error hover:bg-error/20 text-xs font-semibold transition-colors">
+          <span class="material-symbols-outlined text-[16px]">replay</span>
+          <span>Retry Eligible Failed Only</span>
+        </button>
+      </div>
+
+      <!-- Recipient Level Table -->
+      <div class="p-space-md overflow-y-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-surface-container font-table-header text-on-surface-variant uppercase">
+              <th class="py-2 px-3">Recipient Email</th>
+              <th class="py-2 px-3">Status</th>
+              <th class="py-2 px-3">Attempts</th>
+              <th class="py-2 px-3">Message ID / Error Info</th>
+            </tr>
+          </thead>
+          <tbody id="modal-recipients-tbody" class="divide-y divide-surface-container"></tbody>
+        </table>
+      </div>
+
+      <div
+        class="px-space-lg py-space-sm border-t border-surface-container flex items-center justify-end bg-surface-container-low">
+        <button onclick="closeBatchDetailModal()"
+          class="px-space-md py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentSelectedBatchId = null;
+
+    async function loadEmailBatches() {
+      const loading = document.getElementById('bulk-loading');
+      const empty = document.getElementById('bulk-empty');
+      const tableWrap = document.getElementById('bulk-batches-table-wrap');
+      const countBadge = document.getElementById('bulk-batch-count');
+      const tbody = document.getElementById('bulk-batches-tbody');
+
+      loading.classList.remove('hidden');
+      empty.classList.add('hidden');
+      tableWrap.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/bulk-email/batches');
+        const data = await res.json();
+        loading.classList.add('hidden');
+
+        if (data.success && data.batches && data.batches.length > 0) {
+          countBadge.textContent = `${data.batches.length} Campaign${data.batches.length > 1 ? 's' : ''}`;
+          tbody.innerHTML = '';
+
+          data.batches.forEach(b => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+
+            let statusClass = 'bg-surface-container-high text-on-surface-variant';
+            if (b.status === 'COMPLETED') statusClass = 'bg-tertiary-fixed/30 text-tertiary font-semibold';
+            if (b.status === 'SENDING' || b.status === 'QUEUED') statusClass = 'bg-primary-fixed text-primary font-semibold';
+            if (b.status === 'FAILED') statusClass = 'bg-error-container text-error font-semibold';
+
+            tr.innerHTML = `
+          <td class="py-3 px-4 font-semibold text-on-surface">${b.batch_name}</td>
+          <td class="py-3 px-4 text-on-surface-variant truncate max-w-xs">${b.subject}</td>
+          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-[11px] bg-surface-container text-on-surface">${b.sending_mode}</span></td>
+          <td class="py-3 px-4 font-mono">${b.total_recipients}</td>
+          <td class="py-3 px-4 text-tertiary font-semibold font-mono">${b.accepted_count}</td>
+          <td class="py-3 px-4 text-error font-semibold font-mono">${b.failed_count}</td>
+          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${statusClass}">${b.status}</span></td>
+          <td class="py-3 px-4 text-xs text-on-surface-variant">${b.created_at ? new Date(b.created_at).toLocaleDateString() : '—'}</td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="viewBatchDetails(${b.id})" class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-colors">
+              Inspect
+            </button>
+          </td>
+        `;
+            tbody.appendChild(tr);
+          });
+
+          tableWrap.classList.remove('hidden');
+        } else {
+          countBadge.textContent = '0 Campaigns';
+          empty.classList.remove('hidden');
+        }
+      } catch (err) {
+        loading.classList.add('hidden');
+        empty.classList.remove('hidden');
+        console.error('Failed to load email batches:', err);
       }
-    });
-  })();
-</script>
-{% endblock %}
+    }
+
+    async function viewBatchDetails(batchId) {
+      currentSelectedBatchId = batchId;
+      const modal = document.getElementById('batch-detail-modal');
+      const title = document.getElementById('modal-batch-title');
+      const metricTotal = document.getElementById('modal-metric-total');
+      const metricAccepted = document.getElementById('modal-metric-accepted');
+      const metricFailed = document.getElementById('modal-metric-failed');
+      const btnRetry = document.getElementById('modal-btn-retry');
+      const tbody = document.getElementById('modal-recipients-tbody');
+
+      tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-on-surface-variant">Loading recipient details...</td></tr>';
+      modal.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`/api/bulk-email/batches/${batchId}`);
+        const data = await res.json();
+        if (data.success) {
+          const b = data.batch;
+          title.textContent = `Campaign: ${b.batch_name}`;
+          metricTotal.textContent = b.total_recipients;
+          metricAccepted.textContent = b.accepted_count;
+          metricFailed.textContent = b.failed_count;
+
+          if (b.failed_count > 0) {
+            btnRetry.classList.remove('hidden');
+          } else {
+            btnRetry.classList.add('hidden');
+          }
+
+          tbody.innerHTML = '';
+          data.recipients.forEach(r => {
+            const tr = document.createElement('tr');
+            let rStatusClass = 'bg-surface-container text-on-surface-variant';
+            if (r.status === 'ACCEPTED') rStatusClass = 'bg-tertiary-fixed/30 text-tertiary font-semibold';
+            if (r.status === 'FAILED') rStatusClass = 'bg-error-container text-error font-semibold';
+            if (r.status === 'PROCESSING') rStatusClass = 'bg-primary-fixed text-primary';
+
+            tr.innerHTML = `
+          <td class="py-2.5 px-3 font-mono font-medium">${r.email_address}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[11px] ${rStatusClass}">${r.status}</span></td>
+          <td class="py-2.5 px-3 font-mono">${r.attempt_count}</td>
+          <td class="py-2.5 px-3 truncate max-w-sm text-xs ${r.status === 'FAILED' ? 'text-error font-mono' : 'text-on-surface-variant font-mono'}">
+            ${r.error_message || (r.provider_message_id ? 'ID: ' + r.provider_message_id : 'Pending')}
+          </td>
+        `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-error">Failed to load recipient details.</td></tr>';
+      }
+    }
+
+    function closeBatchDetailModal() {
+      document.getElementById('batch-detail-modal').classList.add('hidden');
+    }
+
+    async function retryFailedBatchRecipients() {
+      if (!currentSelectedBatchId) return;
+      const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+      try {
+        const res = await fetch(`/api/bulk-email/batches/${currentSelectedBatchId}/retry-failed`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+          }
+        });
+        const data = await res.json();
+        alert(data.message || (data.success ? 'Retrying failed recipients...' : data.error));
+        if (data.success) {
+          viewBatchDetails(currentSelectedBatchId);
+          loadEmailBatches();
+        }
+      } catch (err) {
+        alert('Failed to trigger retry for failed recipients.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadEmailBatches);
+  </script>
+  {% endblock %}
